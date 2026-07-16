@@ -18,12 +18,13 @@ def check():
         print("Checking database connection...")
         # Force database connection
         connection.ensure_connection()
-        print("✓ Database connection: SUCCESSFUL!")
+        print("SUCCESS: Database connection established!")
         
         # Get host and database name
         db_settings = connection.settings_dict
         print(f"Connected to Host: {db_settings.get('HOST')}")
         print(f"Database Name: {db_settings.get('NAME')}")
+        print(f"Engine: {db_settings.get('ENGINE')}")
         
         # Retrieve list of tables
         tables = connection.introspection.table_names()
@@ -32,12 +33,12 @@ def check():
             print(f"  - {table}")
             
         if len(tables) == 0:
-            print("\n⚠ Warning: Database is connected but empty! No tables have been created yet.")
+            print("\nWARNING: Database is connected but empty! No tables have been created yet.")
         else:
-            print("\n✓ Success: Migrations have been applied successfully and all tables are present!")
+            print("\nSUCCESS: Migrations have been applied successfully and all tables are present!")
             
     except Exception as e:
-        print("\n❌ Error: Database connection failed!")
+        print("\nERROR: Database connection failed!")
         print("Error details:")
         print(str(e))
 

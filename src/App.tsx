@@ -11,13 +11,30 @@ import type {AppDispatch,RootState} from './store'
 
 export default function App(){
   const [session,setSession]=useState<'checking'|'authenticated'|'anonymous'>('checking')
-  const [view,setView]=useState<'app'|'admin'>('app')
+  const [path, setPath] = useState(window.location.pathname)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const dispatch=useDispatch<AppDispatch>()
   const {profile,loading,error}=useSelector((s:RootState)=>s.luna)
   
-  useEffect(()=>{api.get('/auth/session/').then(()=>{setSession('authenticated');dispatch(loadDashboard())}).catch(()=>setSession('anonymous'))},[dispatch])
+  useEffect(()=>{
+    api.get('/auth/session/')
+      .then(()=>{
+        setSession('authenticated')
+        dispatch(loadDashboard())
+        if (window.location.pathname === '/' || window.location.pathname === '/how-it-works') {
+          window.history.replaceState({}, '', '/dashboard')
+          setPath('/dashboard')
+        }
+      })
+      .catch(()=>setSession('anonymous'))
+  },[dispatch])
+
+  useEffect(() => {
+    const handlePop = () => setPath(window.location.pathname)
+    window.addEventListener('popstate', handlePop)
+    return () => window.removeEventListener('popstate', handlePop)
+  }, [])
   
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -83,10 +100,10 @@ export default function App(){
   
   return (
     <>
-      {view === 'admin' && profile?.user.is_staff ? (
-        <AdminDashboard onBack={() => setView('app')} />
+      {path === '/admin' && profile?.user.is_staff ? (
+        <AdminDashboard onBack={() => { window.history.pushState({}, '', '/dashboard'); setPath('/dashboard') }} />
       ) : profile ? (
-        <Dashboard onGoToAdmin={() => setView('admin')}/>
+        <Dashboard onGoToAdmin={() => { window.history.pushState({}, '', '/admin'); setPath('/admin') }}/>
       ) : null}
 
       {showInstallBanner && (

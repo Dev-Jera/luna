@@ -874,9 +874,43 @@ function Preferences({ profile, onSaved }: { profile: Profile; onSaved: (profile
 export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void }) {
   const dispatch = useDispatch<AppDispatch>()
   const state = useSelector((s: RootState) => s.luna)
-  const [page, setPage] = useState<'conversations' | 'preferences'>('conversations')
-  const [chatId, setChatId] = useState<number | null>(null)
   const [inboxTab, setInboxTab] = useState<'chats' | 'offers'>('chats')
+
+  const getInitialStateFromUrl = () => {
+    const p = window.location.pathname
+    if (p === '/preferences') {
+      return { page: 'preferences' as const, chatId: null }
+    }
+    if (p.startsWith('/chat/')) {
+      const id = parseInt(p.split('/')[2], 10)
+      return { page: 'conversations' as const, chatId: isNaN(id) ? null : id }
+    }
+    return { page: 'conversations' as const, chatId: null }
+  }
+
+  const [urlState, setUrlState] = useState(getInitialStateFromUrl)
+  const page = urlState.page
+  const chatId = urlState.chatId
+
+  const navigateToPage = (newPage: 'conversations' | 'preferences') => {
+    const path = newPage === 'preferences' ? '/preferences' : '/dashboard'
+    window.history.pushState({}, '', path)
+    setUrlState({ page: newPage, chatId: null })
+  }
+
+  const navigateToChat = (id: number | null) => {
+    const path = id === null ? '/dashboard' : `/chat/${id}`
+    window.history.pushState({}, '', path)
+    setUrlState({ page: 'conversations', chatId: id })
+  }
+
+  useEffect(() => {
+    const handlePop = () => {
+      setUrlState(getInitialStateFromUrl())
+    }
+    window.addEventListener('popstate', handlePop)
+    return () => window.removeEventListener('popstate', handlePop)
+  }, [])
 
   useEffect(() => {
     dispatch(loadDashboard())
@@ -889,7 +923,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
 
   return (
     <div className="noise min-h-screen bg-[#1e1410] text-[#f5ebe0] selection:bg-[#f27059]/20 flex flex-col">
-      <AppHeader page={page} setPage={setPage} profile={profile} onGoToAdmin={onGoToAdmin} />
+      <AppHeader page={page} setPage={navigateToPage} profile={profile} onGoToAdmin={onGoToAdmin} />
       
       <main className="mx-auto w-full max-w-6xl px-5 pb-20 flex-1 flex flex-col">
         {page === 'conversations' ? (
@@ -935,7 +969,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                       return (
                         <button
                           key={c.id}
-                          onClick={() => setChatId(c.id)}
+                          onClick={() => navigateToChat(c.id)}
                           className={`flex w-full items-center gap-4 rounded-2xl p-4.5 text-left transition-all duration-200 border ${
                             isSelected
                               ? 'bg-[#1e1410] border-[#f27059]/30 text-white shadow-premium'
@@ -1035,7 +1069,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                                 const res = await api.post(`/matches/${m.id}/accept/`)
                                 dispatch(loadDashboard())
                                 if (res.data.conversation_id) {
-                                  setChatId(res.data.conversation_id)
+                                  navigateToChat(res.data.conversation_id)
                                 }
                               } catch (e) {
                                 console.error(e)
@@ -1062,7 +1096,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
             {/* Conversation Window/Placeholder Pane */}
             <section className={`lg:col-span-7 xl:col-span-8 ${chatId === null ? 'hidden lg:flex lg:items-center lg:justify-center' : 'flex flex-col'}`}>
               {conversation ? (
-                <Chat conversation={conversation} onClose={() => setChatId(null)} onReload={() => dispatch(loadDashboard())} />
+                <Chat conversation={conversation} onClose={() => navigateToChat(null)} onReload={() => dispatch(loadDashboard())} />
               ) : (
                 <div className="hidden lg:flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] border border-dashed border-cocoa-900/10 bg-white/20 h-[calc(100vh-210px)]">
                   <div className="p-4 bg-terracotta-50 rounded-full border border-terracotta-200/50 text-terracotta-500 mb-4 animate-bounce">

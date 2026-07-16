@@ -32,7 +32,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
   const total = 6
   const progress = useMemo(() => ((step + 1) / total) * 100, [step])
 
-  const labelClass = 'text-xs font-bold uppercase tracking-wider text-cocoa-500 mb-1.5 block'
+  const labelClass = 'text-xs font-bold uppercase tracking-wider text-[#e6ccb2] mb-1.5 block'
 
   const finish = async () => {
     setSaving(true)
@@ -56,23 +56,23 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
   }
 
   return (
-    <main className="min-h-screen bg-warmbg text-cocoa-900 selection:bg-terracotta-200 noise flex flex-col justify-between">
+    <main className="min-h-screen bg-[#1e1410] text-[#f5ebe0] selection:bg-[#f27059]/20 noise flex flex-col justify-between">
       {/* Header */}
       <header className="mx-auto flex h-20 w-full max-w-5xl items-center justify-between px-6 sm:px-12">
         <div className="flex items-center gap-2">
-          <Circle size={16} strokeWidth={4} className="text-terracotta-500" />
-          <span className="font-display text-xl font-bold tracking-tight">luna<span className="text-terracotta-500">.</span></span>
+          <Circle size={16} strokeWidth={4} className="text-[#f27059]" />
+          <span className="font-display text-xl font-bold tracking-tight text-white">luna<span className="text-[#f27059]">.</span></span>
         </div>
-        <span className="text-xs font-semibold text-cocoa-500 bg-white/50 backdrop-blur border border-cocoa-900/5 px-3.5 py-1.5 rounded-full">
+        <span className="text-xs font-semibold text-[#f5ebe0]/80 bg-[#f5ebe0]/5 backdrop-blur border border-[#f5ebe0]/10 px-3.5 py-1.5 rounded-full">
           Answers stay editable
         </span>
       </header>
 
       {/* Progress Bar Container */}
       <div className="mx-auto w-full max-w-3xl px-6 sm:px-12">
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-cocoa-900/5">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-terracotta-500 transition-all duration-500 ease-out"
+            className="h-full rounded-full bg-[#f27059] transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -80,7 +80,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
 
       {/* Main Content Area */}
       <section className="mx-auto flex w-full max-w-3xl flex-col px-6 py-10 sm:px-12 flex-1 justify-start">
-        <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-terracotta-500 mb-6">
+        <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8ea869] mb-6">
           About you · Step {step + 1} of {total}
         </div>
 
@@ -89,13 +89,13 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
             {step === 0 && (
               <div className="space-y-6">
                 <div>
-                  <div className="p-3 bg-terracotta-50 rounded-2xl inline-block border border-terracotta-200/50 mb-4">
-                    <Sparkles className="text-terracotta-500" size={24} />
+                  <div className="p-3 bg-[#8ea869]/10 rounded-2xl inline-block border border-[#8ea869]/20 mb-4">
+                    <Sparkles className="text-[#8ea869]" size={24} />
                   </div>
-                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-cocoa-900 sm:text-4xl">
+                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
                     Let’s start with the person behind the profile.
                   </h1>
-                  <p className="mt-2 text-sm text-cocoa-500">
+                  <p className="mt-2 text-sm text-[#f5ebe0]/80">
                     What should people call you, and where are you based?
                   </p>
                 </div>
@@ -103,7 +103,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                   <div>
                     <label className={labelClass}>I go by</label>
                     <input
-                      className="premium-input"
+                      className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] placeholder-[#a39089]/60 focus:!border-[#f27059] focus:!ring-[#f27059]/20"
                       value={form.display_name}
                       onChange={e => setForm({ ...form, display_name: e.target.value })}
                       placeholder="Your display name"
@@ -112,7 +112,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                   <div>
                     <label className={labelClass}>I’m based in</label>
                     <input
-                      className="premium-input"
+                      className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] placeholder-[#a39089]/60 focus:!border-[#f27059] focus:!ring-[#f27059]/20"
                       value={form.location}
                       onChange={e => setForm({ ...form, location: e.target.value })}
                       placeholder="Nairobi, Kenya"
@@ -125,10 +125,10 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
             {step === 1 && (
               <div className="space-y-6">
                 <div>
-                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-cocoa-900 sm:text-4xl">
+                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
                     What kind of connection feels right?
                   </h1>
-                  <p className="mt-2 text-sm text-cocoa-500">
+                  <p className="mt-2 text-sm text-[#f5ebe0]/80">
                     Choose the main reason you’re here. You can change this later in preferences.
                   </p>
                 </div>
@@ -137,22 +137,22 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                     <button
                       key={value}
                       onClick={() => setForm({ ...form, connection_goal: value })}
-                      className={`flex items-start justify-between rounded-2xl border p-5 text-left hover-premium transition-all duration-200 ${
+                      className={`flex items-start justify-between rounded-2xl border p-5 text-left transition-all duration-200 ${
                         form.connection_goal === value
-                          ? 'border-terracotta-500 bg-white shadow-premium'
-                          : 'border-cocoa-900/10 bg-white/40 hover:border-terracotta-500/40'
+                          ? 'border-[#f27059] bg-[#291e19] shadow-glow'
+                          : 'border-[#f5ebe0]/10 bg-[#1e1410] hover:border-[#f27059]/40'
                       }`}
                     >
                       <div className="pr-4">
-                        <span className={`block font-bold text-base transition-colors ${form.connection_goal === value ? 'text-terracotta-500' : 'text-cocoa-900'}`}>
+                        <span className={`block font-bold text-base transition-colors ${form.connection_goal === value ? 'text-[#f27059]' : 'text-white'}`}>
                           {title}
                         </span>
-                        <span className="mt-1 block text-xs text-cocoa-500 leading-relaxed">{desc}</span>
+                        <span className="mt-1 block text-xs text-[#e6ccb2]/85 leading-relaxed">{desc}</span>
                       </div>
                       <div className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border transition ${
                         form.connection_goal === value
-                          ? 'border-terracotta-500 bg-terracotta-500 text-white'
-                          : 'border-cocoa-900/20'
+                          ? 'border-[#f27059] bg-[#f27059] text-white'
+                          : 'border-[#f5ebe0]/20'
                       }`}>
                         {form.connection_goal === value && <Check size={12} strokeWidth={3} />}
                       </div>
@@ -165,10 +165,10 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
             {step === 2 && (
               <div className="space-y-6">
                 <div>
-                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-cocoa-900 sm:text-4xl">
+                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
                     What matters in your world?
                   </h1>
-                  <p className="mt-2 text-sm text-cocoa-500">
+                  <p className="mt-2 text-sm text-[#f5ebe0]/80">
                     Separate answers with commas. Specific, genuine answers help Luna find the best compatibility.
                   </p>
                 </div>
@@ -176,7 +176,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                   <div>
                     <label className={labelClass}>Values I try to live by</label>
                     <input
-                      className="premium-input"
+                      className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] placeholder-[#a39089]/60 focus:!border-[#f27059] focus:!ring-[#f27059]/20"
                       value={form.values}
                       onChange={e => setForm({ ...form, values: e.target.value })}
                       placeholder="Curiosity, kindness, courage, self-honesty..."
@@ -185,7 +185,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                   <div>
                     <label className={labelClass}>Things I genuinely enjoy</label>
                     <input
-                      className="premium-input"
+                      className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] placeholder-[#a39089]/60 focus:!border-[#f27059] focus:!ring-[#f27059]/20"
                       value={form.interests}
                       onChange={e => setForm({ ...form, interests: e.target.value })}
                       placeholder="Photography, hiking, live music, vintage books..."
@@ -198,10 +198,10 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
             {step === 3 && (
               <div className="space-y-6">
                 <div>
-                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-cocoa-900 sm:text-4xl">
+                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
                     How do you connect best?
                   </h1>
-                  <p className="mt-2 text-sm text-cocoa-500">
+                  <p className="mt-2 text-sm text-[#f5ebe0]/80">
                     Select a style pill to start, then describe it in your own words.
                   </p>
                 </div>
@@ -214,10 +214,10 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                           key={style}
                           type="button"
                           onClick={() => setForm({ ...form, communication_style: style })}
-                          className={`rounded-full border px-4 py-2 text-xs font-semibold hover-premium transition-all ${
+                          className={`rounded-full border px-4 py-2 text-xs font-semibold transition-all ${
                             form.communication_style.includes(style)
-                              ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-500'
-                              : 'border-cocoa-900/10 bg-white/60 text-cocoa-500 hover:border-terracotta-500/40 hover:text-terracotta-500'
+                              ? 'border-[#f27059] bg-[#f27059]/10 text-[#f27059]'
+                              : 'border-[#f5ebe0]/10 bg-[#291e19]/60 text-[#f5ebe0]/70 hover:border-[#f27059]/40 hover:text-[#f27059]'
                           }`}
                         >
                           {style}
@@ -228,7 +228,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                   <div>
                     <label className={labelClass}>Describe how you communicate</label>
                     <input
-                      className="premium-input"
+                      className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] placeholder-[#a39089]/60 focus:!border-[#f27059] focus:!ring-[#f27059]/20"
                       value={form.communication_style}
                       onChange={e => setForm({ ...form, communication_style: e.target.value })}
                       placeholder="For example: I’m warm, honest, and prefer direct conversations"
@@ -238,12 +238,12 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                     <label className={labelClass}>Tell Luna more about you</label>
                     <textarea
                       rows={4}
-                      className="premium-input resize-none"
+                      className="premium-input resize-none !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] placeholder-[#a39089]/60 focus:!border-[#f27059] focus:!ring-[#f27059]/20"
                       value={form.bio}
                       onChange={e => setForm({ ...form, bio: e.target.value })}
                       placeholder="Write freely—what should Luna understand about you? What makes you tick?"
                     />
-                    <p className="mt-2 text-[10px] text-cocoa-300">
+                    <p className="mt-2 text-[10px] text-[#f5ebe0]/40">
                       Luna uses what you write here to generate compatibility explanations.
                     </p>
                   </div>
@@ -254,10 +254,10 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
             {step === 4 && (
               <div className="space-y-6">
                 <div>
-                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-cocoa-900 sm:text-4xl">
+                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
                     What should fit into real life?
                   </h1>
-                  <p className="mt-2 text-sm text-cocoa-500">
+                  <p className="mt-2 text-sm text-[#f5ebe0]/80">
                     Share your direction, everyday rhythm, and boundaries. Deal-breakers are used strictly as negative filters.
                   </p>
                 </div>
@@ -265,7 +265,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                   <div>
                     <label className={labelClass}>Life goals</label>
                     <input
-                      className="premium-input"
+                      className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] placeholder-[#a39089]/60 focus:!border-[#f27059] focus:!ring-[#f27059]/20"
                       value={form.life_goals}
                       onChange={e => setForm({ ...form, life_goals: e.target.value })}
                       placeholder="Build a community, travel, start a company..."
@@ -274,7 +274,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                   <div>
                     <label className={labelClass}>Lifestyle</label>
                     <input
-                      className="premium-input"
+                      className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] placeholder-[#a39089]/60 focus:!border-[#f27059] focus:!ring-[#f27059]/20"
                       value={form.lifestyle}
                       onChange={e => setForm({ ...form, lifestyle: e.target.value })}
                       placeholder="Early riser, active weekends, quiet evenings..."
@@ -283,7 +283,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                   <div>
                     <label className={labelClass}>Deal-breakers</label>
                     <input
-                      className="premium-input"
+                      className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] placeholder-[#a39089]/60 focus:!border-[#f27059] focus:!ring-[#f27059]/20"
                       value={form.deal_breakers}
                       onChange={e => setForm({ ...form, deal_breakers: e.target.value })}
                       placeholder="Disrespect, dishonesty, smoking..."
@@ -296,39 +296,39 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
             {step === 5 && (
               <div className="space-y-6">
                 <div>
-                  <div className="p-3 bg-terracotta-50 rounded-2xl inline-block border border-terracotta-200/50 mb-4">
-                    <LockKeyhole className="text-terracotta-500" size={24} />
+                  <div className="p-3 bg-[#8ea869]/10 rounded-2xl inline-block border border-[#8ea869]/20 mb-4">
+                    <LockKeyhole className="text-[#8ea869]" size={24} />
                   </div>
-                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-cocoa-900 sm:text-4xl">
+                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
                     You stay in control of Luna.
                   </h1>
-                  <p className="mt-2 text-sm text-cocoa-500">
+                  <p className="mt-2 text-sm text-[#f5ebe0]/80">
                     Luna uses these answers to structure compatibility insights. This never gives permission to read human chats.
                   </p>
                 </div>
                 <div className="space-y-4 pt-4">
-                  <label className={`flex cursor-pointer gap-4 rounded-[2rem] border p-6 hover-premium transition-all duration-200 ${
+                  <label className={`flex cursor-pointer gap-4 rounded-[2rem] border p-6 transition-all duration-200 ${
                     form.ai_profile_consent
-                      ? 'border-terracotta-500 bg-white shadow-premium'
-                      : 'border-cocoa-900/10 bg-white/40'
+                      ? 'border-[#f27059] bg-[#291e19] shadow-glow'
+                      : 'border-[#f5ebe0]/10 bg-[#1e1410]'
                   }`}>
                     <input
                       type="checkbox"
                       checked={form.ai_profile_consent}
                       onChange={e => setForm({ ...form, ai_profile_consent: e.target.checked })}
-                      className="mt-1 rounded border-cocoa-900/10 text-terracotta-500 focus:ring-terracotta-500/20 h-5 w-5"
+                      className="mt-1 rounded border-[#f5ebe0]/10 text-[#f27059] focus:ring-[#f27059]/20 h-5 w-5"
                     />
                     <span>
-                      <strong className={`block font-bold text-base transition-colors ${form.ai_profile_consent ? 'text-terracotta-500' : 'text-cocoa-900'}`}>
+                      <strong className={`block font-bold text-base transition-colors ${form.ai_profile_consent ? 'text-[#f27059]' : 'text-white'}`}>
                         Allow AI profile analysis
                       </strong>
-                      <small className="mt-1.5 block text-xs text-cocoa-500 leading-relaxed">
+                      <small className="mt-1.5 block text-xs text-[#e6ccb2]/85 leading-relaxed">
                         Use my onboarding answers for structured compatibility insights. You can revoke this settings anytime in preferences.
                       </small>
                     </span>
                   </label>
 
-                  <div className="rounded-[1.5rem] border border-cocoa-900/5 bg-white/50 p-5 text-xs text-cocoa-500 leading-relaxed">
+                  <div className="rounded-[1.5rem] border border-[#f5ebe0]/10 bg-[#291e19]/50 p-5 text-xs text-[#f5ebe0]/70 leading-relaxed">
                     <strong>Note:</strong> Matching still works without AI analysis, but Gemini-assisted explanations will be unavailable.
                   </div>
 
@@ -343,11 +343,11 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
           </div>
 
           {/* Step Actions Footer */}
-          <footer className="mt-8 flex items-center justify-between border-t border-cocoa-900/5 pt-6 bg-transparent">
+          <footer className="mt-8 flex items-center justify-between border-t border-[#f5ebe0]/10 pt-6 bg-transparent">
             <button
               onClick={() => setStep(s => Math.max(0, s - 1))}
               disabled={step === 0}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-cocoa-500 hover:text-cocoa-900 transition-colors disabled:invisible"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-[#f5ebe0]/60 hover:text-[#f5ebe0] transition-colors disabled:invisible"
             >
               <ArrowLeft size={16} />
               Back
@@ -361,7 +361,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                   (step === 2 && (!form.values || !form.interests)) ||
                   (step === 3 && (!form.communication_style || !form.bio))
                 }
-                className="flex items-center gap-2 rounded-full bg-terracotta-500 px-7 py-3.5 font-bold text-white shadow-premium hover:bg-terracotta-600 active:scale-95 transition-all disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex items-center gap-2 rounded-full bg-[#f27059] px-7 py-3.5 font-bold text-white shadow-glow hover:bg-[#e05e47] active:scale-95 transition-all disabled:cursor-not-allowed disabled:opacity-30"
               >
                 Continue
                 <ArrowRight size={16} />
@@ -370,7 +370,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
               <button
                 onClick={finish}
                 disabled={saving}
-                className="flex items-center gap-2 rounded-full bg-terracotta-500 px-7 py-3.5 font-bold text-white shadow-premium hover:bg-terracotta-600 active:scale-95 transition-all disabled:opacity-50"
+                className="flex items-center gap-2 rounded-full bg-[#f27059] px-7 py-3.5 font-bold text-white shadow-glow hover:bg-[#e05e47] active:scale-95 transition-all disabled:opacity-50"
               >
                 {saving ? 'Saving…' : 'Show my Luna'}
                 <ArrowRight size={16} />

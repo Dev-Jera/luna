@@ -17,11 +17,13 @@ export default function Auth() {
   const [legal, setLegal] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   const begin = (next: 'login' | 'register' = 'register') => {
     setMode(next)
     setRecovering(false)
     setError('')
+    setSuccess('')
     setOpen(true)
   }
 
@@ -42,6 +44,7 @@ export default function Auth() {
     if (busy) return
     setBusy(true)
     setError('')
+    setSuccess('')
     const cleanUsername = username.trim().toLowerCase()
     try {
       if (mode === 'register') {
@@ -54,6 +57,11 @@ export default function Auth() {
           accept_terms: legal,
           accept_guidelines: legal,
         })
+        setSuccess('Account created successfully! Please sign in with your password.')
+        setMode('login')
+        setPassword('')
+        setBusy(false)
+        return
       }
       await api.post('/auth/token/', { username: cleanUsername, password })
       location.reload()
@@ -69,7 +77,6 @@ export default function Auth() {
       } else {
         setError(message || 'We could not continue. Please try again.')
       }
-    } finally {
       setBusy(false)
     }
   }
@@ -272,6 +279,12 @@ export default function Auth() {
                   </div>
                 )}
 
+                {success && (
+                  <p className="text-sm font-semibold text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
+                    {success}
+                  </p>
+                )}
+
                 {error && (
                   <p className="text-sm font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200/50 rounded-xl p-3">
                     {error}
@@ -289,7 +302,7 @@ export default function Auth() {
                 <div className="space-y-2.5 pt-4 text-center">
                   <button
                     type="button"
-                    onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError('') }}
+                    onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setSuccess('') }}
                     className="text-sm font-semibold text-[#f27059] hover:text-[#e05e47]"
                   >
                     {mode === 'login' ? 'New here? Join Luna' : 'Already have an account? Sign in'}

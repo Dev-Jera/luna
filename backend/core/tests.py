@@ -8,6 +8,30 @@ class LunaJourneyTests(APITestCase):
  def setUp(self):
   self.user=User.objects.create_user('amani',password='strongpass123');self.other=User.objects.create_user('amara',password='strongpass123')
   self.client.force_authenticate(self.user)
+  from unittest.mock import patch
+  self.structured_patcher = patch('core.ai.gemini.GeminiProvider.structured')
+  self.embed_patcher = patch('core.ai.gemini.GeminiProvider.embed')
+  self.mock_structured = self.structured_patcher.start()
+  self.mock_embed = self.embed_patcher.start()
+  self.mock_embed.return_value = [0.1] * 768
+  self.mock_structured.return_value = {
+   'summary': 'Mocked profile summary',
+   'traits': ['Empathetic', 'Communicative'],
+   'welcome_message': 'Hello and welcome to Luna!',
+   'explanation': 'Shared interests.',
+   'categories': ['harmless'],
+   'threat': False,
+   'reply': 'Mocked AI reply',
+   'draft': 'Mocked introduction draft',
+   'score_adjustment': 2,
+   'reasons': ['Shared values'],
+   'venues': [{'name': 'Central Cafe', 'address': 'City Square', 'reason': 'Safe spot'}],
+   'is_disrespectful': False,
+   'settle_comment': 'Please stay respectful.'
+  }
+ def tearDown(self):
+  self.structured_patcher.stop()
+  self.embed_patcher.stop()
  def test_onboarding_updates_owned_profile(self):
   response=self.client.patch('/api/profiles/me/',{'display_name':'Amani','values':['Kindness'],'interests':['Hiking'],'communication_style':'Thoughtful & direct','ai_profile_consent':True,'onboarding_complete':True},format='json')
   self.assertEqual(response.status_code,200);self.user.profile.refresh_from_db();self.assertTrue(self.user.profile.onboarding_complete);self.assertTrue(self.user.profile.ai_profile_consent)

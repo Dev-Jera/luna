@@ -360,7 +360,7 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
     }
   }
 
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), [conversation.messages.length, sending])
+  useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), [conversation.messages?.length || 0, sending])
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -431,7 +431,7 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
             )}
             <p className="whitespace-pre-wrap">{m.body}</p>
 
-            {m.metadata?.type === 'profile_card' && (
+            {m.metadata?.type === 'profile_card' && m.metadata?.profile && (
               <div className="mt-4 rounded-2xl border border-[#f5ebe0]/10 bg-[#1e1410] p-5 text-[#f5ebe0] shadow-soft">
                 <div className="text-lg font-bold font-display text-white">{m.metadata.profile.display_name}</div>
                 <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#f5ebe0]/80">
@@ -443,7 +443,7 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
                 <p className="mt-3.5 text-xs text-[#f5ebe0]/80 leading-relaxed border-t border-[#f5ebe0]/10 pt-3.5 italic">
                   "{m.metadata.profile.bio || 'No bio shared yet.'}"
                 </p>
-                {m.metadata.profile.interests && m.metadata.profile.interests.length > 0 && (
+                {Array.isArray(m.metadata.profile.interests) && m.metadata.profile.interests.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {m.metadata.profile.interests.map((item: string) => (
                       <span key={item} className="rounded-full bg-terracotta-50 px-2.5 py-1 text-[10px] font-semibold text-terracotta-500 border border-terracotta-200/20">
@@ -456,24 +456,24 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
             )}
 
             {m.metadata?.type === 'date_proposal' && (
-              <div className="mt-4 rounded-2xl border border-cocoa-900/5 bg-white p-5 text-cocoa-900 shadow-soft max-w-sm">
-                <div className="flex items-center gap-2 text-terracotta-500 font-bold text-xs">
+              <div className="mt-4 rounded-2xl border border-[#f5ebe0]/10 bg-[#1e1410] p-5 text-[#f5ebe0] shadow-soft max-w-sm">
+                <div className="flex items-center gap-2 text-[#f27059] font-bold text-xs">
                   <Calendar size={14} /> Meetup Proposal
                 </div>
-                <div className="mt-2 text-sm font-bold font-display">{m.metadata.venue_name}</div>
-                <div className="text-xs text-cocoa-500 mt-1">{new Date(m.metadata.proposed_time).toLocaleString()}</div>
+                <div className="mt-2 text-sm font-bold font-display text-white">{m.metadata.venue_name}</div>
+                <div className="text-xs text-[#f5ebe0]/70 mt-1">{m.metadata.proposed_time ? new Date(m.metadata.proposed_time).toLocaleString() : ''}</div>
                 
                 {m.sender?.id !== currentUserId && (
-                  <div className="flex gap-2.5 mt-4 pt-4 border-t border-cocoa-900/5">
+                  <div className="flex gap-2.5 mt-4 pt-4 border-t border-[#f5ebe0]/10">
                     <button
                       onClick={() => respondToDate(m.metadata.meeting_id, 'decline')}
-                      className="flex-1 rounded-full border border-cocoa-900/5 bg-white py-2 text-xs font-bold text-cocoa-500 hover:bg-cocoa-50 active:scale-95 transition-all"
+                      className="flex-1 rounded-full border border-[#f5ebe0]/20 bg-transparent py-2 text-xs font-bold text-[#f5ebe0] hover:bg-[#f5ebe0]/10 active:scale-95 transition-all"
                     >
                       Decline
                     </button>
                     <button
                       onClick={() => respondToDate(m.metadata.meeting_id, 'accept')}
-                      className="flex-1 rounded-full bg-terracotta-500 py-2 text-xs font-bold text-white shadow-premium hover:bg-terracotta-600 active:scale-95 transition-all"
+                      className="flex-1 rounded-full bg-[#f27059] py-2 text-xs font-bold text-white shadow-glow hover:bg-[#e05e47] active:scale-95 transition-all"
                     >
                       Accept
                     </button>
@@ -558,20 +558,20 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
 
         {/* Chat Messages */}
         <div className="flex-1 space-y-4 overflow-y-auto bg-[#1e1410] px-4 py-6 sm:px-6">
-          {conversation.messages.map(renderMessage)}
-          {conversation.messages.length === 0 && (
-            <p className="mt-16 text-center text-xs font-semibold text-cocoa-300">This conversation has just begun.</p>
+          {(conversation.messages || []).map(renderMessage)}
+          {(!conversation.messages || conversation.messages.length === 0) && (
+            <p className="mt-16 text-center text-xs font-semibold text-[#f5ebe0]/40">This conversation has just begun.</p>
           )}
           {sending && conversation.is_luna && (
-            <div className="flex items-center gap-2 text-xs font-medium text-terracotta-500 bg-terracotta-50 rounded-full px-4 py-2 w-max border border-terracotta-200/20">
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-terracotta-500" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-terracotta-500 [animation-delay:0.2s]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-terracotta-500 [animation-delay:0.4s]" />
+            <div className="flex items-center gap-2 text-xs font-medium text-[#f27059] bg-[#f27059]/10 rounded-full px-4 py-2 w-max border border-[#f27059]/20">
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#f27059]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#f27059] [animation-delay:0.2s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#f27059] [animation-delay:0.4s]" />
               Luna is drafting compatibility insights...
             </div>
           )}
           {typingName && (
-            <p className="text-[10px] text-cocoa-500 italic px-2">{typingName} is typing...</p>
+            <p className="text-[10px] text-[#f5ebe0]/60 italic px-2">{typingName} is typing...</p>
           )}
           <div ref={endRef} />
         </div>
@@ -888,7 +888,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
   if (!profile) return null
 
   return (
-    <div className="noise min-h-screen bg-warmbg text-cocoa-900 flex flex-col">
+    <div className="noise min-h-screen bg-[#1e1410] text-[#f5ebe0] selection:bg-[#f27059]/20 flex flex-col">
       <AppHeader page={page} setPage={setPage} profile={profile} onGoToAdmin={onGoToAdmin} />
       
       <main className="mx-auto w-full max-w-6xl px-5 pb-20 flex-1 flex flex-col">
@@ -949,24 +949,24 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between">
-                              <span className={`font-bold text-sm truncate ${isSelected ? 'text-terracotta-500' : 'text-cocoa-900'}`}>
+                              <span className={`font-bold text-sm truncate ${isSelected ? 'text-[#f27059]' : 'text-white'}`}>
                                 {c.title}
                               </span>
                               {c.unread_count > 0 && (
-                                <span className="h-2 w-2 shrink-0 rounded-full bg-terracotta-500 shadow-glow" />
+                                <span className="h-2 w-2 shrink-0 rounded-full bg-[#f27059] shadow-glow" />
                               )}
                             </div>
-                            <div className="mt-1 truncate text-xs text-cocoa-500">
-                              {c.messages.length ? c.messages[c.messages.length - 1].body : 'Start the conversation'}
+                            <div className="mt-1 truncate text-xs text-[#f5ebe0]/60">
+                              {c.messages && c.messages.length ? c.messages[c.messages.length - 1].body : 'Start the conversation'}
                             </div>
                           </div>
-                          <ArrowRight size={14} className={`shrink-0 transition-transform ${isSelected ? 'text-terracotta-500 translate-x-0.5' : 'text-cocoa-300'}`} />
+                          <ArrowRight size={14} className={`shrink-0 transition-transform ${isSelected ? 'text-[#f27059]' : 'text-[#f5ebe0]/40'}`} />
                         </button>
                       )
                     })}
                     
                     {!state.loading && state.conversations.length === 0 && (
-                      <div className="rounded-2xl border border-dashed border-cocoa-900/10 bg-white/20 p-8 text-center text-xs font-semibold text-cocoa-500">
+                      <div className="rounded-2xl border border-dashed border-[#f5ebe0]/10 bg-[#291e19]/50 p-8 text-center text-xs font-semibold text-[#f5ebe0]/50">
                         Your Luna inbox is being prepared.
                       </div>
                     )}

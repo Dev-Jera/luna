@@ -729,7 +729,7 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
-                  e.currentTarget.form?.requestSubmit()
+                  send(e as any)
                 }
               }}
               placeholder={conversation.is_luna ? 'Message Luna…' : 'Write a message…'}

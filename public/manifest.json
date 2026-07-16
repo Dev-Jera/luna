@@ -1,0 +1,21 @@
+{
+  "short_name": "Luna",
+  "name": "Luna — Meaningful Connections",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#fffdfc",
+  "theme_color": "#ad4f37",
+  "display": "standalone",
+  "orientation": "portrait"
+}

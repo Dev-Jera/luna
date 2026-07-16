@@ -1,0 +1,57 @@
+# Node/Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+.pnpm-store/
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# TypeScript
+*.tsbuildinfo
+
+# Vite & Config
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+EXTERNAL_CONFIG.txt
+
+# Playwright & Testing
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.nyc_output/
+
+# Python / Django backend
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+*.log
+
+# IDEs & System files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db

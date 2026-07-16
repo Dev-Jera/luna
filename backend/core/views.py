@@ -16,7 +16,7 @@ from .task_dispatch import dispatch
 from .sms import AfricasTalkingSMS,consume_code,send_code
 from .ai import GeminiProvider
 from .ai.prompts import LUNA_CHAT_SYSTEM
-class RegisterView(generics.CreateAPIView):serializer_class=RegisterSerializer;permission_classes=[permissions.AllowAny]
+class RegisterView(generics.CreateAPIView):serializer_class=RegisterSerializer;permission_classes=[permissions.AllowAny];authentication_classes=[]
 class SendPhoneVerificationView(APIView):
  def post(self,request):
   profile=request.user.profile

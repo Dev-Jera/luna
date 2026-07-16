@@ -7,7 +7,7 @@ load_dotenv(BASE_DIR.parent/'.env')
 load_dotenv(BASE_DIR/'.env')
 SECRET_KEY=os.getenv('DJANGO_SECRET_KEY','dev-only-change-me-use-32-plus-characters')
 DEBUG=os.getenv('DEBUG','true').lower()=='true'
-ALLOWED_HOSTS=os.getenv('ALLOWED_HOSTS','localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS=os.getenv('ALLOWED_HOSTS','localhost,127.0.0.1').split(',');render_host=os.getenv('RENDER_EXTERNAL_HOSTNAME');ALLOWED_HOSTS.append(render_host) if render_host else None
 INSTALLED_APPS=['daphne','django.contrib.admin','django.contrib.auth','django.contrib.contenttypes','django.contrib.sessions','django.contrib.messages','django.contrib.staticfiles','corsheaders','rest_framework','drf_spectacular','channels','core']
 MIDDLEWARE=['django.middleware.security.SecurityMiddleware','whitenoise.middleware.WhiteNoiseMiddleware','corsheaders.middleware.CorsMiddleware','django.contrib.sessions.middleware.SessionMiddleware','django.middleware.common.CommonMiddleware','django.middleware.csrf.CsrfViewMiddleware','django.contrib.auth.middleware.AuthenticationMiddleware','django.contrib.messages.middleware.MessageMiddleware']
 ROOT_URLCONF='config.urls';TEMPLATES=[{'BACKEND':'django.template.backends.django.DjangoTemplates','DIRS':[BASE_DIR.parent / 'dist'],'APP_DIRS':True,'OPTIONS':{'context_processors':['django.template.context_processors.request','django.contrib.auth.context_processors.auth','django.contrib.messages.context_processors.messages']}}]
@@ -29,9 +29,7 @@ AUTH_PASSWORD_VALIDATORS=[];LANGUAGE_CODE='en-us';TIME_ZONE='Africa/Nairobi';USE
 REST_FRAMEWORK={'DEFAULT_AUTHENTICATION_CLASSES':['core.authentication.CookieJWTAuthentication'],'DEFAULT_PERMISSION_CLASSES':['rest_framework.permissions.IsAuthenticated'],'DEFAULT_SCHEMA_CLASS':'drf_spectacular.openapi.AutoSchema','DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination','PAGE_SIZE':20,'EXCEPTION_HANDLER':'core.exceptions.api_exception_handler','DEFAULT_THROTTLE_RATES':{'messages':'30/min','safety':'10/hour'}}
 SPECTACULAR_SETTINGS={'TITLE':'Luna API','DESCRIPTION':'Consent-first social intelligence platform API powered by Google Gemini','VERSION':'0.1.0','SERVE_INCLUDE_SCHEMA':False}
 SIMPLE_JWT={'ACCESS_TOKEN_LIFETIME':timedelta(minutes=60),'REFRESH_TOKEN_LIFETIME':timedelta(days=7)}
-CORS_ALLOWED_ORIGINS=os.getenv('CORS_ALLOWED_ORIGINS','http://localhost:5173').split(',')
-CORS_ALLOW_CREDENTIALS=True
-CSRF_TRUSTED_ORIGINS=os.getenv('CSRF_TRUSTED_ORIGINS','http://localhost:5173').split(',')
+CORS_ALLOWED_ORIGINS=os.getenv('CORS_ALLOWED_ORIGINS','http://localhost:5173').split(',');CORS_ALLOW_CREDENTIALS=True;CSRF_TRUSTED_ORIGINS=os.getenv('CSRF_TRUSTED_ORIGINS','http://localhost:5173').split(',');CORS_ALLOWED_ORIGINS.append(f'https://{render_host}') if render_host else None;CSRF_TRUSTED_ORIGINS.append(f'https://{render_host}') if render_host else None
 if not DEBUG and os.getenv('ENABLE_HTTPS','false').lower()=='true':
  SECURE_SSL_REDIRECT=True;SESSION_COOKIE_SECURE=True;CSRF_COOKIE_SECURE=True;SECURE_HSTS_SECONDS=31536000;SECURE_HSTS_INCLUDE_SUBDOMAINS=True;SECURE_HSTS_PRELOAD=True;SECURE_CONTENT_TYPE_NOSNIFF=True
 REDIS_URL=os.getenv('REDIS_URL','redis://localhost:6379/0')

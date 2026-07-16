@@ -14,7 +14,7 @@ ROOT_URLCONF='config.urls';TEMPLATES=[{'BACKEND':'django.template.backends.djang
 WSGI_APPLICATION='config.wsgi.application';ASGI_APPLICATION='config.asgi.application'
 import sys
 if 'test' in sys.argv or os.getenv('USE_SQLITE','true').lower()=='true':
- DATABASES={'default':{'ENGINE':'django.db.backends.sqlite3','NAME':BASE_DIR/'db.sqlite3'}}
+ DATABASES={'default':{'ENGINE':'django.db.backends.sqlite3','NAME':(BASE_DIR/'data'/'db.sqlite3') if os.path.exists(BASE_DIR/'data') else (BASE_DIR/'db.sqlite3')}}
 else:
  DATABASES={'default':{
   'ENGINE':'django.db.backends.mysql',

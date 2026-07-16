@@ -122,7 +122,7 @@ export default function Auth() {
         {/* Right Column (Mascot Illustration) */}
         <div className="w-full md:w-1/2 h-[380px] md:h-auto relative overflow-hidden bg-[#1e1410] flex-initial md:flex-1 flex items-center justify-center p-8">
           <img
-            src="/static/alternative-image.jpg"
+            src="/static/luna_playful_mascot.png"
             alt="Luna AI Mascot"
             className="w-full max-w-[340px] md:max-w-[420px] aspect-square object-contain"
           />

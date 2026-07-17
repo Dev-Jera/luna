@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema,inline_serializer
 from rest_framework import serializers
 
-def cookie_options():return {'httponly':True,'secure':getattr(settings,'SESSION_COOKIE_SECURE',False),'samesite':'Strict','path':'/'}
+def cookie_options():return {'httponly':True,'secure':getattr(settings,'SESSION_COOKIE_SECURE',False),'samesite':'Lax','path':'/'}
 def set_tokens(response,access,refresh=None):
  response.set_cookie('luna_access',str(access),max_age=int(settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()),**cookie_options())
  if refresh:response.set_cookie('luna_refresh',str(refresh),max_age=int(settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()),**cookie_options())

@@ -216,6 +216,28 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
     return Response({'message':data,'luna_reply':reply_data},status=status.HTTP_201_CREATED)
    else:return Response({'message':data,'luna_reply':None},status=status.HTTP_201_CREATED)
   Notification.objects.bulk_create([Notification(profile=p,conversation=c,title=request.user.profile.display_name,body=body[:240]) for p in c.participants.exclude(user=request.user)])
+  if not c.is_luna:
+   recipient = c.participants.exclude(user=request.user).first()
+   if recipient:
+    from django.utils import timezone
+    from datetime import timedelta
+    from .sms import AfricasTalkingSMS
+    read_state = ConversationReadState.objects.filter(conversation=c, profile=recipient).first()
+    is_active = read_state and read_state.last_read_at and read_state.last_read_at >= timezone.now() - timedelta(minutes=2)
+    if not is_active:
+     cooldown = timezone.now() - timedelta(minutes=15)
+     recent_sms = Notification.objects.filter(profile=recipient, conversation=c, sms_sent_at__gte=cooldown).exists()
+     if not recent_sms:
+      if recipient.phone_verified and recipient.sms_unread_reminders:
+       sms_body = f"Hi {recipient.display_name}, {request.user.profile.display_name} is online and just sent you a message: '{body[:60]}...'. Log in to reply!"
+       try:
+        sms = AfricasTalkingSMS()
+        if sms.send(recipient.phone_number, sms_body):
+         notif = Notification.objects.filter(profile=recipient, conversation=c, read_at__isnull=True).order_by('-created_at').first()
+         if notif:
+          notif.sms_sent_at = timezone.now()
+          notif.save(update_fields=['sms_sent_at'])
+       except Exception:pass
   ConversationReadState.objects.update_or_create(conversation=c,profile=request.user.profile,defaults={'last_read_at':timezone.now()});data=MessageSerializer(message).data
   try:
    async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})

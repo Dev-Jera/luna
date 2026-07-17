@@ -102,14 +102,27 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
  def accept(self,request,pk=None):
   match=self.get_object()
   match.status='accepted'
-  if not match.conversation:
-   conversation=Conversation.objects.create(title=f'{match.requester.display_name} & {match.candidate.display_name}')
-   conversation.participants.add(match.requester,match.candidate)
-   ConversationReadState.objects.bulk_create([ConversationReadState(conversation=conversation,profile=p) for p in [match.requester,match.candidate]])
-  match.conversation=conversation
-  match.save()
-  candidate=match.candidate
-  if candidate.phone_verified and candidate.sms_match_notifications:AfricasTalkingSMS().send(candidate.phone_number,'You have a new connection notification in Luna. Open the app to view it.')
+  match.save(update_fields=['status'])
+  rev_match=Match.objects.filter(requester=match.candidate,candidate=match.requester).first()
+  if rev_match and rev_match.status=='accepted':
+   if not match.conversation:
+    conversation=Conversation.objects.create(title=f'{match.requester.display_name} & {match.candidate.display_name}', is_luna=False)
+    conversation.participants.add(match.requester,match.candidate)
+    ConversationReadState.objects.bulk_create([ConversationReadState(conversation=conversation,profile=p) for p in [match.requester,match.candidate]])
+    Message.objects.create(conversation=conversation, is_ai=True, body=f"Welcome {match.requester.display_name} and {match.candidate.display_name}! You both agreed to connect. Feel free to start chatting!")
+    match.conversation=conversation
+    match.save(update_fields=['conversation'])
+    rev_match.conversation=conversation
+    rev_match.save(update_fields=['conversation'])
+  else:
+   rev_match, created = Match.objects.get_or_create(
+    requester=match.candidate,
+    candidate=match.requester,
+    defaults={'score': match.score, 'reasons': match.reasons}
+   )
+   if rev_match.status != 'accepted':
+    rev_match.status = 'suggested'
+    rev_match.save(update_fields=['status'])
   return Response(self.get_serializer(match).data)
  @action(detail=True,methods=['post'],url_path='pass')
  def pass_match(self,request,pk=None):
@@ -202,20 +215,43 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   if c.luna_stage=='discussing' and match:
    candidate=match.candidate;is_connecting=any(word in text for word in ['invite', 'connect', 'introduce', 'meet', 'yes', 'fit', 'stay', 'moderate', 'leave'])
    if is_connecting:
-    moderate=any(word in text for word in ['moderate', 'stay', 'watch', 'observe']);leave=any(word in text for word in ['leave', 'go', 'private', 'alone'])
-    if moderate:
-     c.participants.add(candidate);c.luna_stage='moderating';c.save(update_fields=['luna_stage']);match.status='accepted';match.save(update_fields=['status']);msg=Message.objects.create(conversation=c, is_ai=True, body=f"I've invited {candidate.display_name} to this chat. I will stay to moderate and help you connect. Welcome {candidate.display_name}!");
-     try:
-      from channels.layers import get_channel_layer;from .serializers import MessageSerializer;data=MessageSerializer(msg).data;async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
-     except Exception:pass
-     return msg
-    elif leave:
-     c.participants.add(candidate);c.luna_stage='left';c.save(update_fields=['luna_stage']);match.status='accepted';match.save(update_fields=['status']);msg=Message.objects.create(conversation=c, is_ai=True, body=f"I've invited {candidate.display_name} to join. I will leave you both to chat privately. Click 'Re-engage Luna' in the options when you're done!");sys_msg=Message.objects.create(conversation=c, is_ai=True, body="Luna has left the conversation.", metadata={'type':'system_left'})
-     try:
-      from channels.layers import get_channel_layer;from .serializers import MessageSerializer;data1=MessageSerializer(msg).data;data2=MessageSerializer(sys_msg).data;async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data1});async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data2})
-     except Exception:pass
-     return msg
-    else:context={'state':'choose_moderation_style','instruction':'Ask the user if they want you to stay and moderate the chat, or invite the candidate and leave the chat.'};return self._gemini_message(c,profile,body,context)
+    match.status = 'accepted'
+    match.save(update_fields=['status'])
+    rev_match = Match.objects.filter(requester=candidate, candidate=profile).first()
+    if rev_match and rev_match.status == 'accepted':
+     direct_c = Conversation.objects.create(title=f"{profile.display_name} & {candidate.display_name}", is_luna=False)
+     direct_c.participants.add(profile, candidate)
+     Message.objects.create(conversation=direct_c, is_ai=True, body=f"Welcome {profile.display_name} and {candidate.display_name}! You both agreed to connect. Feel free to start chatting!")
+     c.luna_stage = 'welcome'
+     c.pending_match = None
+     c.save(update_fields=['luna_stage', 'pending_match'])
+     inbox_b = Conversation.objects.filter(is_luna=True, participants=candidate).first()
+     if inbox_b:
+      inbox_b.luna_stage = 'welcome'
+      inbox_b.pending_match = None
+      inbox_b.save(update_fields=['luna_stage', 'pending_match'])
+     return Message.objects.create(
+      conversation=c,
+      is_ai=True,
+      body=f"Excellent! {candidate.display_name} has also accepted your invitation. I have opened a new direct chat conversation for you two! You can find it on your dashboard."
+     )
+    else:
+     rev_match, created = Match.objects.get_or_create(
+      requester=candidate,
+      candidate=profile,
+      defaults={'score': match.score, 'reasons': match.reasons}
+     )
+     if rev_match.status != 'accepted':
+      rev_match.status = 'suggested'
+      rev_match.save(update_fields=['status'])
+     c.luna_stage = 'welcome'
+     c.pending_match = None
+     c.save(update_fields=['luna_stage', 'pending_match'])
+     return Message.objects.create(
+      conversation=c,
+      is_ai=True,
+      body=f"I have saved your choice! I will privately offer your profile to {candidate.display_name} to see if they'd also like to connect. I will notify you as soon as they respond."
+     )
    context={'state':'discussing_profile','candidate':{'display_name':candidate.display_name,'bio':candidate.bio,'location':candidate.location,'connection_goal':candidate.connection_goal,'values':candidate.values,'interests':candidate.interests,'communication_style':candidate.communication_style},'match_reasons':match.reasons};return self._gemini_message(c,profile,body,context)
   if c.luna_stage=='moderating':
    if any(word in text for word in ['luna leave', 'luna go', 'leave chat', 'luna end']):

@@ -37,8 +37,16 @@ class LunaJourneyTests(APITestCase):
   self.assertEqual(response.status_code,200);self.user.profile.refresh_from_db();self.assertTrue(self.user.profile.onboarding_complete);self.assertTrue(self.user.profile.ai_profile_consent)
  def test_accept_creates_conversation_with_ai_off(self):
   match=Match.objects.create(requester=self.user.profile,candidate=self.other.profile,score=90,reasons=['Shared values'])
-  response=self.client.post(f'/api/matches/{match.id}/accept/')
-  self.assertEqual(response.status_code,200);conversation=Conversation.objects.get();self.assertFalse(conversation.ai_enabled);self.assertEqual(conversation.participants.count(),2)
+  match_rev=Match.objects.create(requester=self.other.profile,candidate=self.user.profile,score=90,reasons=['Shared values'])
+  resp1=self.client.post(f'/api/matches/{match.id}/accept/')
+  self.assertEqual(resp1.status_code,200)
+  self.assertFalse(Conversation.objects.filter(is_luna=False).exists())
+  self.client.force_authenticate(self.other)
+  resp2=self.client.post(f'/api/matches/{match_rev.id}/accept/')
+  self.assertEqual(resp2.status_code,200)
+  conversation=Conversation.objects.filter(is_luna=False).get()
+  self.assertFalse(conversation.ai_enabled)
+  self.assertEqual(conversation.participants.count(),2)
  def test_pass_hides_suggestion(self):
   match=Match.objects.create(requester=self.user.profile,candidate=self.other.profile,score=70)
   response=self.client.post(f'/api/matches/{match.id}/pass/')
@@ -97,13 +105,14 @@ class LunaJourneyTests(APITestCase):
  def test_luna_inbox_reveals_one_profile_before_introduction(self):
   inbox=Conversation.objects.create(title='Luna',is_luna=True,luna_stage='offered');inbox.participants.add(self.user.profile);match=Match.objects.create(requester=self.user.profile,candidate=self.other.profile,score=88,reasons=['Shared values']);inbox.pending_match=match;inbox.save(update_fields=['pending_match'])
   shown=self.client.post(f'/api/conversations/{inbox.id}/messages/',{'body':'Yes, show me their profile'},format='json');self.assertEqual(shown.status_code,201);self.assertEqual(shown.data['luna_reply']['metadata']['type'],'profile_card');self.assertEqual(shown.data['luna_reply']['metadata']['profile']['display_name'],self.other.profile.display_name)
-  introduced=self.client.post(f'/api/conversations/{inbox.id}/messages/',{'body':'invite them and moderate'},format='json')
+  introduced=self.client.post(f'/api/conversations/{inbox.id}/messages/',{'body':'invite them'},format='json')
   self.assertEqual(introduced.status_code,201)
   inbox.refresh_from_db()
-  self.assertEqual(inbox.luna_stage,'moderating')
+  self.assertEqual(inbox.luna_stage,'welcome')
+  self.assertIsNone(inbox.pending_match)
   match.refresh_from_db()
   self.assertEqual(match.status,'accepted')
-  self.assertTrue(inbox.participants.filter(pk=self.other.profile.id).exists())
+  self.assertFalse(inbox.participants.filter(pk=self.other.profile.id).exists())
  def test_generate_welcome_message_task(self):
   from .tasks import generate_welcome_message
   conversation=Conversation.objects.create(title='Luna',is_luna=True)
@@ -119,16 +128,24 @@ class LunaJourneyTests(APITestCase):
   self.assertEqual(response.status_code, 201)
   inbox.refresh_from_db()
   self.assertEqual(inbox.luna_stage, 'discussing')
-  response = self.client.post(f'/api/conversations/{inbox.id}/messages/', {'body': 'invite them and leave'}, format='json')
+  response = self.client.post(f'/api/conversations/{inbox.id}/messages/', {'body': 'invite them'}, format='json')
   self.assertEqual(response.status_code, 201)
   inbox.refresh_from_db()
-  self.assertEqual(inbox.luna_stage, 'left')
-  self.assertTrue(inbox.participants.filter(pk=self.other.profile.id).exists())
-  response = self.client.post(f'/api/conversations/{inbox.id}/reengage/')
-  self.assertEqual(response.status_code, 200)
-  inbox.refresh_from_db()
-  self.assertEqual(inbox.luna_stage, 'feedback')
-  self.assertFalse(inbox.participants.filter(pk=self.other.profile.id).exists())
+  self.assertEqual(inbox.luna_stage, 'welcome')
+  self.assertIsNone(inbox.pending_match)
+  match.refresh_from_db()
+  self.assertEqual(match.status, 'accepted')
+  rev_match = Match.objects.get(requester=self.other.profile, candidate=self.user.profile)
+  self.assertEqual(rev_match.status, 'suggested')
+  inbox_b = Conversation.objects.create(title='Luna', is_luna=True, luna_stage='offered', pending_match=rev_match)
+  inbox_b.participants.add(self.other.profile)
+  self.client.force_authenticate(self.other)
+  response_b = self.client.post(f'/api/conversations/{inbox_b.id}/messages/', {'body': 'Yes, let’s connect.'}, format='json')
+  self.assertEqual(response_b.status_code, 201)
+  response_b2 = self.client.post(f'/api/conversations/{inbox_b.id}/messages/', {'body': 'connect'}, format='json')
+  self.assertEqual(response_b2.status_code, 201)
+  direct_c = Conversation.objects.filter(is_luna=False).get()
+  self.assertEqual(direct_c.participants.count(), 2)
  def test_moderation_dispute_settlement_and_suspension(self):
   c=Conversation.objects.create(title='Amani & Amara',is_luna=True,luna_stage='moderating')
   c.participants.add(self.user.profile,self.other.profile)
@@ -219,8 +236,7 @@ class LunaJourneyTests(APITestCase):
   p2.save()
   
   refresh_matches(p1.id)
-  match2 = Match.objects.get(requester=p1, candidate=p2)
-  self.assertEqual(match2.score, 0) # Cosine similarity = 0.0 -> 0 score
+  self.assertFalse(Match.objects.filter(requester=p1, candidate=p2).exists())
  def test_gender_and_preference_filtering(self):
   from .tasks import refresh_matches
   from django.contrib.auth.models import User
@@ -230,6 +246,8 @@ class LunaJourneyTests(APITestCase):
   p1.connection_goal = 'romance'
   p1.gender = 'female'
   p1.gender_preference = 'male'
+  p1.values = ['honesty', 'kindness']
+  p1.interests = ['hiking']
   p1.save()
 
   # Candidate 1: Male looking for Women (romance) -> Should Match
@@ -241,6 +259,8 @@ class LunaJourneyTests(APITestCase):
   p2.connection_goal = 'romance'
   p2.gender = 'male'
   p2.gender_preference = 'female'
+  p2.values = ['honesty', 'kindness']
+  p2.interests = ['hiking']
   p2.save()
 
   # Candidate 2: Female looking for Men (romance) -> Should NOT match (p1 wants males)
@@ -252,6 +272,8 @@ class LunaJourneyTests(APITestCase):
   p3.connection_goal = 'romance'
   p3.gender = 'female'
   p3.gender_preference = 'male'
+  p3.values = ['honesty', 'kindness']
+  p3.interests = ['hiking']
   p3.save()
 
   # Candidate 3: Male looking for Men (romance) -> Should NOT match (p4 wants males, user is female)
@@ -263,6 +285,8 @@ class LunaJourneyTests(APITestCase):
   p4.connection_goal = 'romance'
   p4.gender = 'male'
   p4.gender_preference = 'male'
+  p4.values = ['honesty', 'kindness']
+  p4.interests = ['hiking']
   p4.save()
 
   refresh_matches(p1.id)

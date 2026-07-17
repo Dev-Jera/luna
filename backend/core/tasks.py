@@ -24,9 +24,9 @@ def refresh_matches(profile_id):
  if not (p.onboarding_complete and p.is_discoverable):return 0
  blocked_ids=set(p.blocks_made.values_list('blocked_id',flat=True))|set(p.blocks_received.values_list('blocker_id',flat=True))
  candidates=Profile.objects.exclude(pk=profile_id).exclude(pk__in=blocked_ids).filter(onboarding_complete=True,is_discoverable=True)
+ candidates=candidates.filter(connection_goal=p.connection_goal)
  if p.connection_goal=='romance':
   from django.db.models import Q
-  candidates=candidates.filter(connection_goal='romance')
   if p.gender_preference!='both':candidates=candidates.filter(gender=p.gender_preference)
   if p.gender!='male':candidates=candidates.exclude(gender_preference='male')
   if p.gender!='female':candidates=candidates.exclude(gender_preference='female')
@@ -38,7 +38,10 @@ def refresh_matches(profile_id):
    reasons=[f"Shared interests: {', '.join(shared_interests[:3])}"] if shared_interests else ["Highly aligned profile values"]
   else:
    score,reasons=compatibility(p,candidate)
-  Match.objects.update_or_create(requester=p,candidate=candidate,defaults={'score':score,'reasons':reasons})
+  if score >= 70:
+   Match.objects.update_or_create(requester=p,candidate=candidate,defaults={'score':score,'reasons':reasons})
+  else:
+   Match.objects.filter(requester=p,candidate=candidate,status='suggested').delete()
   
   if candidate.ai_embedding and p.ai_embedding:
    sim=cosine_similarity(candidate.ai_embedding,p.ai_embedding)
@@ -47,7 +50,10 @@ def refresh_matches(profile_id):
    rev_reasons=[f"Shared interests: {', '.join(shared_interests[:3])}"] if shared_interests else ["Highly aligned profile values"]
   else:
    rev_score,rev_reasons=compatibility(candidate,p)
-  Match.objects.update_or_create(requester=candidate,candidate=p,defaults={'score':rev_score,'reasons':rev_reasons})
+  if rev_score >= 70:
+   Match.objects.update_or_create(requester=candidate,candidate=p,defaults={'score':rev_score,'reasons':rev_reasons})
+  else:
+   Match.objects.filter(requester=candidate,candidate=p,status='suggested').delete()
  for owner in [p,*list(candidates)]:
   inbox=Conversation.objects.filter(is_luna=True,participants=owner).first();pending=Match.objects.filter(requester=owner,status='suggested',presented_at__isnull=True,candidate__onboarding_complete=True,candidate__is_discoverable=True).order_by('-score').first()
   if inbox and pending and not inbox.pending_match_id:

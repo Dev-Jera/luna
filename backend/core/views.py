@@ -129,7 +129,7 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     rev_match.status = 'suggested'
     rev_match.save(update_fields=['status'])
     if match.candidate.phone_verified and match.candidate.sms_match_notifications:
-     try:AfricasTalkingSMS().send(match.candidate.phone_number,f"Hi {match.candidate.display_name}, someone wants to connect with you on Luna! Log in to view their profile.")
+     try:AfricasTalkingSMS().send(match.candidate.phone_number,f"Hi {match.candidate.display_name}, {match.requester.display_name} would like to chat and is online. Log in to the Luna app to connect!")
      except Exception:pass
   return Response(self.get_serializer(match).data)
  @action(detail=True,methods=['post'],url_path='pass')
@@ -264,7 +264,7 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
       rev_match.status = 'suggested'
       rev_match.save(update_fields=['status'])
       if candidate.phone_verified and candidate.sms_match_notifications:
-       try:AfricasTalkingSMS().send(candidate.phone_number,f"Hi {candidate.display_name}, someone wants to connect with you on Luna! Log in to view their profile.")
+       try:AfricasTalkingSMS().send(candidate.phone_number,f"Hi {candidate.display_name}, {profile.display_name} would like to chat and is online. Log in to the Luna app to connect!")
        except Exception:pass
      c.luna_stage = 'welcome'
      c.pending_match = None

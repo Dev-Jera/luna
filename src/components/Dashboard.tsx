@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings } from 'lucide-react'
+import { ArrowLeft, ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings, Menu } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import api from '../lib/api'
 import { addMessage, loadDashboard, setProfile } from '../store'
@@ -8,6 +8,7 @@ import type { Conversation, Message, Profile } from '../types'
 import NotificationCenter from './NotificationCenter'
 
 function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversations' | 'preferences' | 'counseling'; setPage: (page: 'conversations' | 'preferences' | 'counseling') => void; profile: Profile; onGoToAdmin?: () => void }) {
+  const [menuOpen, setMenuOpen] = useState(false)
   return (
     <header className="sticky top-0 z-20 bg-[#1e1410] border-b border-[#f5ebe0]/10">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
@@ -15,70 +16,160 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
           <span className="h-4 w-4 rounded-full bg-[#f27059] block shrink-0" />
           <span className="font-display text-xl font-bold tracking-tight text-[#f5ebe0]">luna<span className="text-[#f27059]">.</span></span>
         </button>
-        <nav className="flex items-center gap-1.5 sm:gap-3">
-          <button
-            onClick={() => setPage('conversations')}
-            className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
-              page === 'conversations'
-                ? 'bg-[#f27059] text-white shadow-premium'
-                : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
-            }`}
-          >
-            <MessageCircle size={14} />
-            <span className="hidden sm:inline">Conversations</span>
-          </button>
-          <button
-            onClick={() => setPage('counseling')}
-            className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
-              page === 'counseling'
-                ? 'bg-[#f27059] text-white shadow-premium'
-                : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
-            }`}
-          >
-            <Heart size={14} />
-            <span className="hidden sm:inline">Counseling</span>
-          </button>
-          <button
-            onClick={() => setPage('preferences')}
-            className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
-              page === 'preferences'
-                ? 'bg-[#f27059] text-white shadow-premium'
-                : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
-            }`}
-          >
-            <Settings size={14} />
-            <span className="hidden sm:inline">Preferences</span>
-          </button>
 
-          {profile.user.is_staff && onGoToAdmin && (
-            <button
-              onClick={onGoToAdmin}
-              className="flex items-center gap-1 bg-yellow-500/10 text-[#eab308] border border-yellow-500/20 hover:bg-yellow-500/20 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200"
-            >
-              <Shield size={12} className="text-[#eab308] animate-pulse" />
-              Admin
-            </button>
-          )}
-          
-          <div className="w-[1px] h-6 bg-[#f5ebe0]/10 mx-1" />
-
+        {/* Right Side Header Controls */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <NotificationCenter />
-          
-          <div className="hidden sm:grid h-9 w-9 place-items-center rounded-full bg-[#8ea869] text-sm font-bold text-[#1e1410]">
-            {profile.display_name[0]?.toUpperCase()}
-          </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-1.5 sm:gap-3">
+            <button
+              onClick={() => setPage('conversations')}
+              className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
+                page === 'conversations'
+                  ? 'bg-[#f27059] text-white shadow-premium'
+                  : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+              }`}
+            >
+              <MessageCircle size={14} />
+              <span className="hidden sm:inline">Conversations</span>
+            </button>
+            <button
+              onClick={() => setPage('counseling')}
+              className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
+                page === 'counseling'
+                  ? 'bg-[#f27059] text-white shadow-premium'
+                  : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+              }`}
+            >
+              <Heart size={14} />
+              <span className="hidden sm:inline">Counseling</span>
+            </button>
+            <button
+              onClick={() => setPage('preferences')}
+              className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
+                page === 'preferences'
+                  ? 'bg-[#f27059] text-white shadow-premium'
+                  : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+              }`}
+            >
+              <Settings size={14} />
+              <span className="hidden sm:inline">Preferences</span>
+            </button>
+
+            {profile.user.is_staff && onGoToAdmin && (
+              <button
+                onClick={onGoToAdmin}
+                className="flex items-center gap-1 bg-yellow-500/10 text-[#eab308] border border-yellow-500/20 hover:bg-yellow-500/20 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200"
+              >
+                <Shield size={12} className="text-[#eab308] animate-pulse" />
+                Admin
+              </button>
+            )}
+            
+            <div className="w-[1px] h-6 bg-[#f5ebe0]/10 mx-1" />
+
+            <div className="hidden sm:grid h-9 w-9 place-items-center rounded-full bg-[#8ea869] text-sm font-bold text-[#1e1410]">
+              {profile.display_name[0]?.toUpperCase()}
+            </div>
+            <button
+              aria-label="Sign out"
+              onClick={async () => {
+                await api.post('/auth/logout/')
+                location.reload()
+              }}
+              className="rounded-full p-2.5 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-[#ffffff] transition-all duration-200"
+            >
+              <LogOut size={16} />
+            </button>
+          </nav>
+
+          {/* Mobile hamburger menu toggle */}
           <button
-            aria-label="Sign out"
-            onClick={async () => {
-              await api.post('/auth/logout/')
-              location.reload()
-            }}
-            className="rounded-full p-2.5 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-[#ffffff] transition-all duration-200"
+            onClick={() => setMenuOpen(true)}
+            className="flex md:hidden rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white transition-all active:scale-95"
+            aria-label="Open navigation menu"
           >
-            <LogOut size={16} />
+            <Menu size={20} />
           </button>
-        </nav>
+        </div>
       </div>
+
+      {/* Hamburger Drawer Overlay (Mobile Only) */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+          <div className="w-64 max-w-xs bg-[#1e1410] border-r border-[#f5ebe0]/10 p-6 flex flex-col h-full animate-slide-in">
+            <div className="flex items-center justify-between pb-6 border-b border-[#f5ebe0]/10">
+              <button onClick={() => { setPage('conversations'); setMenuOpen(false); }} className="flex items-center gap-2.5 text-base font-bold tracking-tight">
+                <span className="h-4 w-4 rounded-full bg-[#f27059] block shrink-0" />
+                <span className="font-display text-xl font-bold tracking-tight text-[#f5ebe0]">luna<span className="text-[#f27059]">.</span></span>
+              </button>
+              <button onClick={() => setMenuOpen(false)} className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white">
+                <X size={18} />
+              </button>
+            </div>
+
+            <nav className="flex-1 py-8 flex flex-col gap-3">
+              <button
+                onClick={() => { setPage('conversations'); setMenuOpen(false); }}
+                className={`rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-3 transition-all ${
+                  page === 'conversations' ? 'bg-[#f27059] text-white shadow-premium' : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+                }`}
+              >
+                <MessageCircle size={16} />
+                <span>Conversations</span>
+              </button>
+              <button
+                onClick={() => { setPage('counseling'); setMenuOpen(false); }}
+                className={`rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-3 transition-all ${
+                  page === 'counseling' ? 'bg-[#f27059] text-white shadow-premium' : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+                }`}
+              >
+                <Heart size={16} />
+                <span>Counseling</span>
+              </button>
+              <button
+                onClick={() => { setPage('preferences'); setMenuOpen(false); }}
+                className={`rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-3 transition-all ${
+                  page === 'preferences' ? 'bg-[#f27059] text-white shadow-premium' : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+                }`}
+              >
+                <Settings size={16} />
+                <span>Preferences</span>
+              </button>
+
+              {profile.user.is_staff && onGoToAdmin && (
+                <button
+                  onClick={() => { onGoToAdmin(); setMenuOpen(false); }}
+                  className="flex items-center gap-3 text-yellow-500/90 border border-yellow-500/20 bg-yellow-500/5 hover:bg-yellow-500/10 rounded-xl px-4 py-3 text-sm font-semibold transition-all mt-4"
+                >
+                  <Shield size={16} />
+                  <span>Admin Panel</span>
+                </button>
+              )}
+            </nav>
+
+            <div className="pt-6 border-t border-[#f5ebe0]/10 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="grid h-8 w-8 place-items-center rounded-full bg-[#8ea869] text-xs font-bold text-[#1e1410]">
+                  {profile.display_name[0]?.toUpperCase()}
+                </div>
+                <span className="text-xs font-bold text-[#f5ebe0]">{profile.display_name}</span>
+              </div>
+              <button
+                aria-label="Sign out"
+                onClick={async () => {
+                  await api.post('/auth/logout/')
+                  location.reload()
+                }}
+                className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-red-500/20 hover:text-red-400 transition-all"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

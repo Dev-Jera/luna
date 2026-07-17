@@ -29,7 +29,13 @@ class AfricasTalkingSMS:
         self.username = settings.AFRICASTALKING_USERNAME
         self.api_key = settings.AFRICASTALKING_API_KEY
         self.sender_id = settings.AFRICASTALKING_SENDER_ID
-        self.base_url = settings.AFRICASTALKING_SMS_URL
+        env_url = getattr(settings, 'AFRICASTALKING_SMS_URL', '')
+        if env_url and 'sandbox' not in env_url and self.username.lower() == 'sandbox':
+            self.base_url = 'https://api.sandbox.africastalking.com/version1/messaging'
+        elif env_url and 'sandbox' in env_url and self.username.lower() != 'sandbox':
+            self.base_url = 'https://api.africastalking.com/version1/messaging'
+        else:
+            self.base_url = env_url or ('https://api.sandbox.africastalking.com/version1/messaging' if self.username.lower() == 'sandbox' else 'https://api.africastalking.com/version1/messaging')
 
     @property
     def configured(self):

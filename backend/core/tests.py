@@ -270,3 +270,27 @@ class LunaJourneyTests(APITestCase):
   self.assertTrue(Match.objects.filter(requester=p1, candidate=p2).exists())
   self.assertFalse(Match.objects.filter(requester=p1, candidate=p3).exists())
   self.assertFalse(Match.objects.filter(requester=p1, candidate=p4).exists())
+
+ def test_luna_intent_safety_screening(self):
+  from unittest.mock import patch
+  c = Conversation.objects.create(title='Luna', is_luna=True)
+  c.participants.add(self.user.profile)
+  
+  # Mock Gemini response to flag suspicious message
+  mock_flagged_response = {
+   'is_suspicious': True,
+   'reason': 'soliciting money and wire transfers'
+  }
+  
+  with patch('core.ai.GeminiProvider.structured', return_value=mock_flagged_response), \
+       patch('core.ai.GeminiProvider.configured', return_value=True):
+   resp = self.client.post(f'/api/conversations/{c.id}/messages/', {'body': 'Wire me some cash first and I will meet you tonight'}, format='json')
+   self.assertEqual(resp.status_code, 201)
+   
+   # Verify the user got a response from Luna (not blocked)
+   self.assertIsNotNone(resp.data['luna_reply'])
+   
+   # Verify the silent report is generated
+   self.assertTrue(Report.objects.filter(reported=self.user.profile, reason='unsafe').exists())
+   report = Report.objects.get(reported=self.user.profile, reason='unsafe')
+   self.assertIn('soliciting money', report.details)

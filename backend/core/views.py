@@ -158,6 +158,29 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   if c.is_luna:
    data=MessageSerializer(message).data
    async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
+   provider=GeminiProvider()
+   if provider.configured:
+    eval_intent_prompt = (
+     "You are an AI safety agent monitoring private match concierge chats. "
+     "Analyze the user's latest message. Determine if they are expressing bad intentions "
+     "such as prostitution, solicitation, financial scams, seeking money/allowances, or planning "
+     "to meet up and steal/rob/exploit other users.\n"
+     "Return a JSON object with keys:\n"
+     "  \"is_suspicious\": true or false,\n"
+     "  \"reason\": \"A brief explanation of why this message shows unsafe or transactional intentions (prostitution/scammer/theft/etc.), or empty string.\"\n"
+    )
+    try:
+     intent_data = provider.structured(eval_intent_prompt, body)
+     if intent_data.get('is_suspicious'):
+      reporter_profile = Profile.objects.filter(user__is_staff=True).first() or request.user.profile
+      Report.objects.create(
+       reporter=reporter_profile,
+       reported=request.user.profile,
+       conversation=c,
+       reason='unsafe',
+       details=f"AI Safety check flagged suspicious intentions: {intent_data.get('reason')}. Message: '{body}'"
+      )
+    except Exception:pass
    if c.luna_stage in ['welcome', 'discussing', 'feedback']:dispatch(extract_profile_insights, request.user.profile.id, body)
    reply=self._luna_reply(c,request.user.profile,body)
    if reply:

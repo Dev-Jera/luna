@@ -1,4 +1,4 @@
-const CACHE_NAME = 'luna-cache-v2';
+const CACHE_NAME = 'luna-cache-v3';
 const ASSETS = [
   '/',
   '/index.html',
@@ -44,7 +44,13 @@ self.addEventListener('fetch', event => {
         return response;
       })
       .catch(() => {
-        return caches.match(event.request);
+        return caches.match(event.request).then(cachedResponse => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Return a rejection if not in cache to let the browser display the standard offline page
+          return Promise.reject(new Error('Network error and asset not in cache'));
+        });
       })
   );
 });

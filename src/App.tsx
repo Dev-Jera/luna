@@ -31,9 +31,14 @@ export default function App(){
   },[dispatch])
 
   useEffect(() => {
+    const handleLogout = () => setSession('anonymous')
+    window.addEventListener('auth-logged-out', handleLogout)
     const handlePop = () => setPath(window.location.pathname)
     window.addEventListener('popstate', handlePop)
-    return () => window.removeEventListener('popstate', handlePop)
+    return () => {
+      window.removeEventListener('auth-logged-out', handleLogout)
+      window.removeEventListener('popstate', handlePop)
+    }
   }, [])
   
   useEffect(() => {

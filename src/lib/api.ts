@@ -5,7 +5,17 @@ api.interceptors.response.use(r=>r,async error=>{
  const original=error.config
  if(error.response?.status===401&&!original?._retried&&!String(original?.url).includes('/auth/token/')){
   original._retried=true
-  try{refreshing??=api.post('/auth/token/refresh/');await refreshing;refreshing=null;return api(original)}catch{refreshing=null}
+  try{
+   refreshing??=api.post('/auth/token/refresh/');
+   await refreshing;
+   refreshing=null;
+   return api(original);
+  }catch(err){
+   refreshing=null;
+   if(typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('auth-logged-out'));
+   }
+  }
  }
  return Promise.reject(error)
 })

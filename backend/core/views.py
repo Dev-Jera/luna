@@ -114,6 +114,11 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     match.save(update_fields=['conversation'])
     rev_match.conversation=conversation
     rev_match.save(update_fields=['conversation'])
+    sms=AfricasTalkingSMS()
+    for p in [match.requester,match.candidate]:
+     if p.phone_verified and p.sms_match_notifications:
+      try:sms.send(p.phone_number,f"Hi {p.display_name}, you have a new match connection on Luna! You both agreed to connect. Log in to start chatting!")
+      except Exception:pass
   else:
    rev_match, created = Match.objects.get_or_create(
     requester=match.candidate,
@@ -123,6 +128,9 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
    if rev_match.status != 'accepted':
     rev_match.status = 'suggested'
     rev_match.save(update_fields=['status'])
+    if match.candidate.phone_verified and match.candidate.sms_match_notifications:
+     try:AfricasTalkingSMS().send(match.candidate.phone_number,f"Hi {match.candidate.display_name}, someone wants to connect with you on Luna! Log in to view their profile.")
+     except Exception:pass
   return Response(self.get_serializer(match).data)
  @action(detail=True,methods=['post'],url_path='pass')
  def pass_match(self,request,pk=None):
@@ -236,6 +244,11 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
       inbox_b.luna_stage = 'welcome'
       inbox_b.pending_match = None
       inbox_b.save(update_fields=['luna_stage', 'pending_match'])
+     sms=AfricasTalkingSMS()
+     for p in [profile,candidate]:
+      if p.phone_verified and p.sms_match_notifications:
+       try:sms.send(p.phone_number,f"Hi {p.display_name}, you have a new match connection on Luna! You both agreed to connect. Log in to start chatting!")
+       except Exception:pass
      return Message.objects.create(
       conversation=c,
       is_ai=True,
@@ -250,6 +263,9 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
      if rev_match.status != 'accepted':
       rev_match.status = 'suggested'
       rev_match.save(update_fields=['status'])
+      if candidate.phone_verified and candidate.sms_match_notifications:
+       try:AfricasTalkingSMS().send(candidate.phone_number,f"Hi {candidate.display_name}, someone wants to connect with you on Luna! Log in to view their profile.")
+       except Exception:pass
      c.luna_stage = 'welcome'
      c.pending_match = None
      c.save(update_fields=['luna_stage', 'pending_match'])

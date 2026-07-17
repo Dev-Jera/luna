@@ -102,6 +102,7 @@ function Circle({ size = 20, strokeWidth = 2, className = '' }) {
 function Chat({ conversation, onClose, onReload }: { conversation: Conversation; onClose: () => void; onReload: () => void }) {
   const dispatch = useDispatch<AppDispatch>()
   const currentUserId = useSelector((s: RootState) => s.luna.profile?.user.id)
+  const activeProfileId = useSelector((s: RootState) => s.luna.profile?.id)
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [connected, setConnected] = useState(false)
@@ -161,7 +162,11 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
       ws.onmessage = e => {
         const payload = JSON.parse(e.data)
         if (payload.message) {
-          dispatch(addMessage({ conversationId: conversation.id, message: payload.message }))
+          const msg = payload.message
+          if (msg.metadata?.visible_to_profile_id && msg.metadata.visible_to_profile_id !== activeProfileId) {
+            return
+          }
+          dispatch(addMessage({ conversationId: conversation.id, message: msg }))
           setSending(false)
         } else if (payload.event === 'typing' && payload.user_id !== currentUserId) {
           setTypingName(payload.typing ? payload.display_name : '')
@@ -182,7 +187,7 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
       if (retry) clearTimeout(retry)
       wsRef.current?.close()
     }
-  }, [conversation.id, currentUserId, dispatch])
+  }, [conversation.id, currentUserId, activeProfileId, dispatch])
 
   // Hybrid polling fallback when WebSocket is not connected or active
   useEffect(() => {

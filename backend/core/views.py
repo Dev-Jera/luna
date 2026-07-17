@@ -247,7 +247,7 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
           conversation=c,
           is_ai=True,
           body=f"Luna: {recipient.display_name} is offline. I have sent them an SMS to notify them.",
-          metadata={'type': 'system_left'}
+          metadata={'type': 'system_left', 'visible_to_profile_id': request.user.profile.id}
          )
          try:
           sys_data = MessageSerializer(sys_msg).data

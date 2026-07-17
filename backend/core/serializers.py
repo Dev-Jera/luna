@@ -11,8 +11,15 @@ class MessageSerializer(serializers.ModelSerializer):
  sender=UserSerializer(read_only=True)
  class Meta:model=Message;fields=['id','sender','body','is_ai','metadata','created_at']
 class ConversationSerializer(serializers.ModelSerializer):
- participants=ProfileSerializer(many=True,read_only=True);messages=MessageSerializer(many=True,read_only=True);my_ai_consent=serializers.SerializerMethodField();unread_count=serializers.SerializerMethodField()
+ participants=ProfileSerializer(many=True,read_only=True);messages=serializers.SerializerMethodField();my_ai_consent=serializers.SerializerMethodField();unread_count=serializers.SerializerMethodField()
  class Meta:model=Conversation;fields=['id','title','participants','is_luna','luna_stage','ai_enabled','my_ai_consent','unread_count','is_contact_sharing_allowed','messages']
+ def get_messages(self, obj):
+  request = self.context.get('request')
+  qs = obj.messages.all()
+  if request and hasattr(request.user, 'profile'):
+   profile_id = request.user.profile.id
+   qs = [m for m in qs if not m.metadata or m.metadata.get('visible_to_profile_id') is None or m.metadata.get('visible_to_profile_id') == profile_id]
+  return MessageSerializer(qs, many=True, context=self.context).data
  def get_my_ai_consent(self,obj)->bool:
   request=self.context.get('request')
   return bool(request and Consent.objects.filter(conversation=obj,profile__user=request.user,ai_assistance=True).exists())
@@ -21,7 +28,9 @@ class ConversationSerializer(serializers.ModelSerializer):
   if not request:return 0
   state=obj.read_states.filter(profile__user=request.user).first()
   if not state:return obj.messages.exclude(sender=request.user).count()
-  return sum(1 for m in obj.messages.all() if m.sender != request.user and m.created_at > state.last_read_at)
+  # Filter unread messages query using the same visible_to check
+  visible_msgs = [m for m in obj.messages.all() if not m.metadata or m.metadata.get('visible_to_profile_id') is None or m.metadata.get('visible_to_profile_id') == request.user.profile.id]
+  return sum(1 for m in visible_msgs if m.sender != request.user and m.created_at > state.last_read_at)
 class MatchSerializer(serializers.ModelSerializer):
  profile=ProfileSerializer(source='candidate',read_only=True);conversation_id=serializers.IntegerField(source='conversation.id',read_only=True)
  class Meta:model=Match;fields=['id','profile','score','reasons','ai_explanation','status','conversation_id']

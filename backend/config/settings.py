@@ -16,8 +16,13 @@ import sys
 if 'test' in sys.argv or os.getenv('USE_SQLITE','true').lower()=='true':
  DATABASES={'default':{'ENGINE':'django.db.backends.sqlite3','NAME':(BASE_DIR/'data'/'db.sqlite3') if os.path.exists(BASE_DIR/'data') else (BASE_DIR/'db.sqlite3')}}
 else:
- import urllib.parse
+ from django.core.exceptions import ImproperlyConfigured
  db_url = os.getenv('DATABASE_URL')
+ mysql_host = os.getenv('MYSQL_HOST')
+ if not db_url and not mysql_host:
+  raise ImproperlyConfigured("CRITICAL CONFIGURATION ERROR: You have set USE_SQLITE=false to connect to a MySQL/TiDB database, but you have not defined DATABASE_URL or MYSQL_HOST in your Render environment variables. Please add your database connection details to your Render dashboard.")
+
+ import urllib.parse
  if db_url and (db_url.startswith('mysql://') or db_url.startswith('mysql+pymysql://')):
   url = urllib.parse.urlparse(db_url)
   db_name = url.path[1:].split('?')[0]

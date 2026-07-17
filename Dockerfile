@@ -37,7 +37,7 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY backend/ ./backend/
 
 # Copy static frontend assets from STAGE 1
-COPY --from=frontend-builder /app/dist/ /var/www/html/
+COPY --from=frontend-builder /app/dist/ /app/dist/
 
 # Copy custom Nginx configuration
 COPY nginx.conf /etc/nginx/sites-available/default

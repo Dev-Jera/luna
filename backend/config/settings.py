@@ -27,6 +27,7 @@ else:
   url = urllib.parse.urlparse(db_url)
   db_name = url.path[1:].split('?')[0]
   DATABASES = {'default':{
+   # Use django-tidb database backend for full schema compatibility on TiDB Cloud Serverless
    'ENGINE':'django_tidb',
    'NAME':db_name,
    'USER':url.username or '',

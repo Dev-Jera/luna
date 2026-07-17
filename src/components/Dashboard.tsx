@@ -132,6 +132,7 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
 
   useEffect(() => {
     api.post(`/conversations/${conversation.id}/read/`).catch(() => {})
+    if (conversation.is_luna) return
     let stopped = false
     let retry: number | undefined
     

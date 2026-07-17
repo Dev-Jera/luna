@@ -420,6 +420,16 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
 
   const renderMessage = (m: Message) => {
     const mine = m.sender?.id === currentUserId
+    const isSystem = m.metadata?.type === 'system_left' || m.body.includes('joined the chat') || m.body.includes('left the conversation') || m.body.includes('Luna has left')
+    if (isSystem) {
+      return (
+        <div key={m.id} className="flex justify-center my-4 w-full">
+          <div className="rounded-full bg-[#f5ebe0]/5 border border-[#f5ebe0]/10 px-4 py-1.5 text-[11px] font-semibold text-[#f5ebe0]/60 text-center shadow-soft">
+            {m.body}
+          </div>
+        </div>
+      )
+    }
     return (
       <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'} mb-4`}>
         <div className={`max-w-[85%] ${mine ? 'items-end' : 'items-start'} flex flex-col`}>

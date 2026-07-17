@@ -106,10 +106,12 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
   rev_match=Match.objects.filter(requester=match.candidate,candidate=match.requester).first()
   if rev_match and rev_match.status=='accepted':
    if not match.conversation:
-    conversation=Conversation.objects.create(title=f'{match.requester.display_name} & {match.candidate.display_name}', is_luna=False)
+    conversation=Conversation.objects.create(title=f'{match.requester.display_name} & {match.candidate.display_name}', is_luna=False, luna_stage='moderating')
     conversation.participants.add(match.requester,match.candidate)
     ConversationReadState.objects.bulk_create([ConversationReadState(conversation=conversation,profile=p) for p in [match.requester,match.candidate]])
-    Message.objects.create(conversation=conversation, is_ai=True, body=f"Welcome {match.requester.display_name} and {match.candidate.display_name}! You both agreed to connect. Feel free to start chatting!")
+    Message.objects.create(conversation=conversation, is_ai=True, body=f"{match.requester.display_name} has joined the chat.", metadata={'type': 'system_left'})
+    Message.objects.create(conversation=conversation, is_ai=True, body=f"{match.candidate.display_name} has joined the chat.", metadata={'type': 'system_left'})
+    Message.objects.create(conversation=conversation, is_ai=True, body=f"Hello {match.requester.display_name} and {match.candidate.display_name}! I have brought you both together. Would you like me to leave the chat and let you chat privately?")
     match.conversation=conversation
     match.save(update_fields=['conversation'])
     rev_match.conversation=conversation
@@ -176,9 +178,11 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
     except Exception:pass
    
   message=Message.objects.create(conversation=c,sender=request.user,body=body);inspect_message(message)
-  if c.is_luna:
+  if c.is_luna or c.luna_stage == 'moderating':
    data=MessageSerializer(message).data
-   async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
+   try:
+    async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
+   except Exception:pass
    provider=GeminiProvider()
    if provider.configured:
     eval_intent_prompt = (
@@ -233,9 +237,11 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
     match.save(update_fields=['status'])
     rev_match = Match.objects.filter(requester=candidate, candidate=profile).first()
     if rev_match and rev_match.status == 'accepted':
-     direct_c = Conversation.objects.create(title=f"{profile.display_name} & {candidate.display_name}", is_luna=False)
+     direct_c = Conversation.objects.create(title=f"{profile.display_name} & {candidate.display_name}", is_luna=False, luna_stage='moderating')
      direct_c.participants.add(profile, candidate)
-     Message.objects.create(conversation=direct_c, is_ai=True, body=f"Welcome {profile.display_name} and {candidate.display_name}! You both agreed to connect. Feel free to start chatting!")
+     Message.objects.create(conversation=direct_c, is_ai=True, body=f"{profile.display_name} has joined the chat.", metadata={'type': 'system_left'})
+     Message.objects.create(conversation=direct_c, is_ai=True, body=f"{candidate.display_name} has joined the chat.", metadata={'type': 'system_left'})
+     Message.objects.create(conversation=direct_c, is_ai=True, body=f"Hello {profile.display_name} and {candidate.display_name}! I have brought you both together. Would you like me to leave the chat and let you chat privately?")
      c.luna_stage = 'welcome'
      c.pending_match = None
      c.save(update_fields=['luna_stage', 'pending_match'])
@@ -276,12 +282,12 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
      )
    context={'state':'discussing_profile','candidate':{'display_name':candidate.display_name,'bio':candidate.bio,'location':candidate.location,'connection_goal':candidate.connection_goal,'values':candidate.values,'interests':candidate.interests,'communication_style':candidate.communication_style},'match_reasons':match.reasons};return self._gemini_message(c,profile,body,context)
   if c.luna_stage=='moderating':
-   if any(word in text for word in ['luna leave', 'luna go', 'leave chat', 'luna end']):
+   if any(word in text for word in ['luna leave', 'luna go', 'leave chat', 'luna end', 'yes']):
     c.luna_stage='left';c.save(update_fields=['luna_stage']);sys_msg=Message.objects.create(conversation=c, is_ai=True, body="Luna has left the conversation.", metadata={'type':'system_left'})
     try:
      from channels.layers import get_channel_layer;from .serializers import MessageSerializer;data=MessageSerializer(sys_msg).data;async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
     except Exception:pass
-    return Message.objects.create(conversation=c, is_ai=True, body="Understood. I will leave you two to chat privately. Click 'Re-engage Luna' whenever you want to discuss how it went!")
+    return Message.objects.create(conversation=c, is_ai=True, body="Understood! I will leave you both to chat privately. Click 'Re-engage Luna' in the options when you're done!")
    
    # Dispute moderation and warnings
    provider=GeminiProvider()
@@ -386,8 +392,28 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
  @action(detail=True,methods=['post'],url_path='reengage')
  def reengage(self,request,pk=None):
   c=self.get_object()
+  if not c.is_luna and c.luna_stage != 'left':
+   return Response({'detail':'Only Luna or ended conversations can be re-engaged.'},status=status.HTTP_400_BAD_REQUEST)
   if not c.is_luna:
-   return Response({'detail':'Only Luna conversations can be re-engaged.'},status=status.HTTP_400_BAD_REQUEST)
+   c.luna_stage = 'feedback'
+   c.save(update_fields=['luna_stage'])
+   for p in c.participants.all():
+    inbox = Conversation.objects.filter(is_luna=True, participants=p).first()
+    if inbox:
+     inbox.luna_stage = 'feedback'
+     inbox.save(update_fields=['luna_stage'])
+     msg_body = f"Welcome back, {p.display_name}! Your chat with the other person has ended. How did it go? Tell me everything—did you enjoy talking to them? Do you want to go on a date?"
+     msg = Message.objects.create(conversation=inbox, is_ai=True, body=msg_body)
+     try:
+      from channels.layers import get_channel_layer;from .serializers import MessageSerializer;data = MessageSerializer(msg).data
+      async_to_sync(get_channel_layer().group_send)(f'chat_{inbox.id}',{'type':'chat.message','message':data})
+     except Exception:pass
+   msg = Message.objects.create(conversation=c, is_ai=True, body="I have taken both of you back to your private chats to debrief. Thank you!")
+   try:
+    from channels.layers import get_channel_layer;from .serializers import MessageSerializer;data = MessageSerializer(msg).data
+    async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
+   except Exception:pass
+   return Response(self.get_serializer(c).data)
   user_profile = request.user.profile
   candidate = c.participants.exclude(pk=user_profile.id).first()
   if candidate:

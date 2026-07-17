@@ -27,7 +27,7 @@ else:
   url = urllib.parse.urlparse(db_url)
   db_name = url.path[1:].split('?')[0]
   DATABASES = {'default':{
-   'ENGINE':'django.db.backends.mysql',
+   'ENGINE':'django_tidb',
    'NAME':db_name,
    'USER':url.username or '',
    'PASSWORD':url.password or '',
@@ -37,7 +37,7 @@ else:
   }}
  else:
   DATABASES={'default':{
-   'ENGINE':'django.db.backends.mysql',
+   'ENGINE':'django_tidb',
    'NAME':os.getenv('MYSQL_DATABASE','luna_db'),
    'USER':os.getenv('MYSQL_USER','root'),
    'PASSWORD':os.getenv('MYSQL_PASSWORD',''),

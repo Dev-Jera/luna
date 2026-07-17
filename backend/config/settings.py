@@ -33,7 +33,7 @@ else:
    'PASSWORD':url.password or '',
    'HOST':url.hostname or '127.0.0.1',
    'PORT':str(url.port or 3306),
-   'OPTIONS':{'charset':'utf8mb4','init_command':"SET sql_mode='STRICT_TRANS_TABLES'"},
+   'OPTIONS':{'charset':'utf8mb4','init_command':"SET sql_mode='STRICT_TRANS_TABLES'",'ssl':{}},
   }}
  else:
   DATABASES={'default':{
@@ -43,7 +43,7 @@ else:
    'PASSWORD':os.getenv('MYSQL_PASSWORD',''),
    'HOST':os.getenv('MYSQL_HOST','127.0.0.1'),
    'PORT':os.getenv('MYSQL_PORT','3306'),
-   'OPTIONS':{'charset':'utf8mb4','init_command':"SET sql_mode='STRICT_TRANS_TABLES'"},
+   'OPTIONS':{'charset':'utf8mb4','init_command':"SET sql_mode='STRICT_TRANS_TABLES'",'ssl':{}},
   }}
 AUTH_PASSWORD_VALIDATORS=[];LANGUAGE_CODE='en-us';TIME_ZONE='Africa/Nairobi';USE_I18N=True;USE_TZ=True;STATIC_URL='/static/';MEDIA_URL='/media/';STATICFILES_DIRS=[BASE_DIR.parent / 'dist'];STATIC_ROOT=BASE_DIR / 'staticfiles';STORAGES={"default":{"BACKEND":"django.core.files.storage.FileSystemStorage"},"staticfiles":{"BACKEND":"whitenoise.storage.CompressedManifestStaticFilesStorage"}};DEFAULT_AUTO_FIELD='django.db.models.BigAutoField'
 REST_FRAMEWORK={'DEFAULT_AUTHENTICATION_CLASSES':['core.authentication.CookieJWTAuthentication'],'DEFAULT_PERMISSION_CLASSES':['rest_framework.permissions.IsAuthenticated'],'DEFAULT_SCHEMA_CLASS':'drf_spectacular.openapi.AutoSchema','DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination','PAGE_SIZE':20,'EXCEPTION_HANDLER':'core.exceptions.api_exception_handler','DEFAULT_THROTTLE_RATES':{'messages':'30/min','safety':'10/hour'}}

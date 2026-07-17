@@ -265,6 +265,31 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
    context={'state':'relationship_counseling','instruction':'Speak as an empathetic relationship therapist. Offer support and ask clarifying questions about their concerns.'}
    return self._gemini_message(c,profile,body,context,system_prompt=LUNA_COUNSELING_SYSTEM)
   text=body.lower().strip();yes=any(word in text for word in ['yes','yeah','sure','show','okay','ok','please']);no=any(word in text for word in ['no','not interested','pass','skip']);match=c.pending_match
+  if c.luna_stage == 'waiting_nudge' and match:
+   candidate = match.candidate
+   if yes:
+    if candidate.phone_verified and candidate.sms_unread_reminders:
+     sms_body = f"Hi {candidate.display_name}, {profile.display_name} wants to connect with you on Luna! Log in to connect."
+     try:
+      AfricasTalkingSMS().send(candidate.phone_number, sms_body)
+     except Exception:pass
+    c.luna_stage = 'welcome'
+    c.pending_match = None
+    c.save(update_fields=['luna_stage', 'pending_match'])
+    return Message.objects.create(
+     conversation=c,
+     is_ai=True,
+     body=f"I have sent {candidate.display_name} an SMS notification. I will let you know as soon as they are ready!"
+    )
+   else:
+    c.luna_stage = 'welcome'
+    c.pending_match = None
+    c.save(update_fields=['luna_stage', 'pending_match'])
+    return Message.objects.create(
+     conversation=c,
+     is_ai=True,
+     body="Alright, I won't notify them. I will still leave the invitation in their inbox for when they next log in!"
+    )
   is_connecting = match and any(word in text for word in ['invite', 'connect', 'introduce', 'meet', 'yes', 'fit', 'stay', 'moderate', 'leave'])
   is_choosing = (c.luna_stage == 'offered' and (yes or no)) or (c.luna_stage == 'discussing' and (is_connecting or no))
   if c.is_luna and match and not is_choosing:
@@ -329,17 +354,48 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
      if rev_match.status != 'accepted':
       rev_match.status = 'suggested'
       rev_match.save(update_fields=['status'])
-      if candidate.phone_verified and candidate.sms_match_notifications:
-       try:AfricasTalkingSMS().send(candidate.phone_number,f"Hi {candidate.display_name}, {profile.display_name} would like to chat and is online. Log in to the Luna app to connect!")
-       except Exception:pass
-     c.luna_stage = 'welcome'
-     c.pending_match = None
-     c.save(update_fields=['luna_stage', 'pending_match'])
-     return Message.objects.create(
-      conversation=c,
+     
+     inbox_b = Conversation.objects.filter(is_luna=True, participants=candidate).first()
+     if not inbox_b:
+      inbox_b = Conversation.objects.create(title='Luna', is_luna=True, luna_stage='offered')
+      inbox_b.participants.add(candidate)
+     inbox_b.pending_match = rev_match
+     inbox_b.luna_stage = 'offered'
+     inbox_b.save(update_fields=['pending_match', 'luna_stage'])
+     
+     b_msg = Message.objects.create(
+      conversation=inbox_b,
       is_ai=True,
-      body=f"I have saved your choice! I will privately offer your profile to {candidate.display_name} to see if they'd also like to connect. I will notify you as soon as they respond."
+      body=f"Hi {candidate.display_name}, {profile.display_name} would like to connect with you! Would you like to join the chat and connect with them? You can ask me more about them first before accepting."
      )
+     try:
+      from .serializers import MessageSerializer
+      b_data = MessageSerializer(b_msg).data
+      async_to_sync(get_channel_layer().group_send)(f'chat_{inbox_b.id}', {'type': 'chat.message', 'message': b_data})
+     except Exception:pass
+
+     from django.utils import timezone
+     from datetime import timedelta
+     read_state = ConversationReadState.objects.filter(profile=candidate).order_by('-last_read_at').first()
+     is_active = read_state and read_state.last_read_at and read_state.last_read_at >= timezone.now() - timedelta(minutes=2)
+     
+     if is_active:
+      c.luna_stage = 'welcome'
+      c.pending_match = None
+      c.save(update_fields=['luna_stage', 'pending_match'])
+      return Message.objects.create(
+       conversation=c,
+       is_ai=True,
+       body=f"Hold on, I am getting into contact with {candidate.display_name}."
+      )
+     else:
+      c.luna_stage = 'waiting_nudge'
+      c.save(update_fields=['luna_stage'])
+      return Message.objects.create(
+       conversation=c,
+       is_ai=True,
+       body=f"Hello! {candidate.display_name} is not currently online. Would you like me to notify you when they are ready?"
+      )
    context={'state':'discussing_profile','candidate':{'display_name':candidate.display_name,'bio':candidate.bio,'location':candidate.location,'connection_goal':candidate.connection_goal,'values':candidate.values,'interests':candidate.interests,'communication_style':candidate.communication_style},'match_reasons':match.reasons};return self._gemini_message(c,profile,body,context)
   if c.luna_stage=='moderating':
    if any(word in text for word in ['luna leave', 'luna go', 'leave chat', 'luna end', 'yes']):

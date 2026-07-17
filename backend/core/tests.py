@@ -105,6 +105,9 @@ class LunaJourneyTests(APITestCase):
  def test_luna_inbox_reveals_one_profile_before_introduction(self):
   inbox=Conversation.objects.create(title='Luna',is_luna=True,luna_stage='offered');inbox.participants.add(self.user.profile);match=Match.objects.create(requester=self.user.profile,candidate=self.other.profile,score=88,reasons=['Shared values']);inbox.pending_match=match;inbox.save(update_fields=['pending_match'])
   shown=self.client.post(f'/api/conversations/{inbox.id}/messages/',{'body':'Yes, show me their profile'},format='json');self.assertEqual(shown.status_code,201);self.assertEqual(shown.data['luna_reply']['metadata']['type'],'profile_card');self.assertEqual(shown.data['luna_reply']['metadata']['profile']['display_name'],self.other.profile.display_name)
+  from .models import ConversationReadState
+  from django.utils import timezone
+  ConversationReadState.objects.create(conversation=inbox, profile=self.other.profile, last_read_at=timezone.now())
   introduced=self.client.post(f'/api/conversations/{inbox.id}/messages/',{'body':'invite them'},format='json')
   self.assertEqual(introduced.status_code,201)
   inbox.refresh_from_db()
@@ -128,6 +131,9 @@ class LunaJourneyTests(APITestCase):
   self.assertEqual(response.status_code, 201)
   inbox.refresh_from_db()
   self.assertEqual(inbox.luna_stage, 'discussing')
+  from .models import ConversationReadState
+  from django.utils import timezone
+  ConversationReadState.objects.create(conversation=inbox, profile=self.other.profile, last_read_at=timezone.now())
   response = self.client.post(f'/api/conversations/{inbox.id}/messages/', {'body': 'invite them'}, format='json')
   self.assertEqual(response.status_code, 201)
   inbox.refresh_from_db()
@@ -355,3 +361,23 @@ class LunaJourneyTests(APITestCase):
   self.assertEqual(resp_list.status_code, 200)
   self.assertEqual(len(resp_list.data), 1)
   self.assertEqual(resp_list.data[0]['partner_name'], 'Amara Smith')
+
+ def test_luna_connection_permission_and_nudge_flow(self):
+  match = Match.objects.create(requester=self.user.profile, candidate=self.other.profile, score=90, reasons=['Aligned'])
+  inbox = Conversation.objects.create(title='Luna', is_luna=True, luna_stage='discussing', pending_match=match)
+  inbox.participants.add(self.user.profile)
+  resp = self.client.post(f'/api/conversations/{inbox.id}/messages/', {'body': 'invite them'}, format='json')
+  self.assertEqual(resp.status_code, 201)
+  inbox.refresh_from_db()
+  self.assertEqual(inbox.luna_stage, 'waiting_nudge')
+  self.assertIn("not currently online. Would you like me to notify you", resp.data['luna_reply']['body'])
+  inbox_b = Conversation.objects.filter(is_luna=True, participants=self.other.profile).first()
+  self.assertIsNotNone(inbox_b)
+  self.assertEqual(inbox_b.luna_stage, 'offered')
+  self.assertTrue(inbox_b.messages.filter(body__contains="would like to connect with you!").exists())
+  resp_nudge = self.client.post(f'/api/conversations/{inbox.id}/messages/', {'body': 'Yes, please notify them'}, format='json')
+  self.assertEqual(resp_nudge.status_code, 201)
+  inbox.refresh_from_db()
+  self.assertEqual(inbox.luna_stage, 'welcome')
+  self.assertIsNone(inbox.pending_match)
+  self.assertIn("sent amara an sms notification", resp_nudge.data['luna_reply']['body'].lower())

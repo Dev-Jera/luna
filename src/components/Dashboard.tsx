@@ -7,7 +7,7 @@ import type { AppDispatch, RootState } from '../store'
 import type { Conversation, Message, Profile } from '../types'
 import NotificationCenter from './NotificationCenter'
 
-function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversations' | 'preferences'; setPage: (page: 'conversations' | 'preferences') => void; profile: Profile; onGoToAdmin?: () => void }) {
+function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversations' | 'preferences' | 'counseling'; setPage: (page: 'conversations' | 'preferences' | 'counseling') => void; profile: Profile; onGoToAdmin?: () => void }) {
   return (
     <header className="sticky top-0 z-20 bg-[#1e1410] border-b border-[#f5ebe0]/10">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
@@ -25,6 +25,16 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
             }`}
           >
             Conversations
+          </button>
+          <button
+            onClick={() => setPage('counseling')}
+            className={`rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 ${
+              page === 'counseling'
+                ? 'bg-[#f27059] text-white shadow-premium'
+                : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+            }`}
+          >
+            Counseling
           </button>
           <button
             onClick={() => setPage('preferences')}
@@ -775,6 +785,305 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
   )
 }
 
+function Counseling({ profile, onSaved }: { profile: Profile; onSaved: (profile: Profile) => void }) {
+  const [tab, setTab] = useState<'ai' | 'couples'>('ai')
+  const [loading, setLoading] = useState(false)
+  const [cState, setCState] = useState<Conversation | null>(null)
+  const [body, setBody] = useState('')
+  const [sending, setSending] = useState(false)
+  const [sessions, setSessions] = useState<any[]>([])
+  
+  const [partnerName, setPartnerName] = useState('')
+  const [partnerPhone, setPartnerPhone] = useState('')
+  const [scheduledTime, setScheduledTime] = useState('')
+  const [scheduling, setScheduling] = useState(false)
+  const [schedError, setSchedError] = useState('')
+  
+  const loadAI = async () => {
+    setLoading(true)
+    try {
+      const res = await api.post('/counseling/ai/')
+      setCState(res.data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadSessions = async () => {
+    try {
+      const res = await api.get('/counseling/sessions/')
+      setSessions(res.data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    if (tab === 'ai') {
+      loadAI()
+    } else if (tab === 'couples' && profile.is_premium) {
+      loadSessions()
+    }
+  }, [tab, profile.is_premium])
+
+  const sendCounselingMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!body.trim() || sending || !cState) return
+    const text = body.trim()
+    setBody('')
+    setSending(true)
+    try {
+      const res = await api.post(`/conversations/${cState.id}/messages/`, { body: text })
+      setCState(prev => {
+        if (!prev) return null
+        return {
+          ...prev,
+          messages: [...(prev.messages || []), res.data.message, res.data.luna_reply].filter(Boolean)
+        }
+      })
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const scheduleSession = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!partnerName || !partnerPhone || !scheduledTime || scheduling) return
+    setScheduling(true)
+    setSchedError('')
+    try {
+      const res = await api.post('/counseling/schedule/', {
+        partner_name: partnerName,
+        partner_phone: partnerPhone,
+        scheduled_time: scheduledTime
+      })
+      setSessions(prev => [res.data, ...prev])
+      setPartnerName('')
+      setPartnerPhone('')
+      setScheduledTime('')
+    } catch (err: any) {
+      setSchedError(err.response?.data?.detail || 'Failed to schedule session.')
+    } finally {
+      setScheduling(false)
+    }
+  }
+
+  const upgradeToPremium = async () => {
+    try {
+      const res = await api.post('/profiles/me/toggle-premium/')
+      onSaved(res.data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  return (
+    <section className="mx-auto flex h-full w-full max-w-4xl flex-col bg-[#1e1410] border border-[#f5ebe0]/10 shadow-2xl sm:rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden lg:h-[calc(100vh-210px)]">
+      <header className="border-b border-[#f5ebe0]/10 bg-[#1e1410] px-5 py-4 sm:px-7 flex justify-between items-center shrink-0">
+        <div>
+          <h2 className="font-bold text-white text-base">Relationship Counseling</h2>
+          <p className="text-xs text-[#f5ebe0]/60 mt-0.5">Private self-reflection and professional guidance</p>
+        </div>
+        <div className="flex gap-1.5 bg-[#9c6644]/10 rounded-full p-1 border border-[#f5ebe0]/5">
+          <button
+            onClick={() => setTab('ai')}
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
+              tab === 'ai' ? 'bg-[#f27059] text-white' : 'text-[#f5ebe0]/60 hover:text-white'
+            }`}
+          >
+            AI Counselor
+          </button>
+          <button
+            onClick={() => setTab('couples')}
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 flex items-center gap-1 ${
+              tab === 'couples' ? 'bg-[#f27059] text-white' : 'text-[#f5ebe0]/60 hover:text-white'
+            }`}
+          >
+            Couples Therapy
+            {!profile.is_premium && <Lock size={10} />}
+          </button>
+        </div>
+      </header>
+
+      {tab === 'ai' ? (
+        <div className="flex-1 flex flex-col min-h-0 bg-[#1e1410]">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center text-sm text-[#f5ebe0]/50">
+              Initializing AI therapy session...
+            </div>
+          ) : (
+            <>
+              <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                {cState?.messages?.map(m => {
+                  const mine = !m.is_ai
+                  return (
+                    <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[85%] ${mine ? 'items-end' : 'items-start'} flex flex-col`}>
+                        <div
+                          className={`rounded-[1.75rem] px-5 py-3 text-[14px] leading-relaxed shadow-soft ${
+                            mine
+                              ? 'rounded-br-sm bg-[#f27059] text-white'
+                              : 'rounded-bl-sm bg-[#9c6644]/10 border border-[#f5ebe0]/10 text-white'
+                          }`}
+                        >
+                          {!mine && (
+                            <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#f27059]">
+                              <Sparkles size={11} /> Luna Therapy
+                            </div>
+                          )}
+                          <p className="whitespace-pre-wrap">{m.body}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+                {sending && (
+                  <div className="flex justify-start">
+                    <div className="rounded-[1.75rem] rounded-bl-sm bg-[#9c6644]/10 border border-[#f5ebe0]/10 px-5 py-3 text-sm text-white/50 animate-pulse">
+                      Luna is typing thoughts...
+                    </div>
+                  </div>
+                )}
+              </div>
+              <form onSubmit={sendCounselingMessage} className="border-t border-[#f5ebe0]/10 p-5 bg-[#1e1410] shrink-0">
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={body}
+                    onChange={e => setBody(e.target.value)}
+                    placeholder="Describe what's happening or how you feel..."
+                    className="flex-1 rounded-2xl border border-[#f5ebe0]/10 bg-[#9c6644]/5 px-5 py-3.5 text-sm text-white placeholder-[#f5ebe0]/40 focus:border-[#f27059] focus:outline-none transition-all"
+                  />
+                  <button
+                    disabled={sending || !body.trim()}
+                    className="grid h-12 w-12 place-items-center rounded-2xl bg-[#f27059] text-white hover:bg-[#e05e47] active:scale-95 disabled:opacity-30 transition-all"
+                  >
+                    <Send size={16} />
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {!profile.is_premium ? (
+            <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto my-12 bg-[#9c6644]/5 border border-[#f5ebe0]/10 rounded-[2rem] shadow-premium">
+              <div className="p-4.5 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-full mb-5">
+                <Lock size={32} />
+              </div>
+              <h3 className="text-lg font-bold text-white font-display">Unlock Joint Couples Therapy</h3>
+              <p className="mt-2 text-xs text-[#f5ebe0]/70 leading-relaxed">
+                Connect and align together. Premium members can schedule live relationship counseling sessions with verified human therapists, including automatic calendar syncing and joint meeting links.
+              </p>
+              <button
+                onClick={upgradeToPremium}
+                className="mt-6 rounded-full bg-[#f27059] px-8 py-3.5 text-xs font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all shadow-glow"
+              >
+                Upgrade to Premium
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+              <form onSubmit={scheduleSession} className="bg-[#9c6644]/5 border border-[#f5ebe0]/10 rounded-[2rem] p-6 space-y-4">
+                <h3 className="font-bold text-white text-sm flex items-center gap-1.5">
+                  <Calendar size={16} className="text-[#f27059]" />
+                  Schedule a Therapist Session
+                </h3>
+                {schedError && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3.5 text-xs text-red-400">
+                    {schedError}
+                  </div>
+                )}
+                <div>
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/60 block mb-1.5">Partner's Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={partnerName}
+                    onChange={e => setPartnerName(e.target.value)}
+                    placeholder="e.g. John Doe"
+                    className="premium-input w-full !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/60 block mb-1.5">Partner's Phone number</label>
+                  <input
+                    type="tel"
+                    required
+                    value={partnerPhone}
+                    onChange={e => setPartnerPhone(e.target.value)}
+                    placeholder="e.g. +256..."
+                    className="premium-input w-full !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/60 block mb-1.5">Preferred Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    required
+                    value={scheduledTime}
+                    onChange={e => setScheduledTime(e.target.value)}
+                    className="premium-input w-full !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059]"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={scheduling}
+                  className="w-full rounded-full bg-[#f27059] py-3.5 text-xs font-bold text-white hover:bg-[#e05e47] transition-all"
+                >
+                  {scheduling ? 'Scheduling...' : 'Schedule Session'}
+                </button>
+              </form>
+
+              <div className="space-y-4">
+                <h3 className="font-bold text-white text-sm flex items-center gap-1.5">
+                  <Calendar size={16} className="text-[#8ea869]" />
+                  Upcoming Scheduled Sessions
+                </h3>
+                {sessions.length === 0 ? (
+                  <div className="text-xs text-[#f5ebe0]/50 p-6 text-center border border-[#f5ebe0]/10 rounded-2xl bg-[#9c6644]/5">
+                    No sessions scheduled yet. Book your first couples therapy session above!
+                  </div>
+                ) : (
+                  <div className="space-y-3.5">
+                    {sessions.map(s => (
+                      <div key={s.id} className="border border-[#f5ebe0]/10 rounded-2xl p-4.5 bg-[#9c6644]/5 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="text-sm font-bold text-white">Joint session with {s.partner_name}</div>
+                            <div className="text-[11px] text-[#f5ebe0]/60 mt-0.5">{new Date(s.scheduled_time).toLocaleString()}</div>
+                          </div>
+                          <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
+                            {s.status}
+                          </span>
+                        </div>
+                        <a
+                          href={s.meeting_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-1.5 w-full rounded-xl bg-[#8ea869]/10 hover:bg-[#8ea869]/20 border border-[#8ea869]/20 text-[#8ea869] font-bold py-2.5 text-xs transition-all"
+                        >
+                          <Video size={13} />
+                          Join Google Meet Session
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  )
+}
+
 function Preferences({ profile, onSaved }: { profile: Profile; onSaved: (profile: Profile) => void }) {
   const [form, setForm] = useState({
     ...profile,
@@ -882,6 +1191,7 @@ function Preferences({ profile, onSaved }: { profile: Profile; onSaved: (profile
           <div className="space-y-3 mt-3">
             {([
               ['is_discoverable', 'Allow Luna to look for introductions', 'Let Gemini match your profile with other verified users.'],
+              ['is_premium', 'Luna Premium Subscription', 'Unlock couples therapy with certified human counselors.'],
               ['ai_profile_consent', 'Allow AI profile analysis', 'Use Gemini to build compatibility score metrics.'],
               ['sms_match_notifications', 'SMS connection notifications', 'Send quick text alerts when you get introduced.'],
               ['sms_unread_reminders', 'SMS unread reminders', 'Alert your phone if you have unread direct messages.'],
@@ -932,6 +1242,9 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
     if (p === '/preferences') {
       return { page: 'preferences' as const, chatId: null }
     }
+    if (p === '/counseling') {
+      return { page: 'counseling' as const, chatId: null }
+    }
     if (p.startsWith('/chat/')) {
       const id = parseInt(p.split('/')[2], 10)
       return { page: 'conversations' as const, chatId: isNaN(id) ? null : id }
@@ -943,8 +1256,8 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
   const page = urlState.page
   const chatId = urlState.chatId
 
-  const navigateToPage = (newPage: 'conversations' | 'preferences') => {
-    const path = newPage === 'preferences' ? '/preferences' : '/dashboard'
+  const navigateToPage = (newPage: 'conversations' | 'preferences' | 'counseling') => {
+    const path = newPage === 'preferences' ? '/preferences' : (newPage === 'counseling' ? '/counseling' : '/dashboard')
     window.history.pushState({}, '', path)
     setUrlState({ page: newPage, chatId: null })
   }
@@ -998,7 +1311,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                       : 'text-[#f5ebe0]/80 hover:bg-[#1e1410] hover:text-white'
                   }`}
                 >
-                  Chats ({state.conversations.length})
+                  Chats ({state.conversations.filter(c => !c.is_counseling).length})
                 </button>
                 <button
                   onClick={() => setInboxTab('offers')}
@@ -1015,7 +1328,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
               <div className="mt-5 space-y-4 flex-1 overflow-y-auto max-h-[calc(100vh-270px)] pr-2">
                 {inboxTab === 'chats' ? (
                   <>
-                    {state.conversations.map(c => {
+                    {state.conversations.filter(c => !c.is_counseling).map(c => {
                       const isSelected = c.id === chatId
                       return (
                         <button
@@ -1162,8 +1475,10 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
             </section>
 
           </div>
-        ) : (
+        ) : page === 'preferences' ? (
           <Preferences profile={profile} onSaved={p => dispatch(setProfile(p))} />
+        ) : (
+          <Counseling profile={profile} onSaved={p => dispatch(setProfile(p))} />
         )}
       </main>
     </div>

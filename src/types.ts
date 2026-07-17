@@ -36,6 +36,7 @@ export type Profile = {
   onboarding_complete: boolean;
   gender: 'male' | 'female' | 'other';
   gender_preference: 'male' | 'female' | 'both';
+  is_premium: boolean;
 };
 export type Match = {
   id: number;
@@ -64,6 +65,7 @@ export type Conversation = {
   my_ai_consent: boolean;
   unread_count: number;
   is_contact_sharing_allowed: boolean;
+  is_counseling?: boolean;
   messages: Message[];
 };
 export type IntroductionDraft = {
@@ -74,3 +76,13 @@ export type IntroductionDraft = {
   created_at: string;
 };
 export type Notification={id:number;conversation:number|null;kind:string;title:string;body:string;read_at:string|null;created_at:string};
+
+export type CounselingSession = {
+  id: number;
+  partner_name: string;
+  partner_phone: string;
+  scheduled_time: string;
+  meeting_link: string;
+  status: "scheduled" | "completed" | "cancelled";
+  created_at: string;
+};

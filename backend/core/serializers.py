@@ -1,12 +1,12 @@
 from django.contrib.auth.models import User
 from django.db import transaction
 from rest_framework import serializers
-from .models import Consent,Conversation,IntroductionDraft,Match,Message,Notification,Profile,Report
+from .models import Consent,Conversation,IntroductionDraft,Match,Message,Notification,Profile,Report,CounselingSession
 class UserSerializer(serializers.ModelSerializer):
  class Meta:model=User;fields=['id','username','first_name','email','is_staff']
 class ProfileSerializer(serializers.ModelSerializer):
  user=UserSerializer(read_only=True)
- class Meta:model=Profile;fields=['id','user','display_name','bio','location','phone_number','phone_verified','sms_match_notifications','sms_unread_reminders','sms_safety_alerts','connection_goal','values','interests','communication_style','life_goals','lifestyle','deal_breakers','gender','gender_preference','is_discoverable','is_18_or_older','terms_version','terms_accepted_at','guidelines_accepted_at','ai_profile_consent','ai_summary','ai_traits','ai_analysis_status','onboarding_complete'];read_only_fields=['phone_number','phone_verified','is_18_or_older','terms_version','terms_accepted_at','guidelines_accepted_at','ai_summary','ai_traits','ai_analysis_status']
+ class Meta:model=Profile;fields=['id','user','display_name','bio','location','phone_number','phone_verified','sms_match_notifications','sms_unread_reminders','sms_safety_alerts','connection_goal','values','interests','communication_style','life_goals','lifestyle','deal_breakers','gender','gender_preference','is_discoverable','is_18_or_older','terms_version','terms_accepted_at','guidelines_accepted_at','ai_profile_consent','ai_summary','ai_traits','ai_analysis_status','onboarding_complete','is_premium'];read_only_fields=['phone_number','phone_verified','is_18_or_older','terms_version','terms_accepted_at','guidelines_accepted_at','ai_summary','ai_traits','ai_analysis_status']
 class MessageSerializer(serializers.ModelSerializer):
  sender=UserSerializer(read_only=True)
  class Meta:model=Message;fields=['id','sender','body','is_ai','metadata','created_at']
@@ -52,4 +52,10 @@ class RegisterSerializer(serializers.ModelSerializer):
   age=data.pop('is_18_or_older');phone=data.pop('phone_number');data.pop('accept_terms');data.pop('accept_guidelines');user=User.objects.create_user(**data);profile=user.profile;profile.phone_number=phone;profile.is_18_or_older=age;profile.terms_version=settings.TERMS_VERSION;profile.terms_accepted_at=timezone.now();profile.guidelines_accepted_at=timezone.now();profile.save();conversation=Conversation.objects.create(title='Luna',is_luna=True);conversation.participants.add(profile)
   transaction.on_commit(lambda: dispatch(generate_welcome_message,profile.id,conversation.id))
   return user
+
+class CounselingSessionSerializer(serializers.ModelSerializer):
+ class Meta:
+  model=CounselingSession
+  fields=['id','partner_name','partner_phone','scheduled_time','meeting_link','status','created_at']
+  read_only_fields=['meeting_link','status','created_at']
 

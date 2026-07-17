@@ -8,9 +8,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle,UserRateThrottle
 from rest_framework.views import APIView
-from .models import AuditEvent,Block,Consent,Conversation,ConversationReadState,IntroductionDraft,Match,MatchFeedback,Message,Notification,Profile,Report,ModerationEvent,DateMeeting
+from .models import AuditEvent,Block,Consent,Conversation,ConversationReadState,IntroductionDraft,Match,MatchFeedback,Message,Notification,Profile,Report,ModerationEvent,DateMeeting,CounselingSession
 from .moderation import inspect_message
-from .serializers import ConversationSerializer,IntroductionDraftSerializer,MatchSerializer,MessageSerializer,NotificationSerializer,ProfileSerializer,RegisterSerializer
+from .serializers import ConversationSerializer,IntroductionDraftSerializer,MatchSerializer,MessageSerializer,NotificationSerializer,ProfileSerializer,RegisterSerializer,CounselingSessionSerializer
 from .tasks import analyze_profile,enrich_match,generate_introduction,refresh_matches,generate_welcome_message,extract_profile_insights
 from .task_dispatch import dispatch
 from .sms import AfricasTalkingSMS,consume_code,send_code
@@ -78,6 +78,12 @@ class ProfileViewSet(viewsets.GenericViewSet):
  def delete_account(self,request):
   if not request.user.check_password(str(request.data.get('password',''))):return Response({'password':['Password confirmation is incorrect.']},status=status.HTTP_400_BAD_REQUEST)
   request.user.delete();return Response(status=status.HTTP_204_NO_CONTENT)
+ @action(detail=False,methods=['post'],url_path='me/toggle-premium')
+ def toggle_premium(self,request):
+  profile=request.user.profile
+  profile.is_premium = not profile.is_premium
+  profile.save(update_fields=['is_premium'])
+  return Response(self.get_serializer(profile).data)
  @action(detail=False,methods=['post','delete'],url_path='safety/block',throttle_classes=[ScopedRateThrottle])
  def block(self,request):
   self.throttle_scope='safety';target=Profile.objects.filter(pk=request.data.get('profile_id')).exclude(pk=request.user.profile.pk).first()
@@ -244,7 +250,10 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   except Exception:pass
   return Response(data,status=status.HTTP_201_CREATED)
  def _luna_reply(self,c,profile,body):
-  from .ai.prompts import LUNA_CHAT_SYSTEM, MODERATION_SYSTEM, DEBRIEF_SYSTEM
+  from .ai.prompts import LUNA_CHAT_SYSTEM, MODERATION_SYSTEM, DEBRIEF_SYSTEM, LUNA_COUNSELING_SYSTEM
+  if c.is_counseling:
+   context={'state':'relationship_counseling','instruction':'Speak as an empathetic relationship therapist. Offer support and ask clarifying questions about their concerns.'}
+   return self._gemini_message(c,profile,body,context,system_prompt=LUNA_COUNSELING_SYSTEM)
   text=body.lower().strip();yes=any(word in text for word in ['yes','yeah','sure','show','okay','ok','please']);no=any(word in text for word in ['no','not interested','pass','skip']);match=c.pending_match
   if not match and c.luna_stage not in ['moderating', 'left', 'feedback']:return self._gemini_message(c,profile,body,{'state':'no_match','instruction':'No match is available. Respond naturally and offer to help with the user’s profile or preferences. Never imply anybody joined.'})
   if c.luna_stage=='offered' and match:
@@ -541,3 +550,30 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
  def get_queryset(self):return Notification.objects.filter(profile=self.request.user.profile)
  @action(detail=False,methods=['post'],url_path='read-all')
  def read_all(self,request):Notification.objects.filter(profile=request.user.profile,read_at__isnull=True).update(read_at=timezone.now());return Response(status=status.HTTP_204_NO_CONTENT)
+
+class CounselingViewSet(viewsets.GenericViewSet):
+ permission_classes=[permissions.IsAuthenticated]
+ @action(detail=False,methods=['post'],url_path='ai')
+ def get_or_create_ai(self,request):
+  profile=request.user.profile
+  c=Conversation.objects.filter(is_counseling=True,is_luna=True,participants=profile).first()
+  if not c:
+   c=Conversation.objects.create(title="AI Counseling",is_luna=True,is_counseling=True)
+   c.participants.add(profile)
+   Message.objects.create(conversation=c,is_ai=True,body="Hello! I am Luna, your private relationship counselor. Anything you share here is completely confidential. What is on your mind today?")
+  return Response(ConversationSerializer(c,context={'request':request}).data)
+ @action(detail=False,methods=['post'],url_path='schedule')
+ def schedule(self,request):
+  profile=request.user.profile
+  if not profile.is_premium:
+   return Response({'detail':'Couples counseling requires a premium subscription.'},status=status.HTTP_403_FORBIDDEN)
+  serializer=CounselingSessionSerializer(data=request.data)
+  serializer.is_valid(raise_exception=True)
+  meeting_link="https://meet.google.com/" + "".join(timezone.now().strftime("%Y%m%d%H%M%S"))[-10:]
+  session=serializer.save(client=profile,meeting_link=meeting_link,status='scheduled')
+  return Response(CounselingSessionSerializer(session).data,status=status.HTTP_201_CREATED)
+ @action(detail=False,methods=['get'],url_path='sessions')
+ def sessions(self,request):
+  profile=request.user.profile
+  sessions=CounselingSession.objects.filter(client=profile)
+  return Response(CounselingSessionSerializer(sessions,many=True).data)

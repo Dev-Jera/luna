@@ -318,3 +318,40 @@ class LunaJourneyTests(APITestCase):
    self.assertTrue(Report.objects.filter(reported=self.user.profile, reason='unsafe').exists())
    report = Report.objects.get(reported=self.user.profile, reason='unsafe')
    self.assertIn('soliciting money', report.details)
+
+ def test_ai_counseling_initialization(self):
+  resp = self.client.post('/api/counseling/ai/')
+  self.assertEqual(resp.status_code, 200)
+  self.assertTrue(Conversation.objects.filter(is_counseling=True, is_luna=True).exists())
+  c = Conversation.objects.get(is_counseling=True, is_luna=True)
+  self.assertIn("your private relationship counselor", c.messages.first().body)
+
+ def test_schedule_session_requires_premium(self):
+  # Try scheduling as free user
+  resp = self.client.post('/api/counseling/schedule/', {
+   'partner_name': 'Amara Smith',
+   'partner_phone': '+256700000000',
+   'scheduled_time': '2026-07-20T10:00:00Z'
+  }, format='json')
+  self.assertEqual(resp.status_code, 403)
+
+  # Upgrade to premium
+  resp_upgrade = self.client.post('/api/profiles/me/toggle-premium/')
+  self.assertEqual(resp_upgrade.status_code, 200)
+  self.assertTrue(resp_upgrade.data['is_premium'])
+
+  # Schedule again as premium user
+  resp_premium = self.client.post('/api/counseling/schedule/', {
+   'partner_name': 'Amara Smith',
+   'partner_phone': '+256700000000',
+   'scheduled_time': '2026-07-20T10:00:00Z'
+  }, format='json')
+  self.assertEqual(resp_premium.status_code, 201)
+  self.assertIn('meeting_link', resp_premium.data)
+  self.assertTrue(resp_premium.data['meeting_link'].startswith('https://meet.google.com/'))
+
+  # List sessions
+  resp_list = self.client.get('/api/counseling/sessions/')
+  self.assertEqual(resp_list.status_code, 200)
+  self.assertEqual(len(resp_list.data), 1)
+  self.assertEqual(resp_list.data[0]['partner_name'], 'Amara Smith')

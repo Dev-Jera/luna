@@ -243,6 +243,16 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
          if notif:
           notif.sms_sent_at = timezone.now()
           notif.save(update_fields=['sms_sent_at'])
+         sys_msg = Message.objects.create(
+          conversation=c,
+          is_ai=True,
+          body=f"Luna: {recipient.display_name} is offline. I have sent them an SMS to notify them.",
+          metadata={'type': 'system_left'}
+         )
+         try:
+          sys_data = MessageSerializer(sys_msg).data
+          async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}', {'type': 'chat.message', 'message': sys_data})
+         except Exception:pass
        except Exception:pass
   ConversationReadState.objects.update_or_create(conversation=c,profile=request.user.profile,defaults={'last_read_at':timezone.now()});data=MessageSerializer(message).data
   try:

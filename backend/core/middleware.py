@@ -12,5 +12,12 @@ class JWTAuthMiddleware:
  async def __call__(self,scope,receive,send):
   token=parse_qs(scope.get('query_string',b'').decode()).get('token',[''])[0]
   if not token:
-   headers=dict(scope.get('headers',[]));cookies=SimpleCookie();cookies.load(headers.get(b'cookie',b'').decode());token=cookies.get('luna_access').value if cookies.get('luna_access') else ''
+   try:
+    headers={k.lower():v for k,v in scope.get('headers',[])}
+    cookie_bytes=headers.get(b'cookie',b'')
+    if cookie_bytes:
+     import re
+     match=re.search(r'luna_access=([^;]+)',cookie_bytes.decode())
+     if match:token=match.group(1).strip()
+   except Exception:pass
   scope['user']=await user_for(token);return await self.app(scope,receive,send)

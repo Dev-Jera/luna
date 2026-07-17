@@ -174,6 +174,16 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
     }
   }, [conversation.id, currentUserId, dispatch])
 
+  // Hybrid polling fallback when WebSocket is not connected or active
+  useEffect(() => {
+    if (conversation.is_luna) return
+    if (connected) return
+    const interval = setInterval(() => {
+      dispatch(loadDashboard())
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [conversation.id, conversation.is_luna, connected, dispatch])
+
   // Cleanup WebRTC connection on unmount
   useEffect(() => {
     return () => {

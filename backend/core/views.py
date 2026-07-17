@@ -197,11 +197,17 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
    if c.luna_stage in ['welcome', 'discussing', 'feedback']:dispatch(extract_profile_insights, request.user.profile.id, body)
    reply=self._luna_reply(c,request.user.profile,body)
    if reply:
-    reply_data=MessageSerializer(reply).data;async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':reply_data});return Response({'message':data,'luna_reply':reply_data},status=status.HTTP_201_CREATED)
+    reply_data=MessageSerializer(reply).data
+    try:
+     async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':reply_data})
+    except Exception:pass
+    return Response({'message':data,'luna_reply':reply_data},status=status.HTTP_201_CREATED)
    else:return Response({'message':data,'luna_reply':None},status=status.HTTP_201_CREATED)
   Notification.objects.bulk_create([Notification(profile=p,conversation=c,title=request.user.profile.display_name,body=body[:240]) for p in c.participants.exclude(user=request.user)])
   ConversationReadState.objects.update_or_create(conversation=c,profile=request.user.profile,defaults={'last_read_at':timezone.now()});data=MessageSerializer(message).data
-  async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
+  try:
+   async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
+  except Exception:pass
   return Response(data,status=status.HTTP_201_CREATED)
  def _luna_reply(self,c,profile,body):
   from .ai.prompts import LUNA_CHAT_SYSTEM, MODERATION_SYSTEM, DEBRIEF_SYSTEM

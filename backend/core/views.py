@@ -265,6 +265,25 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
    context={'state':'relationship_counseling','instruction':'Speak as an empathetic relationship therapist. Offer support and ask clarifying questions about their concerns.'}
    return self._gemini_message(c,profile,body,context,system_prompt=LUNA_COUNSELING_SYSTEM)
   text=body.lower().strip();yes=any(word in text for word in ['yes','yeah','sure','show','okay','ok','please']);no=any(word in text for word in ['no','not interested','pass','skip']);match=c.pending_match
+  is_connecting = match and any(word in text for word in ['invite', 'connect', 'introduce', 'meet', 'yes', 'fit', 'stay', 'moderate', 'leave'])
+  is_choosing = (c.luna_stage == 'offered' and (yes or no)) or (c.luna_stage == 'discussing' and (is_connecting or no))
+  if c.is_luna and match and not is_choosing:
+   other_profile = match.candidate if match.requester == profile else match.requester
+   trigger_words = ['online', 'reply', 'sms', 'text', 'wait', 'message', 'invite', 'nudge', 'where', 'busy', 'here', 'hello', 'hey', 'talk', 'chat']
+   words = [w.strip('?,.!') for w in text.split()]
+   if any(w in words for w in trigger_words):
+    from django.utils import timezone
+    from datetime import timedelta
+    read_state = ConversationReadState.objects.filter(profile=other_profile).order_by('-last_read_at').first()
+    is_active = read_state and read_state.last_read_at and read_state.last_read_at >= timezone.now() - timedelta(minutes=2)
+    if not is_active:
+     if other_profile.phone_verified and other_profile.sms_unread_reminders:
+      sms_body = f"Hi {other_profile.display_name}, {profile.display_name} is online and wants to chat on Luna! Log in to connect."
+      try:
+       AfricasTalkingSMS().send(other_profile.phone_number, sms_body)
+      except Exception:pass
+     reply_body = f"Hello! {other_profile.display_name} is not yet online. Give me a minute, I will send them an SMS to come online. I'll get back to you!"
+     return Message.objects.create(conversation=c, is_ai=True, body=reply_body)
   if not match and c.luna_stage not in ['moderating', 'left', 'feedback']:return self._gemini_message(c,profile,body,{'state':'no_match','instruction':'No match is available. Respond naturally and offer to help with the user’s profile or preferences. Never imply anybody joined.'})
   if c.luna_stage=='offered' and match:
    candidate=match.candidate

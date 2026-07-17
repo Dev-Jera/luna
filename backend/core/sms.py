@@ -48,18 +48,22 @@ class AfricasTalkingSMS:
         payload = {'username': self.username, 'to': phone, 'message': message}
         if self.sender_id:
             payload['from'] = self.sender_id
-        request = urllib.request.Request(
-            self.base_url,
-            data=urllib.parse.urlencode(payload).encode(),
-            headers={'apiKey': self.api_key, 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'},
-            method='POST',
-        )
+        headers = {
+            'apiKey': self.api_key,
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
         try:
-            with urllib.request.urlopen(request, timeout=settings.AFRICASTALKING_TIMEOUT) as response:
-                result = json.loads(response.read())
-            recipients = result.get('SMSMessageData', {}).get('Recipients', [])
-            return bool(recipients and str(recipients[0].get('status', '')).lower() == 'success')
-        except (urllib.error.URLError, urllib.error.HTTPError, ValueError, json.JSONDecodeError) as exc:
+            import requests
+            response = requests.post(self.base_url, headers=headers, data=payload, timeout=settings.AFRICASTALKING_TIMEOUT)
+            if response.status_code == 201:
+                result = response.json()
+                recipients = result.get('SMSMessageData', {}).get('Recipients', [])
+                return bool(recipients and str(recipients[0].get('status', '')).lower() == 'success')
+            else:
+                logger.warning('Africa\'s Talking SMS failed with status %d: %s', response.status_code, response.text)
+                return False
+        except Exception as exc:
             logger.warning('Africa\'s Talking SMS failed: %s', exc)
             return False
 

@@ -361,7 +361,9 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
     }
   }
 
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), [conversation.messages?.length || 0, sending])
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [conversation.messages?.length || 0, sending])
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault()

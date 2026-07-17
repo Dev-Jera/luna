@@ -1385,7 +1385,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
   if (!profile) return null
 
   return (
-    <div className="noise min-h-screen bg-[#1e1410] text-[#f5ebe0] selection:bg-[#f27059]/20 flex flex-col">
+    <div className="noise min-h-screen bg-[#1e1410] text-[#f5ebe0] selection:bg-[#f27059]/20 flex flex-col overflow-x-hidden">
       <AppHeader page={page} setPage={navigateToPage} profile={profile} onGoToAdmin={onGoToAdmin} />
       
       <main className="mx-auto w-full max-w-6xl px-5 pb-20 flex-1 flex flex-col">

@@ -34,6 +34,8 @@ export type Profile = {
   ai_analysis_status:
     "not_requested" | "queued" | "processing" | "complete" | "failed";
   onboarding_complete: boolean;
+  gender: 'male' | 'female' | 'other';
+  gender_preference: 'male' | 'female' | 'both';
 };
 export type Match = {
   id: number;

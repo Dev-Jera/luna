@@ -26,10 +26,12 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
     life_goals: profile.life_goals.join(', '),
     lifestyle: profile.lifestyle.join(', '),
     deal_breakers: profile.deal_breakers.join(', '),
+    gender: profile.gender || 'other',
+    gender_preference: profile.gender_preference || 'both',
     ai_profile_consent: profile.ai_profile_consent
   })
 
-  const total = 6
+  const total = 7
   const progress = useMemo(() => ((step + 1) / total) * 100, [step])
 
   const labelClass = 'text-xs font-bold uppercase tracking-wider text-[#e6ccb2] mb-1.5 block'
@@ -166,6 +168,60 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
               <div className="space-y-6">
                 <div>
                   <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
+                    Who are we looking for?
+                  </h1>
+                  <p className="mt-2 text-sm text-[#f5ebe0]/80">
+                    Luna uses this to filter matching options correctly, especially for romantic connections.
+                  </p>
+                </div>
+                <div className="space-y-6 pt-4">
+                  <div>
+                    <label className={labelClass}>My Gender</label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {(['male', 'female', 'other'] as const).map(g => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => setForm({ ...form, gender: g })}
+                          className={`rounded-2xl border p-4 text-center font-bold text-sm transition-all duration-200 ${
+                            form.gender === g
+                              ? 'border-[#f27059] bg-[#291e19] text-[#f27059]'
+                              : 'border-[#f5ebe0]/10 bg-[#1e1410] text-[#f5ebe0]/80 hover:border-[#f27059]/40'
+                          }`}
+                        >
+                          {g === 'male' ? 'Man' : g === 'female' ? 'Woman' : 'Non-binary'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Show me profiles of</label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {(['male', 'female', 'both'] as const).map(pref => (
+                        <button
+                          key={pref}
+                          type="button"
+                          onClick={() => setForm({ ...form, gender_preference: pref })}
+                          className={`rounded-2xl border p-4 text-center font-bold text-sm transition-all duration-200 ${
+                            form.gender_preference === pref
+                              ? 'border-[#f27059] bg-[#291e19] text-[#f27059]'
+                              : 'border-[#f5ebe0]/10 bg-[#1e1410] text-[#f5ebe0]/80 hover:border-[#f27059]/40'
+                          }`}
+                        >
+                          {pref === 'male' ? 'Men' : pref === 'female' ? 'Women' : 'Everyone'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
                     What matters in your world?
                   </h1>
                   <p className="mt-2 text-sm text-[#f5ebe0]/80">
@@ -195,7 +251,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
               </div>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <div className="space-y-6">
                 <div>
                   <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
@@ -251,7 +307,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
               </div>
             )}
 
-            {step === 4 && (
+            {step === 5 && (
               <div className="space-y-6">
                 <div>
                   <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
@@ -293,7 +349,7 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
               </div>
             )}
 
-            {step === 5 && (
+            {step === 6 && (
               <div className="space-y-6">
                 <div>
                   <div className="p-3 bg-[#8ea869]/10 rounded-2xl inline-block border border-[#8ea869]/20 mb-4">
@@ -358,8 +414,8 @@ export default function Onboarding({ profile, onComplete }: { profile: Profile; 
                 onClick={() => setStep(s => Math.min(total - 1, s + 1))}
                 disabled={
                   (step === 0 && !form.display_name) ||
-                  (step === 2 && (!form.values || !form.interests)) ||
-                  (step === 3 && (!form.communication_style || !form.bio))
+                  (step === 3 && (!form.values || !form.interests)) ||
+                  (step === 4 && (!form.communication_style || !form.bio))
                 }
                 className="flex items-center gap-2 rounded-full bg-[#f27059] px-7 py-3.5 font-bold text-white shadow-glow hover:bg-[#e05e47] active:scale-95 transition-all disabled:cursor-not-allowed disabled:opacity-30"
               >

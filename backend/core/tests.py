@@ -221,3 +221,52 @@ class LunaJourneyTests(APITestCase):
   refresh_matches(p1.id)
   match2 = Match.objects.get(requester=p1, candidate=p2)
   self.assertEqual(match2.score, 0) # Cosine similarity = 0.0 -> 0 score
+ def test_gender_and_preference_filtering(self):
+  from .tasks import refresh_matches
+  from django.contrib.auth.models import User
+  p1 = self.user.profile
+  p1.onboarding_complete = True
+  p1.is_discoverable = True
+  p1.connection_goal = 'romance'
+  p1.gender = 'female'
+  p1.gender_preference = 'male'
+  p1.save()
+
+  # Candidate 1: Male looking for Women (romance) -> Should Match
+  u2 = User.objects.create_user(username='candidate_male', password='pwd')
+  p2 = u2.profile
+  p2.display_name = 'Male Candidate'
+  p2.onboarding_complete = True
+  p2.is_discoverable = True
+  p2.connection_goal = 'romance'
+  p2.gender = 'male'
+  p2.gender_preference = 'female'
+  p2.save()
+
+  # Candidate 2: Female looking for Men (romance) -> Should NOT match (p1 wants males)
+  u3 = User.objects.create_user(username='candidate_female', password='pwd')
+  p3 = u3.profile
+  p3.display_name = 'Female Candidate'
+  p3.onboarding_complete = True
+  p3.is_discoverable = True
+  p3.connection_goal = 'romance'
+  p3.gender = 'female'
+  p3.gender_preference = 'male'
+  p3.save()
+
+  # Candidate 3: Male looking for Men (romance) -> Should NOT match (p4 wants males, user is female)
+  u4 = User.objects.create_user(username='candidate_male_gay', password='pwd')
+  p4 = u4.profile
+  p4.display_name = 'Gay Male Candidate'
+  p4.onboarding_complete = True
+  p4.is_discoverable = True
+  p4.connection_goal = 'romance'
+  p4.gender = 'male'
+  p4.gender_preference = 'male'
+  p4.save()
+
+  refresh_matches(p1.id)
+
+  self.assertTrue(Match.objects.filter(requester=p1, candidate=p2).exists())
+  self.assertFalse(Match.objects.filter(requester=p1, candidate=p3).exists())
+  self.assertFalse(Match.objects.filter(requester=p1, candidate=p4).exists())

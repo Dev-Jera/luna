@@ -6,7 +6,7 @@ class UserSerializer(serializers.ModelSerializer):
  class Meta:model=User;fields=['id','username','first_name','email','is_staff']
 class ProfileSerializer(serializers.ModelSerializer):
  user=UserSerializer(read_only=True)
- class Meta:model=Profile;fields=['id','user','display_name','bio','location','phone_number','phone_verified','sms_match_notifications','sms_unread_reminders','sms_safety_alerts','connection_goal','values','interests','communication_style','life_goals','lifestyle','deal_breakers','is_discoverable','is_18_or_older','terms_version','terms_accepted_at','guidelines_accepted_at','ai_profile_consent','ai_summary','ai_traits','ai_analysis_status','onboarding_complete'];read_only_fields=['phone_number','phone_verified','is_18_or_older','terms_version','terms_accepted_at','guidelines_accepted_at','ai_summary','ai_traits','ai_analysis_status']
+ class Meta:model=Profile;fields=['id','user','display_name','bio','location','phone_number','phone_verified','sms_match_notifications','sms_unread_reminders','sms_safety_alerts','connection_goal','values','interests','communication_style','life_goals','lifestyle','deal_breakers','gender','gender_preference','is_discoverable','is_18_or_older','terms_version','terms_accepted_at','guidelines_accepted_at','ai_profile_consent','ai_summary','ai_traits','ai_analysis_status','onboarding_complete'];read_only_fields=['phone_number','phone_verified','is_18_or_older','terms_version','terms_accepted_at','guidelines_accepted_at','ai_summary','ai_traits','ai_analysis_status']
 class MessageSerializer(serializers.ModelSerializer):
  sender=UserSerializer(read_only=True)
  class Meta:model=Message;fields=['id','sender','body','is_ai','metadata','created_at']

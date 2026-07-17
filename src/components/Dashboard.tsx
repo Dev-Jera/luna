@@ -829,6 +829,34 @@ function Preferences({ profile, onSaved }: { profile: Profile; onSaved: (profile
           />
         </div>
 
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelStyle}>My Gender</label>
+            <select
+              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              value={form.gender}
+              onChange={e => setForm({ ...form, gender: e.target.value as any })}
+            >
+              <option value="male">Man</option>
+              <option value="female">Woman</option>
+              <option value="other">Other / Non-binary</option>
+            </select>
+          </div>
+
+          <div>
+            <label className={labelStyle}>Show me profiles of</label>
+            <select
+              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              value={form.gender_preference}
+              onChange={e => setForm({ ...form, gender_preference: e.target.value as any })}
+            >
+              <option value="male">Men</option>
+              <option value="female">Women</option>
+              <option value="both">Everyone</option>
+            </select>
+          </div>
+        </div>
+
         <div className="pt-2">
           <label className={labelStyle}>Discoverability & Alerts</label>
           <div className="space-y-3 mt-3">

@@ -24,6 +24,12 @@ def refresh_matches(profile_id):
  if not (p.onboarding_complete and p.is_discoverable):return 0
  blocked_ids=set(p.blocks_made.values_list('blocked_id',flat=True))|set(p.blocks_received.values_list('blocker_id',flat=True))
  candidates=Profile.objects.exclude(pk=profile_id).exclude(pk__in=blocked_ids).filter(onboarding_complete=True,is_discoverable=True)
+ if p.connection_goal=='romance':
+  from django.db.models import Q
+  candidates=candidates.filter(connection_goal='romance')
+  if p.gender_preference!='both':candidates=candidates.filter(gender=p.gender_preference)
+  if p.gender!='male':candidates=candidates.exclude(gender_preference='male')
+  if p.gender!='female':candidates=candidates.exclude(gender_preference='female')
  for candidate in candidates:
   if p.ai_embedding and candidate.ai_embedding:
    sim=cosine_similarity(p.ai_embedding,candidate.ai_embedding)

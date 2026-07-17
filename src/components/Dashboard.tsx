@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle } from 'lucide-react'
+import { ArrowLeft, ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import api from '../lib/api'
 import { addMessage, loadDashboard, setProfile } from '../store'
@@ -15,36 +15,39 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
           <span className="h-4 w-4 rounded-full bg-[#f27059] block shrink-0" />
           <span className="font-display text-xl font-bold tracking-tight text-[#f5ebe0]">luna<span className="text-[#f27059]">.</span></span>
         </button>
-        <nav className="flex items-center gap-2 sm:gap-3">
+        <nav className="flex items-center gap-1.5 sm:gap-3">
           <button
             onClick={() => setPage('conversations')}
-            className={`rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 ${
+            className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
               page === 'conversations'
                 ? 'bg-[#f27059] text-white shadow-premium'
                 : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
             }`}
           >
-            Conversations
+            <MessageCircle size={14} />
+            <span className="hidden sm:inline">Conversations</span>
           </button>
           <button
             onClick={() => setPage('counseling')}
-            className={`rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 ${
+            className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
               page === 'counseling'
                 ? 'bg-[#f27059] text-white shadow-premium'
                 : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
             }`}
           >
-            Counseling
+            <Heart size={14} />
+            <span className="hidden sm:inline">Counseling</span>
           </button>
           <button
             onClick={() => setPage('preferences')}
-            className={`rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 ${
+            className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
               page === 'preferences'
                 ? 'bg-[#f27059] text-white shadow-premium'
                 : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
             }`}
           >
-            Preferences
+            <Settings size={14} />
+            <span className="hidden sm:inline">Preferences</span>
           </button>
 
           {profile.user.is_staff && onGoToAdmin && (
@@ -529,8 +532,8 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
   }
 
   return (
-    <div className="fixed inset-0 z-40 bg-[#1e1410]/70 p-0 sm:p-4 md:p-6 lg:relative lg:inset-auto lg:z-0 lg:p-0 lg:bg-transparent lg:h-[calc(100vh-210px)] flex">
-      <section className="mx-auto flex h-full w-full max-w-4xl flex-col overflow-hidden bg-[#1e1410] border border-[#f5ebe0]/10 shadow-2xl sm:rounded-[2rem] lg:rounded-[2.5rem] lg:shadow-soft">
+    <div className="fixed inset-0 z-40 bg-[#1e1410]/70 p-0 md:relative md:inset-auto md:z-0 md:p-0 md:bg-transparent md:h-[calc(100vh-210px)] flex">
+      <section className="mx-auto flex h-full w-full max-w-4xl flex-col overflow-hidden bg-[#1e1410] border border-[#f5ebe0]/10 shadow-2xl md:rounded-[2rem] md:shadow-soft">
         
         {/* Chat Header */}
         <header className="flex items-center justify-between border-b border-[#f5ebe0]/10 bg-[#1e1410] px-5 py-4 sm:px-7">
@@ -585,11 +588,11 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
               </>
             )}
             <button
-              aria-label="Close conversation"
+              aria-label="Back to conversations"
               onClick={onClose}
               className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white transition-colors"
             >
-              <X size={18} />
+              <ArrowLeft size={18} />
             </button>
           </div>
         </header>
@@ -1296,10 +1299,10 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
       
       <main className="mx-auto w-full max-w-6xl px-5 pb-20 flex-1 flex flex-col">
         {page === 'conversations' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 py-8 flex-1 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-8 flex-1 items-stretch">
             
             {/* Conversations List Panel */}
-            <section className={`lg:col-span-5 xl:col-span-4 flex flex-col ${chatId !== null ? 'hidden lg:flex' : 'flex'}`}>
+            <section className={`md:col-span-5 lg:col-span-4 flex flex-col ${chatId !== null ? 'hidden md:flex' : 'flex'}`}>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f27059]">Your inbox</p>
                 <h1 className="mt-2 text-3xl font-bold font-display text-white">Conversations</h1>
@@ -1463,11 +1466,11 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
             </section>
 
             {/* Conversation Window/Placeholder Pane */}
-            <section className={`lg:col-span-7 xl:col-span-8 ${chatId === null ? 'hidden lg:flex lg:items-center lg:justify-center' : 'flex flex-col'}`}>
+            <section className={`md:col-span-7 lg:col-span-8 ${chatId === null ? 'hidden md:flex md:items-center md:justify-center' : 'flex flex-col'}`}>
               {conversation ? (
                 <Chat conversation={conversation} onClose={() => navigateToChat(null)} onReload={() => dispatch(loadDashboard())} />
               ) : (
-                <div className="hidden lg:flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] border border-dashed border-cocoa-900/10 bg-white/20 h-[calc(100vh-210px)]">
+                <div className="hidden md:flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] border border-dashed border-cocoa-900/10 bg-white/20 h-[calc(100vh-210px)]">
                   <div className="p-4 bg-terracotta-50 rounded-full border border-terracotta-200/50 text-terracotta-500 mb-4 animate-bounce">
                     <Sparkles size={36} />
                   </div>

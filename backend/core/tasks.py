@@ -249,6 +249,13 @@ def process_nylon_payment(profile_id, phone_number, amount, reference):
     if is_mock:
         payment_record.status = 'processing'
         payment_record.save(update_fields=['status'])
+        
+        # Simulate wait time of 8 seconds for phone push prompt and PIN entry
+        import sys
+        if 'test' not in sys.argv:
+            import time
+            time.sleep(8)
+        
         if str(phone_number).endswith('0'):
             payment_record.status = 'failed'
         else:

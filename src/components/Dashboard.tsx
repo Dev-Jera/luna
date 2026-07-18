@@ -200,6 +200,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [smsSending, setSmsSending] = useState(false)
+  const [chatMenuOpen, setChatMenuOpen] = useState(false)
   const [connected, setConnected] = useState(false)
   const [typingName, setTypingName] = useState('')
   const [online, setOnline] = useState(false)
@@ -662,13 +663,13 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
       <section className="flex-1 flex h-full flex-col overflow-hidden">
         
         {/* Chat Header */}
-        <header className="flex items-center justify-between border-b border-[#f5ebe0]/10 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-[#8ea869] text-[#1e1410] font-bold border border-[#8ea869]/20">
+        <header className="relative flex items-center justify-between gap-3 border-b border-[#f5ebe0]/10 pb-4">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#8ea869] text-[#1e1410] font-bold border border-[#8ea869]/20 sm:h-10 sm:w-10">
               {conversation.is_luna ? <Sparkles size={16} /> : <MessageCircle size={16} />}
             </div>
-            <div>
-              <h2 className="font-bold text-white text-sm sm:text-base">{conversation.title}</h2>
+            <div className="min-w-0">
+              <h2 className="truncate font-bold text-white text-sm sm:text-base">{conversation.title}</h2>
               <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[#f5ebe0]/80">
                 <span className={`h-1.5 w-1.5 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-[#f5ebe0]/30'}`} />
                 {conversation.is_luna ? 'Your private AI concierge' : connected ? 'Live conversation' : 'Reconnecting…'}
@@ -681,71 +682,57 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                 {/* E2EE Lock indicator */}
                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#f5ebe0]/80 border border-[#f5ebe0]/10 bg-[#9c6644]/10 rounded-full px-3 py-1">
                   {conversation.is_contact_sharing_allowed ? <Unlock size={11} className="text-emerald-500" /> : <Lock size={11} className="text-[#f27059]" />}
-                  <span>{conversation.is_contact_sharing_allowed ? 'Direct' : 'Shielded'}</span>
+                  <span className="hidden sm:inline">{conversation.is_contact_sharing_allowed ? 'Direct' : 'Shielded'}</span>
                 </div>
 
-                {!conversation.is_contact_sharing_allowed && (
-                  <button
-                    onClick={permitContact}
-                    disabled={permitting}
-                    className="text-[10px] font-bold bg-[#f27059] text-white hover:bg-[#e05e47] rounded-full px-3 py-1.5 transition-all active:scale-95 disabled:opacity-50"
-                  >
-                    {permitting ? 'Consenting...' : 'Unlock Sharing'}
-                  </button>
+                <button
+                  type="button"
+                  aria-label="Open chat options"
+                  aria-expanded={chatMenuOpen}
+                  onClick={() => setChatMenuOpen(open => !open)}
+                  className="rounded-full border border-[#f5ebe0]/10 bg-[#9c6644]/10 p-2 text-[#f5ebe0]/80 transition-all hover:bg-[#9c6644]/20 hover:text-white active:scale-95"
+                >
+                  {chatMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                </button>
+
+                {chatMenuOpen && (
+                  <div className="absolute right-10 top-12 z-50 w-64 overflow-hidden rounded-2xl border border-[#f5ebe0]/10 bg-[#2a1b16] p-2 shadow-2xl">
+                    {!conversation.is_contact_sharing_allowed && (
+                      <button onClick={() => { setChatMenuOpen(false); permitContact() }} disabled={permitting} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#f5ebe0] hover:bg-[#f5ebe0]/10 disabled:opacity-50">
+                        <Unlock size={17} className="text-[#f27059]" /> {permitting ? 'Unlocking sharing…' : 'Unlock contact sharing'}
+                      </button>
+                    )}
+                    <button onClick={() => { setChatMenuOpen(false); startCall() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#f5ebe0] hover:bg-[#f5ebe0]/10">
+                      <Video size={17} className="text-[#f27059]" /> Start video call
+                    </button>
+                    <button onClick={() => { setChatMenuOpen(false); setShowDatePicker(true); loadVenues() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#f5ebe0] hover:bg-[#f5ebe0]/10">
+                      <Calendar size={17} className="text-[#f27059]" /> Plan meetup date
+                    </button>
+                    <button
+                      disabled={smsSending}
+                      onClick={async () => {
+                        setChatMenuOpen(false)
+                        setSmsSending(true)
+                        setError('')
+                        try {
+                          const { data } = await api.post(`/conversations/${conversation.id}/send-sms/`)
+                          dispatch(addMessage({ conversationId: conversation.id, message: data.message }))
+                        } catch (e: any) {
+                          console.error('SMS nudge failed', e)
+                          setError(e?.response?.data?.detail || 'The SMS could not be sent. Please try again.')
+                        } finally {
+                          setSmsSending(false)
+                        }
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#f5ebe0] hover:bg-[#f5ebe0]/10 disabled:opacity-50"
+                    >
+                      <Smartphone size={17} className="text-[#f27059]" /> {smsSending ? 'Sending SMS…' : 'Send SMS nudge'}
+                    </button>
+                    <button onClick={() => { setChatMenuOpen(false); setShowSideBoard(!showSideBoard) }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#f5ebe0] hover:bg-[#f5ebe0]/10">
+                      <Info size={17} className="text-[#f27059]" /> {showSideBoard ? 'Hide match info' : 'Show match info'}
+                    </button>
+                  </div>
                 )}
-
-                {/* Call buttons */}
-                <button
-                  onClick={startCall}
-                  className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white transition-all active:scale-95"
-                  title="Video Call"
-                >
-                  <Video size={16} />
-                </button>
-
-                {/* Plan Date button */}
-                <button
-                  onClick={() => { setShowDatePicker(true); loadVenues(); }}
-                  className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white transition-all active:scale-95"
-                  title="Plan Meetup Date"
-                >
-                  <Calendar size={16} />
-                </button>
-
-                {/* Send SMS Nudge button */}
-                <button
-                  onClick={async () => {
-                    setSmsSending(true)
-                    setError('')
-                    try {
-                      const { data } = await api.post(`/conversations/${conversation.id}/send-sms/`)
-                      dispatch(addMessage({ conversationId: conversation.id, message: data.message }))
-                    } catch (e: any) {
-                      console.error("SMS nudge failed", e)
-                      setError(e?.response?.data?.detail || 'The SMS could not be sent. Please try again.')
-                    } finally {
-                      setSmsSending(false)
-                    }
-                  }}
-                  disabled={smsSending}
-                  className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white transition-all active:scale-95"
-                  title={smsSending ? 'Sending SMS...' : 'Send SMS Nudge'}
-                >
-                  <Smartphone size={16} />
-                </button>
-
-                {/* Match Board Toggle button */}
-                <button
-                  onClick={() => setShowSideBoard(!showSideBoard)}
-                  className={`rounded-full p-2 transition-all active:scale-95 ${
-                    showSideBoard 
-                      ? 'text-[#f27059] bg-[#f27059]/10' 
-                      : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
-                  }`}
-                  title="Toggle Match Info & Progress Board"
-                >
-                  <Info size={16} />
-                </button>
               </>
             )}
             <button

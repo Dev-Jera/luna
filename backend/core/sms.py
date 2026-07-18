@@ -29,6 +29,7 @@ class AfricasTalkingSMS:
         self.username = settings.AFRICASTALKING_USERNAME
         self.api_key = settings.AFRICASTALKING_API_KEY
         self.sender_id = settings.AFRICASTALKING_SENDER_ID
+        self.last_error = ''
         env_url = getattr(settings, 'AFRICASTALKING_SMS_URL', '')
         if env_url and 'sandbox' not in env_url and self.username.lower() == 'sandbox':
             self.base_url = 'https://api.sandbox.africastalking.com/version1/messaging'
@@ -42,7 +43,9 @@ class AfricasTalkingSMS:
         return bool(self.username and self.api_key)
 
     def send(self, phone, message):
+        self.last_error = ''
         if not self.configured:
+            self.last_error = 'Africa\'s Talking credentials are missing.'
             logger.info('SMS skipped because Africa\'s Talking is not configured')
             return False
         payload = {'username': self.username, 'to': phone, 'message': message}
@@ -58,12 +61,26 @@ class AfricasTalkingSMS:
             response = requests.post(self.base_url, headers=headers, data=payload, timeout=settings.AFRICASTALKING_TIMEOUT)
             if response.status_code == 201:
                 result = response.json()
-                recipients = result.get('SMSMessageData', {}).get('Recipients', [])
-                return bool(recipients and str(recipients[0].get('status', '')).lower() == 'success')
+                message_data = result.get('SMSMessageData', {})
+                recipients = message_data.get('Recipients', [])
+                if recipients and str(recipients[0].get('status', '')).lower() == 'success':
+                    return True
+                recipient = recipients[0] if recipients else {}
+                provider_status = str(recipient.get('status') or message_data.get('Message') or 'Unknown provider response')
+                status_code = recipient.get('statusCode')
+                self.last_error = f'{provider_status} (code {status_code})' if status_code is not None else provider_status
+                logger.warning('Africa\'s Talking rejected SMS: %s', self.last_error)
+                return False
             else:
+                try:
+                    provider_message = response.json().get('errorMessage') or response.json().get('description') or response.text
+                except Exception:
+                    provider_message = response.text
+                self.last_error = f'HTTP {response.status_code}: {str(provider_message)[:200]}'
                 logger.warning('Africa\'s Talking SMS failed with status %d: %s', response.status_code, response.text)
                 return False
         except Exception as exc:
+            self.last_error = str(exc)[:200]
             logger.warning('Africa\'s Talking SMS failed: %s', exc)
             return False
 

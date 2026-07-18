@@ -318,7 +318,8 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   if not sms.configured:
    return Response({'detail': 'SMS delivery is not configured. Please contact Luna support.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
   if not sms.send(recipient.phone_number, sms_body):
-   return Response({'detail': 'The SMS provider could not deliver this message. Please try again.'}, status=status.HTTP_502_BAD_GATEWAY)
+   reason = sms.last_error or 'Unknown delivery failure'
+   return Response({'detail': f'The SMS provider rejected this message: {reason}'}, status=status.HTTP_502_BAD_GATEWAY)
   sys_msg = Message.objects.create(
    conversation=c,
    is_ai=True,

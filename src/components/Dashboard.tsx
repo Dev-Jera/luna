@@ -1878,12 +1878,12 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
     <div className="noise min-h-screen bg-[#1e1410] text-[#f5ebe0] selection:bg-[#f27059]/20 flex flex-col overflow-x-hidden">
       <AppHeader page={page} setPage={navigateToPage} profile={profile} onGoToAdmin={onGoToAdmin} />
       
-      <main className="mx-auto w-full max-w-6xl px-5 pb-20 flex-1 flex flex-col">
+      <main className={`mx-auto w-full ${page === 'conversations' ? 'max-w-[1440px]' : 'max-w-6xl'} px-5 pb-20 flex-1 flex flex-col transition-all duration-300`}>
         {page === 'conversations' ? (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-8 flex-1 items-stretch">
             
             {/* Conversations List Panel */}
-            <section className={`md:col-span-5 lg:col-span-4 flex flex-col ${chatId !== null ? 'hidden md:flex' : 'flex'}`}>
+            <section className={`flex flex-col ${chatId !== null ? 'md:col-span-4 lg:col-span-3 hidden md:flex' : 'md:col-span-5 lg:col-span-4 flex'}`}>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f27059]">Your inbox</p>
                 <h1 className="mt-2 text-3xl font-bold font-display text-white">Conversations</h1>
@@ -2087,7 +2087,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
             </section>
 
             {/* Conversation Window/Placeholder Pane */}
-            <section className={`md:col-span-7 lg:col-span-8 ${chatId === null ? 'hidden md:flex md:items-center md:justify-center' : 'flex flex-col'}`}>
+            <section className={`${chatId !== null ? 'md:col-span-8 lg:col-span-9' : 'md:col-span-7 lg:col-span-8'} ${chatId === null ? 'hidden md:flex md:items-center md:justify-center' : 'flex flex-col'}`}>
               {conversation ? (
                 <Chat conversation={conversation} onClose={() => navigateToChat(null)} onReload={() => dispatch(loadDashboard())} onGoToCounseling={() => navigateToPage('counseling', 'couples')} />
               ) : (

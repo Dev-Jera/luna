@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings, Menu, AlertTriangle, Gift } from 'lucide-react'
+import { ArrowLeft, ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings, Menu, AlertTriangle, Gift, Info, TrendingUp } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import api from '../lib/api'
 import { addMessage, loadDashboard, setProfile } from '../store'
@@ -203,6 +203,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   const [typingName, setTypingName] = useState('')
   const [online, setOnline] = useState(false)
   const [error, setError] = useState('')
+  const [showSideBoard, setShowSideBoard] = useState(true)
   const wsRef = useRef<WebSocket | null>(null)
   const endRef = useRef<HTMLDivElement | null>(null)
   const typingTimer = useRef<number | null>(null)
@@ -699,6 +700,19 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                 >
                   <Calendar size={16} />
                 </button>
+
+                {/* Match Board Toggle button */}
+                <button
+                  onClick={() => setShowSideBoard(!showSideBoard)}
+                  className={`rounded-full p-2 transition-all active:scale-95 ${
+                    showSideBoard 
+                      ? 'text-[#f27059] bg-[#f27059]/10' 
+                      : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+                  }`}
+                  title="Toggle Match Info & Progress Board"
+                >
+                  <Info size={16} />
+                </button>
               </>
             )}
             <button
@@ -910,6 +924,95 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
           </p>
         </form>
       </section>
+
+      {/* Side board / partner summary panel */}
+      {!conversation.is_luna && showSideBoard && (() => {
+        const partner = conversation.participants.find(p => p.id !== activeProfileId)
+        if (!partner) return null
+        
+        // Progress steps computation
+        const msgCount = conversation.messages?.length || 0
+        const isIcebreaker = msgCount >= 4
+        const isDeeper = msgCount >= 10
+        const isContactShared = conversation.is_contact_sharing_allowed
+        const isMeetingScheduled = conversation.messages?.some(m => m.metadata?.meeting_id) || false
+        
+        const board = conversation.luna_board || {}
+        const rawSummary = activeProfileId ? (board.summaries?.[String(activeProfileId)] || board.summaries?.[activeProfileId]) : undefined
+        const partnerSummary = rawSummary || `${partner.display_name} is located in ${partner.location || 'Uganda'}. Connection goal: ${partner.connection_goal}.`
+        const relationshipProgress = board.progress || "Match connected! Start chatting to unlock compatibility intelligence from Luna."
+
+        return (
+          <aside className="hidden lg:flex w-80 shrink-0 flex-col bg-[#1c120e] border border-[#f5ebe0]/10 rounded-[2rem] shadow-soft overflow-y-auto p-5 text-[#f5ebe0] animate-fadeIn">
+            {/* Header info */}
+            <div className="flex flex-col items-center text-center pb-4 border-b border-[#f5ebe0]/10">
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-[#9c6644]/20 text-[#f27059] font-bold text-xl border border-[#f5ebe0]/10 mb-3 shadow-inner relative overflow-hidden">
+                {partner.profile_picture ? (
+                  <img src={partner.profile_picture} alt={partner.display_name} className="w-full h-full object-cover" />
+                ) : (
+                  partner.display_name.slice(0, 2).toUpperCase()
+                )}
+              </div>
+              <h3 className="font-bold text-white text-sm">{partner.display_name}</h3>
+              <p className="text-[10px] text-[#f5ebe0]/60 mt-0.5">{partner.location || 'Uganda'}</p>
+              
+              <div className="mt-2.5 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f27059]/10 border border-[#f27059]/20 text-[9px] font-bold text-[#f27059] uppercase tracking-wider">
+                {getGoalIcon(partner.connection_goal)}
+                <span>{partner.connection_goal}</span>
+              </div>
+            </div>
+
+            {/* Profile summary from Luna */}
+            <div className="mt-5 space-y-2">
+              <h4 className="text-[9px] font-bold uppercase tracking-wider text-[#f5ebe0]/40 flex items-center gap-1.5">
+                <Sparkles size={11} className="text-[#f27059]" />
+                Luna's Partner Summary
+              </h4>
+              <div className="rounded-2xl bg-[#9c6644]/5 border border-[#f5ebe0]/5 p-4 text-xs text-[#f5ebe0]/80 leading-relaxed italic">
+                "{partnerSummary}"
+              </div>
+            </div>
+
+            {/* Match progression / timeline */}
+            <div className="mt-6 space-y-3 flex-1">
+              <h4 className="text-[9px] font-bold uppercase tracking-wider text-[#f5ebe0]/40 flex items-center gap-1.5">
+                <TrendingUp size={11} className="text-[#f27059]" />
+                Relationship Progress
+              </h4>
+              <p className="text-xs text-[#f5ebe0]/85 leading-relaxed font-semibold">
+                {relationshipProgress}
+              </p>
+
+              {/* Graphical checklist steps */}
+              <div className="mt-4 space-y-4 relative pl-4 border-l border-[#f5ebe0]/10 ml-2">
+                {[
+                  { label: "Connection Established", desc: "Matched and introduced by Luna.", checked: true },
+                  { label: "First Exchange", desc: "Exchanged initial warm messages.", checked: isIcebreaker },
+                  { label: "Deeper Flow", desc: "Shared values and interests details.", checked: isDeeper },
+                  { label: "Shield Unlocked", desc: "Allowed sharing contact details.", checked: isContactShared },
+                  { label: "Meetup Planned", desc: "Proposed or scheduled a date.", checked: isMeetingScheduled }
+                ].map((step, idx) => (
+                  <div key={idx} className="relative">
+                    <span className={`absolute -left-[22px] top-0.5 grid h-3.5 w-3.5 place-items-center rounded-full border text-[8px] font-bold ${
+                      step.checked
+                        ? 'bg-emerald-500 border-emerald-500 text-white'
+                        : 'bg-[#1c120e] border-[#f5ebe0]/20 text-[#f5ebe0]/30'
+                    }`}>
+                      {step.checked ? "✓" : ""}
+                    </span>
+                    <div>
+                      <div className={`text-[11px] font-bold ${step.checked ? 'text-white' : 'text-[#f5ebe0]/40'}`}>
+                        {step.label}
+                      </div>
+                      <div className="text-[9px] text-[#f5ebe0]/50 mt-0.5">{step.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+        )
+      })()}
     </div>
   )
 }

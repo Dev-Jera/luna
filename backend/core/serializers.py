@@ -12,7 +12,7 @@ class MessageSerializer(serializers.ModelSerializer):
  class Meta:model=Message;fields=['id','sender','body','is_ai','metadata','created_at']
 class ConversationSerializer(serializers.ModelSerializer):
  participants=ProfileSerializer(many=True,read_only=True);messages=serializers.SerializerMethodField();my_ai_consent=serializers.SerializerMethodField();unread_count=serializers.SerializerMethodField()
- class Meta:model=Conversation;fields=['id','title','participants','is_luna','luna_stage','ai_enabled','my_ai_consent','unread_count','is_contact_sharing_allowed','messages']
+ class Meta:model=Conversation;fields=['id','title','participants','is_luna','luna_stage','ai_enabled','my_ai_consent','unread_count','is_contact_sharing_allowed','luna_board','messages']
  def get_messages(self, obj):
   request = self.context.get('request')
   qs = obj.messages.all()

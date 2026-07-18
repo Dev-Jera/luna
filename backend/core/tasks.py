@@ -319,3 +319,66 @@ def process_nylon_payment(profile_id, phone_number, amount, reference):
         payment_record.status = 'failed'
         payment_record.save(update_fields=['status'])
         return 'failed'
+
+
+@shared_task
+def update_match_board(conversation_id):
+    try:
+        c = Conversation.objects.get(pk=conversation_id)
+    except Conversation.DoesNotExist:
+        return
+    if c.is_luna or c.is_counseling:
+        return
+    provider = GeminiProvider()
+    if not provider.configured:
+        return
+
+    # Fetch last 30 messages in chronological order
+    messages = c.messages.filter(is_ai=False).order_by('-created_at')[:30]
+    messages = list(reversed(messages))
+
+    history_text = ""
+    for msg in messages:
+        sender_name = msg.sender.profile.display_name if msg.sender and hasattr(msg.sender, 'profile') else "System"
+        history_text += f"{sender_name}: {msg.body}\n"
+
+    participants = list(c.participants.all())
+    if len(participants) < 2:
+        return
+    p1, p2 = participants[0], participants[1]
+
+    system_prompt = (
+        "You are Luna, an AI relationship intelligence assistant. Your job is to analyze "
+        "the direct chat messages between two users and compile a progress board.\n"
+        "Return a JSON object with the exact keys:\n"
+        "  \"progress\": \"A brief summary of how far their conversation has reached, mutual alignment, what they have talked about, or scheduling states (max 40 words).\"\n"
+        "  \"summary_p1\": \"A warm, concise summary of Participant 1's profile and personality details for Participant 2 to read (max 50 words).\"\n"
+        "  \"summary_p2\": \"A warm, concise summary of Participant 2's profile and personality details for Participant 1 to read (max 50 words).\"\n"
+    )
+
+    user_prompt = (
+        f"Participant 1: {p1.display_name} (Bio: {p1.bio}, Interests: {p1.interests})\n"
+        f"Participant 2: {p2.display_name} (Bio: {p2.bio}, Interests: {p2.interests})\n\n"
+        f"Chat History:\n{history_text}\n"
+    )
+
+    try:
+        res = provider.structured(system_prompt, user_prompt)
+        c.luna_board = {
+            'progress': res.get('progress', 'Conversation initiated. Say hello!'),
+            'summaries': {
+                str(p1.id): res.get('summary_p2', ''), # summary of P2 for P1 to read
+                str(p2.id): res.get('summary_p1', ''), # summary of P1 for P2 to read
+            }
+        }
+        c.save(update_fields=['luna_board'])
+    except Exception:
+        # Fallback to defaults
+        c.luna_board = {
+            'progress': 'Conversation initiated. Start chatting to get to know each other!',
+            'summaries': {
+                str(p1.id): f"{p2.display_name} is located in {p2.location or 'Uganda'}. Connection goal: {p2.connection_goal}.",
+                str(p2.id): f"{p1.display_name} is located in {p1.location or 'Uganda'}. Connection goal: {p1.connection_goal}."
+            }
+        }
+        c.save(update_fields=['luna_board'])

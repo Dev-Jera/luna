@@ -450,4 +450,25 @@ class LunaJourneyTests(APITestCase):
   self.assertFalse(self.other.is_active)
   self.assertTrue(Report.objects.filter(reported=self.other.profile, details__contains='prostitution').exists())
 
+ def test_luna_board_generation(self):
+  # 1. Create matching conversation between user and other
+  conversation = Conversation.objects.create(title='Amani & Amara', is_luna=False)
+  conversation.participants.add(self.user.profile, self.other.profile)
+
+  # 2. Trigger message sending to verify the task is dispatched
+  resp = self.client.post(f'/api/conversations/{conversation.id}/messages/', {'body': 'Hello there! Glad we matched.'}, format='json')
+  self.assertEqual(resp.status_code, 201)
+
+  # 3. Import and manually test update_match_board task
+  from .tasks import update_match_board
+  update_match_board(conversation.id)
+
+  # 4. Assert that luna_board was populated with fallback information successfully
+  conversation.refresh_from_db()
+  self.assertIsNotNone(conversation.luna_board)
+  self.assertIn('progress', conversation.luna_board)
+  self.assertIn('summaries', conversation.luna_board)
+  self.assertIn(str(self.user.profile.id), conversation.luna_board['summaries'])
+  self.assertIn(str(self.other.profile.id), conversation.luna_board['summaries'])
+
 

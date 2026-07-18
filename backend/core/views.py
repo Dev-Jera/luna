@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from .models import AuditEvent,Block,Consent,Conversation,ConversationReadState,IntroductionDraft,Match,MatchFeedback,Message,Notification,Profile,Report,ModerationEvent,DateMeeting,CounselingSession,PremiumPayment
 from .moderation import inspect_message
 from .serializers import ConversationSerializer,IntroductionDraftSerializer,MatchSerializer,MessageSerializer,NotificationSerializer,ProfileSerializer,RegisterSerializer,CounselingSessionSerializer
-from .tasks import analyze_profile,enrich_match,generate_introduction,refresh_matches,generate_welcome_message,extract_profile_insights,process_nylon_payment
+from .tasks import analyze_profile,enrich_match,generate_introduction,refresh_matches,generate_welcome_message,extract_profile_insights,process_nylon_payment,update_match_board
 from .task_dispatch import dispatch
 from .sms import AfricasTalkingSMS,consume_code,send_code
 from .ai import GeminiProvider
@@ -157,6 +157,7 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     match.save(update_fields=['conversation'])
     rev_match.conversation=conversation
     rev_match.save(update_fields=['conversation'])
+    dispatch(update_match_board, conversation.id)
     sms=AfricasTalkingSMS()
     for p in [match.requester,match.candidate]:
      if p.phone_verified and p.sms_match_notifications:
@@ -293,6 +294,8 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   try:
    async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
   except Exception:pass
+  if not c.is_luna:
+   dispatch(update_match_board, c.id)
   return Response(data,status=status.HTTP_201_CREATED)
  def _luna_reply(self,c,profile,body):
   from .ai.prompts import LUNA_CHAT_SYSTEM, MODERATION_SYSTEM, DEBRIEF_SYSTEM, LUNA_COUNSELING_SYSTEM

@@ -67,6 +67,7 @@ export type Conversation = {
   unread_count: number;
   is_contact_sharing_allowed: boolean;
   is_counseling?: boolean;
+  luna_board?: any;
   messages: Message[];
 };
 export type IntroductionDraft = {

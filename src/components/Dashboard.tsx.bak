@@ -336,7 +336,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
         }
       }
       pc.onicecandidate = (event) => {
-        if (event.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
+        if (event.candidate && wsRef.current) {
           wsRef.current.send(JSON.stringify({
             type: 'webrtc',
             signal: { type: 'candidate', candidate: event.candidate }
@@ -346,12 +346,10 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
       peerConnectionRef.current = pc
       const offer = await pc.createOffer()
       await pc.setLocalDescription(offer)
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({
-          type: 'webrtc',
-          signal: { type: 'offer', sdp: offer }
-        }))
-      }
+      wsRef.current?.send(JSON.stringify({
+        type: 'webrtc',
+        signal: { type: 'offer', sdp: offer }
+      }))
     } catch (err) {
       console.error('WebRTC error starting call:', err)
       setError('Could not access microphone/camera. Please check permissions.')
@@ -359,7 +357,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   }
 
   const endCall = () => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
+    if (wsRef.current) {
       wsRef.current.send(JSON.stringify({
         type: 'webrtc',
         signal: { type: 'hangup' }
@@ -394,7 +392,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
           }
         }
         pc.onicecandidate = (event) => {
-          if (event.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
+          if (event.candidate && wsRef.current) {
             wsRef.current.send(JSON.stringify({
               type: 'webrtc',
               signal: { type: 'candidate', candidate: event.candidate }
@@ -405,12 +403,10 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
         await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp))
         const answer = await pc.createAnswer()
         await pc.setLocalDescription(answer)
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send(JSON.stringify({
-            type: 'webrtc',
-            signal: { type: 'answer', sdp: answer }
-          }))
-        }
+        wsRef.current?.send(JSON.stringify({
+          type: 'webrtc',
+          signal: { type: 'answer', sdp: answer }
+        }))
       } catch (err) {
         console.error('WebRTC error responding to call:', err)
       }

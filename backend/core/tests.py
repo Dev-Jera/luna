@@ -416,6 +416,20 @@ class LunaJourneyTests(APITestCase):
   self.assertEqual(response.data['status'],'sent')
   self.assertIsInstance(response.data['message'],dict)
 
+ def test_direct_chat_sms_nudge_allows_saved_unverified_number(self):
+  conversation=Conversation.objects.create(title='Amani & Amara')
+  conversation.participants.add(self.user.profile,self.other.profile)
+  self.other.profile.phone_number='+254712345678'
+  self.other.profile.phone_verified=False
+  self.other.profile.sms_unread_reminders=False
+  self.other.profile.save(update_fields=['phone_number','phone_verified','sms_unread_reminders'])
+  with patch('core.views.AfricasTalkingSMS') as sms_class:
+   sms_class.return_value.configured=True
+   sms_class.return_value.send.return_value=True
+   response=self.client.post(f'/api/conversations/{conversation.id}/send-sms/')
+  self.assertEqual(response.status_code,200)
+  self.assertEqual(sms_class.return_value.send.call_args.args[0],'+254712345678')
+
  def test_direct_chat_sms_nudge_reports_provider_failure(self):
   conversation=Conversation.objects.create(title='Amani & Amara')
   conversation.participants.add(self.user.profile,self.other.profile)
@@ -502,4 +516,3 @@ class LunaJourneyTests(APITestCase):
   self.assertIn('summaries', conversation.luna_board)
   self.assertIn(str(self.user.profile.id), conversation.luna_board['summaries'])
   self.assertIn(str(self.other.profile.id), conversation.luna_board['summaries'])
-

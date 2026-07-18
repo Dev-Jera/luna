@@ -311,10 +311,8 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   recipient = c.participants.exclude(user=request.user).first()
   if not recipient:
    return Response({'detail': 'Recipient not found.'}, status=status.HTTP_404_NOT_FOUND)
-  if not recipient.phone_number or not recipient.phone_verified:
-   return Response({'detail': 'This person does not have a verified phone number.'}, status=status.HTTP_400_BAD_REQUEST)
-  if not recipient.sms_unread_reminders:
-   return Response({'detail': 'This person has not enabled SMS message notifications.'}, status=status.HTTP_400_BAD_REQUEST)
+  if not recipient.phone_number:
+   return Response({'detail': 'This person does not have a phone number saved on Luna.'}, status=status.HTTP_400_BAD_REQUEST)
   sms_body = f"Hi {recipient.display_name}, {request.user.profile.display_name} sent you a message on Luna: 'Hi, are you free to chat? Log in to the app to connect!'"
   sms = AfricasTalkingSMS()
   if not sms.configured:

@@ -499,11 +499,9 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
     setBody('')
     wsRef.current?.send(JSON.stringify({ type: 'typing', typing: false }))
     try {
-      if (!conversation.is_luna && wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({ type: 'message', body: outgoing }))
-        window.setTimeout(() => setSending(false), 5000)
-        return
-      }
+      // Persist chat messages through HTTP even when a WebSocket appears open.
+      // A socket can disconnect between readyState inspection and delivery,
+      // which previously caused messages to vanish without an API fallback.
       const { data } = await api.post(`/conversations/${conversation.id}/messages/`, { body: outgoing })
       if (conversation.is_luna) {
         dispatch(addMessage({ conversationId: conversation.id, message: data.message }))

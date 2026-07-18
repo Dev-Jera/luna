@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings, Menu, AlertTriangle, Gift, Info, TrendingUp } from 'lucide-react'
+import { ArrowLeft, ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings, Menu, AlertTriangle, Gift, Info, TrendingUp, Smartphone } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import api from '../lib/api'
 import { addMessage, loadDashboard, setProfile } from '../store'
@@ -530,7 +530,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
 
   const renderMessage = (m: Message) => {
     const mine = m.sender?.id === currentUserId
-    const isSystem = m.metadata?.type === 'system_left' || m.body.includes('joined the chat') || m.body.includes('left the conversation') || m.body.includes('Luna has left')
+    const isSystem = m.metadata?.type === 'system_left' || (m.body && (m.body.includes('joined the chat') || m.body.includes('left the conversation') || m.body.includes('Luna has left')))
     if (isSystem) {
       return (
         <div key={m.id} className="flex justify-center my-4 w-full">
@@ -699,6 +699,28 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                   title="Plan Meetup Date"
                 >
                   <Calendar size={16} />
+                </button>
+
+                {/* Send SMS Nudge button */}
+                <button
+                  onClick={async () => {
+                    try {
+                      const { data } = await api.post(`/conversations/${conversation.id}/send-sms/`)
+                      dispatch(addMessage({ conversationId: conversation.id, message: {
+                        id: Math.random(),
+                        body: data.message,
+                        is_ai: true,
+                        created_at: new Date().toISOString(),
+                        sender: null
+                      }}))
+                    } catch (e) {
+                      console.error("SMS nudge failed", e)
+                    }
+                  }}
+                  className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white transition-all active:scale-95"
+                  title="Send SMS Nudge"
+                >
+                  <Smartphone size={16} />
                 </button>
 
                 {/* Match Board Toggle button */}

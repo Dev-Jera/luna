@@ -297,6 +297,35 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   if not c.is_luna:
    dispatch(update_match_board, c.id)
   return Response(data,status=status.HTTP_201_CREATED)
+ @action(detail=True,methods=['post'],url_path='read')
+ def mark_read(self,request,pk=None):
+  c=self.get_object()
+  from django.utils import timezone
+  ConversationReadState.objects.update_or_create(conversation=c,profile=request.user.profile,defaults={'last_read_at':timezone.now()})
+  return Response(status=status.HTTP_204_NO_CONTENT)
+ @action(detail=True, methods=['post'], url_path='send-sms')
+ def send_sms_nudge(self, request, pk=None):
+  c = self.get_object()
+  if c.is_luna or c.is_counseling:
+   return Response({'detail': 'SMS nudges are only available in direct match chats.'}, status=status.HTTP_400_BAD_REQUEST)
+  recipient = c.participants.exclude(user=request.user).first()
+  if not recipient:
+   return Response({'detail': 'Recipient not found.'}, status=status.HTTP_404_NOT_FOUND)
+  from .sms import AfricasTalkingSMS
+  sms_body = f"Hi {recipient.display_name}, {request.user.profile.display_name} sent you a message on Luna: 'Hi, are you free to chat? Log in to the app to connect!'"
+  sms = AfricasTalkingSMS()
+  sms.send(recipient.phone_number, sms_body)
+  sys_msg = Message.objects.create(
+   conversation=c,
+   is_ai=True,
+   body=f"Luna: I've sent {recipient.display_name} an SMS nudge to join the chat.",
+   metadata={'type': 'system_left'}
+  )
+  try:
+   sys_data = MessageSerializer(sys_msg).data
+   async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}', {'type': 'chat.message', 'message': sys_data})
+  except Exception:pass
+  return Response({'status': 'sent', 'message': sys_msg.body})
  def _luna_reply(self,c,profile,body):
   from .ai.prompts import LUNA_CHAT_SYSTEM, MODERATION_SYSTEM, DEBRIEF_SYSTEM, LUNA_COUNSELING_SYSTEM
   if c.is_counseling:

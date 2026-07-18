@@ -13,7 +13,7 @@ python backend/manage.py migrate --noinput
 
 # Start Daphne server in the background on port 8000
 echo "Starting Daphne ASGI backend server..."
-daphne -b 127.0.0.1 -p 8000 config.asgi:application &
+(cd backend && daphne -b 127.0.0.1 -p 8000 config.asgi:application) &
 
 # Start Nginx in the foreground to serve frontend and proxy backend API/WebSockets
 echo "Starting Nginx reverse proxy..."

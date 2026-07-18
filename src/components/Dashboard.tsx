@@ -514,7 +514,9 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
       setBody(outgoing)
       setError('Your message was not sent. Please try again.')
     } finally {
-      if (conversation.is_luna) setSending(false)
+      // Direct chats fall back to the REST endpoint while WebSockets reconnect.
+      // Always release the composer after that request completes.
+      setSending(false)
     }
   }
 

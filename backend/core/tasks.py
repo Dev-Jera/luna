@@ -38,7 +38,7 @@ def refresh_matches(profile_id):
    reasons=[f"Shared interests: {', '.join(shared_interests[:3])}"] if shared_interests else ["Highly aligned profile values"]
   else:
    score,reasons=compatibility(p,candidate)
-  if score >= 70:
+  if score >= 40:
    Match.objects.update_or_create(requester=p,candidate=candidate,defaults={'score':score,'reasons':reasons})
   else:
    Match.objects.filter(requester=p,candidate=candidate,status='suggested').delete()
@@ -50,7 +50,7 @@ def refresh_matches(profile_id):
    rev_reasons=[f"Shared interests: {', '.join(shared_interests[:3])}"] if shared_interests else ["Highly aligned profile values"]
   else:
    rev_score,rev_reasons=compatibility(candidate,p)
-  if rev_score >= 70:
+  if rev_score >= 40:
    Match.objects.update_or_create(requester=candidate,candidate=p,defaults={'score':rev_score,'reasons':rev_reasons})
   else:
    Match.objects.filter(requester=candidate,candidate=p,status='suggested').delete()

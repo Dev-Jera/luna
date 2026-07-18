@@ -647,11 +647,11 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   }
 
   return (
-    <div className="fixed inset-0 z-40 bg-[#1e1410]/70 p-0 md:relative md:inset-auto md:z-0 md:p-0 md:bg-transparent md:h-[calc(100vh-210px)] flex">
-      <section className="mx-auto flex h-full w-full max-w-4xl flex-col overflow-hidden bg-[#1e1410] border border-[#f5ebe0]/10 shadow-2xl md:rounded-[2rem] md:shadow-soft">
+    <div className="fixed inset-0 z-40 bg-[#1e1410]/70 p-0 md:relative md:inset-auto md:z-0 md:p-0 md:bg-transparent md:h-[calc(100vh-210px)] flex gap-6 w-full">
+      <section className="flex-1 flex h-full flex-col overflow-hidden">
         
         {/* Chat Header */}
-        <header className="flex items-center justify-between border-b border-[#f5ebe0]/10 bg-[#1e1410] px-5 py-4 sm:px-7">
+        <header className="flex items-center justify-between border-b border-[#f5ebe0]/10 pb-4">
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-full bg-[#8ea869] text-[#1e1410] font-bold border border-[#8ea869]/20">
               {conversation.is_luna ? <Sparkles size={16} /> : <MessageCircle size={16} />}
@@ -726,7 +726,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
         </header>
 
         {/* Chat Messages */}
-        <div className="flex-1 space-y-4 overflow-y-auto bg-[#1e1410] px-4 py-6 sm:px-6">
+        <div className="flex-1 space-y-4 overflow-y-auto py-6">
           <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-3.5 flex gap-3 text-[11px] text-[#f5ebe0]/70 leading-relaxed shadow-soft">
             <AlertTriangle size={16} className="text-yellow-500 shrink-0 mt-0.5" />
             <div>
@@ -895,7 +895,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
         )}
 
         {/* Chat Form */}
-        <form onSubmit={send} className="bg-[#1e1410] p-4 sm:px-6 border-t border-[#f5ebe0]/10">
+        <form onSubmit={send} className="py-4 border-t border-[#f5ebe0]/10">
           {error && <p className="mb-2.5 text-xs font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200/50 p-2.5 rounded-xl">{error}</p>}
           <div className="flex items-end gap-3 rounded-2xl bg-[#9c6644]/10 p-1.5 border border-[#f5ebe0]/10 focus-within:border-[#f27059] focus-within:ring-4 focus-within:ring-[#f27059]/10 transition-all">
             <textarea

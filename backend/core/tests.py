@@ -399,20 +399,18 @@ class LunaJourneyTests(APITestCase):
   self.assertIsNone(inbox.pending_match)
   self.assertIn("sent amara an sms notification", resp_nudge.data['luna_reply']['body'].lower())
 
- def test_direct_chat_sms_nudge_uses_recipient_verified_number(self):
+ def test_direct_chat_sms_nudge_uses_other_participants_number(self):
   conversation=Conversation.objects.create(title='Amani & Amara')
   conversation.participants.add(self.user.profile,self.other.profile)
-  self.other.profile.phone_number='+254712345678'
-  self.other.profile.phone_verified=True
-  self.other.profile.sms_unread_reminders=True
-  self.other.profile.save(update_fields=['phone_number','phone_verified','sms_unread_reminders'])
+  self.other.profile.phone_number='+256788862158'
+  self.other.profile.save(update_fields=['phone_number'])
   with patch('core.views.AfricasTalkingSMS') as sms_class:
    sms_class.return_value.configured=True
    sms_class.return_value.send.return_value=True
    response=self.client.post(f'/api/conversations/{conversation.id}/send-sms/')
   self.assertEqual(response.status_code,200)
   sms_class.return_value.send.assert_called_once()
-  self.assertEqual(sms_class.return_value.send.call_args.args[0],'+254712345678')
+  self.assertEqual(sms_class.return_value.send.call_args.args[0],'+256788862158')
   self.assertEqual(response.data['status'],'sent')
   self.assertIsInstance(response.data['message'],dict)
 
@@ -434,9 +432,7 @@ class LunaJourneyTests(APITestCase):
   conversation=Conversation.objects.create(title='Amani & Amara')
   conversation.participants.add(self.user.profile,self.other.profile)
   self.other.profile.phone_number='+254712345678'
-  self.other.profile.phone_verified=True
-  self.other.profile.sms_unread_reminders=True
-  self.other.profile.save(update_fields=['phone_number','phone_verified','sms_unread_reminders'])
+  self.other.profile.save(update_fields=['phone_number'])
   with patch('core.views.AfricasTalkingSMS') as sms_class:
    sms_class.return_value.configured=True
    sms_class.return_value.send.return_value=False

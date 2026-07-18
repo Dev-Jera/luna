@@ -312,8 +312,8 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   if not recipient:
    return Response({'detail': 'Recipient not found.'}, status=status.HTTP_404_NOT_FOUND)
   if not recipient.phone_number:
-   return Response({'detail': 'This person does not have a phone number saved on Luna.'}, status=status.HTTP_400_BAD_REQUEST)
-  sms_body = f"Hi {recipient.display_name}, {request.user.profile.display_name} sent you a message on Luna: 'Hi, are you free to chat? Log in to the app to connect!'"
+   return Response({'detail': 'The other person does not have a phone number saved on Luna.'}, status=status.HTTP_400_BAD_REQUEST)
+  sms_body = f"Hi {recipient.display_name}, {request.user.profile.display_name} is online on Luna and would like to chat with you. Open Luna to reply."
   sms = AfricasTalkingSMS()
   if not sms.configured:
    return Response({'detail': 'SMS delivery is not configured. Please contact Luna support.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -322,8 +322,8 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   sys_msg = Message.objects.create(
    conversation=c,
    is_ai=True,
-   body=f"Luna: I've sent {recipient.display_name} an SMS nudge to join the chat.",
-   metadata={'type': 'system_left'}
+   body=f"Luna: I sent {recipient.display_name} an SMS letting them know you are online and would like to chat.",
+   metadata={'type': 'system_left', 'visible_to_profile_id': request.user.profile.id}
   )
   try:
    sys_data = MessageSerializer(sys_msg).data

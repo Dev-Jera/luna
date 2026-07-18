@@ -647,7 +647,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   }
 
   return (
-    <div className="fixed inset-0 z-40 bg-[#1e1410]/70 p-0 md:relative md:inset-auto md:z-0 md:p-0 md:bg-transparent md:h-[calc(100vh-210px)] flex gap-6 w-full">
+    <div className="fixed inset-0 z-40 bg-[#1e1410]/70 p-0 md:relative md:inset-auto md:z-0 md:p-0 md:bg-transparent md:h-full flex gap-6 w-full">
       <section className="flex-1 flex h-full flex-col overflow-hidden">
         
         {/* Chat Header */}
@@ -1878,12 +1878,12 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
     <div className="noise min-h-screen bg-[#1e1410] text-[#f5ebe0] selection:bg-[#f27059]/20 flex flex-col overflow-x-hidden">
       <AppHeader page={page} setPage={navigateToPage} profile={profile} onGoToAdmin={onGoToAdmin} />
       
-      <main className={`mx-auto w-full ${page === 'conversations' ? 'max-w-[1440px]' : 'max-w-6xl'} px-5 pb-20 flex-1 flex flex-col transition-all duration-300`}>
+      <main className={`mx-auto w-full ${page === 'conversations' ? 'max-w-[1440px]' : 'max-w-6xl'} px-5 pb-10 flex-1 flex flex-col transition-all duration-300`}>
         {page === 'conversations' ? (
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-8 flex-1 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-8 flex-1 items-stretch md:h-[calc(100vh-160px)]">
             
             {/* Conversations List Panel */}
-            <section className={`flex flex-col ${chatId !== null ? 'md:col-span-4 lg:col-span-3 hidden md:flex' : 'md:col-span-5 lg:col-span-4 flex'}`}>
+            <section className={`flex flex-col h-full ${chatId !== null ? 'md:col-span-4 lg:col-span-3 hidden md:flex' : 'md:col-span-5 lg:col-span-4 flex'}`}>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f27059]">Your inbox</p>
                 <h1 className="mt-2 text-3xl font-bold font-display text-white">Conversations</h1>
@@ -2087,11 +2087,11 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
             </section>
 
             {/* Conversation Window/Placeholder Pane */}
-            <section className={`${chatId !== null ? 'md:col-span-8 lg:col-span-9' : 'md:col-span-7 lg:col-span-8'} ${chatId === null ? 'hidden md:flex md:items-center md:justify-center' : 'flex flex-col'}`}>
+            <section className={`h-full ${chatId !== null ? 'md:col-span-8 lg:col-span-9' : 'md:col-span-7 lg:col-span-8'} ${chatId === null ? 'hidden md:flex md:items-center md:justify-center' : 'flex flex-col'}`}>
               {conversation ? (
                 <Chat conversation={conversation} onClose={() => navigateToChat(null)} onReload={() => dispatch(loadDashboard())} onGoToCounseling={() => navigateToPage('counseling', 'couples')} />
               ) : (
-                <div className="hidden md:flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] border border-dashed border-cocoa-900/10 bg-white/20 h-[calc(100vh-210px)]">
+                <div className="hidden md:flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] border border-dashed border-cocoa-900/10 bg-white/20 h-full w-full">
                   <div className="p-4 bg-terracotta-50 rounded-full border border-terracotta-200/50 text-terracotta-500 mb-4 animate-bounce">
                     <Sparkles size={36} />
                   </div>

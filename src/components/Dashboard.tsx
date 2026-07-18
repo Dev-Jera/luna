@@ -1447,7 +1447,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
   const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!profile.is_premium) {
-      setDeleteError('Account deletion is a Premium feature. Please subscribe to delete.')
+      navigateToPage('counseling', 'couples')
       return
     }
     if (!password) {
@@ -1686,40 +1686,25 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
               This will instantly erase your profile summaries, conversations, matches, and details. This cannot be undone.
             </p>
             
-            {profile.is_premium ? (
-              <form onSubmit={handleDeleteAccount} className="mt-4 space-y-3">
-                {deleteError && <div className="text-xs text-red-400 font-bold">{deleteError}</div>}
-                <div>
-                  <input
-                    type="password"
-                    placeholder="Enter password to confirm deletion"
-                    className="premium-input !bg-[#291e19] !border-red-500/20 !text-[#f5ebe0] focus:!border-red-500 focus:!ring-red-500/20 text-xs py-2"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={deleting}
-                  className="rounded-full bg-red-500 hover:bg-red-600 px-5 py-2 text-xs font-bold text-white transition-all active:scale-95 disabled:opacity-50"
-                >
-                  {deleting ? 'Deleting...' : 'Delete Account'}
-                </button>
-              </form>
-            ) : (
-              <div className="mt-4 flex flex-col gap-3">
-                <div className="text-xs text-[#f5ebe0]/70">
-                  Note: Account deletion is a Premium-only feature.
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigateToPage('counseling', 'couples')}
-                  className="w-max rounded-full bg-red-500 hover:bg-red-600 px-5 py-2 text-xs font-bold text-white transition-all active:scale-95 shadow-glow flex items-center gap-1.5"
-                >
-                  <Unlock size={11} /> Delete Account
-                </button>
+            <form onSubmit={handleDeleteAccount} className="mt-4 space-y-3">
+              {deleteError && <div className="text-xs text-red-400 font-bold">{deleteError}</div>}
+              <div>
+                <input
+                  type="password"
+                  placeholder="Enter password to confirm deletion"
+                  className="premium-input !bg-[#291e19] !border-red-500/20 !text-[#f5ebe0] focus:!border-red-500 focus:!ring-red-500/20 text-xs py-2"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                />
               </div>
-            )}
+              <button
+                type="submit"
+                disabled={deleting}
+                className="rounded-full bg-red-500 hover:bg-red-600 px-5 py-2 text-xs font-bold text-white transition-all active:scale-95 disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete Account'}
+              </button>
+            </form>
           </div>
         </div>
 

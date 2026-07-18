@@ -1395,7 +1395,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
   )
 }
 
-function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; onSaved: (profile: Profile) => void; navigateToPage: (page: 'conversations' | 'preferences' | 'counseling') => void }) {
+function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; onSaved: (profile: Profile) => void; navigateToPage: (page: 'conversations' | 'preferences' | 'counseling', subTab?: 'ai' | 'couples') => void }) {
   const [form, setForm] = useState({
     ...profile,
     username: profile.user.username,
@@ -1708,15 +1708,15 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
               </form>
             ) : (
               <div className="mt-4 flex flex-col gap-3">
-                <div className="text-xs text-yellow-500/90 font-semibold flex items-center gap-1">
-                  <span>🔒 Account deletion is a Premium feature.</span>
+                <div className="text-xs text-[#f5ebe0]/70">
+                  Note: Account deletion is a Premium-only feature.
                 </div>
                 <button
                   type="button"
-                  onClick={() => navigateToPage('counseling')}
-                  className="w-max rounded-full bg-[#f27059] px-5 py-2 text-xs font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all shadow-glow flex items-center gap-1"
+                  onClick={() => navigateToPage('counseling', 'couples')}
+                  className="w-max rounded-full bg-red-500 hover:bg-red-600 px-5 py-2 text-xs font-bold text-white transition-all active:scale-95 shadow-glow flex items-center gap-1.5"
                 >
-                  <Unlock size={11} /> Upgrade to Delete Account
+                  <Unlock size={11} /> Delete Account
                 </button>
               </div>
             )}

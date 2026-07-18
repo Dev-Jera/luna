@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.test import override_settings
+from unittest.mock import patch
 from rest_framework.test import APITestCase
 from .models import Block,Consent,Conversation,IntroductionDraft,Match,MatchFeedback,Message,ModerationEvent,Notification,Report
 
@@ -398,6 +399,37 @@ class LunaJourneyTests(APITestCase):
   self.assertIsNone(inbox.pending_match)
   self.assertIn("sent amara an sms notification", resp_nudge.data['luna_reply']['body'].lower())
 
+ def test_direct_chat_sms_nudge_uses_recipient_verified_number(self):
+  conversation=Conversation.objects.create(title='Amani & Amara')
+  conversation.participants.add(self.user.profile,self.other.profile)
+  self.other.profile.phone_number='+254712345678'
+  self.other.profile.phone_verified=True
+  self.other.profile.sms_unread_reminders=True
+  self.other.profile.save(update_fields=['phone_number','phone_verified','sms_unread_reminders'])
+  with patch('core.views.AfricasTalkingSMS') as sms_class:
+   sms_class.return_value.configured=True
+   sms_class.return_value.send.return_value=True
+   response=self.client.post(f'/api/conversations/{conversation.id}/send-sms/')
+  self.assertEqual(response.status_code,200)
+  sms_class.return_value.send.assert_called_once()
+  self.assertEqual(sms_class.return_value.send.call_args.args[0],'+254712345678')
+  self.assertEqual(response.data['status'],'sent')
+  self.assertIsInstance(response.data['message'],dict)
+
+ def test_direct_chat_sms_nudge_reports_provider_failure(self):
+  conversation=Conversation.objects.create(title='Amani & Amara')
+  conversation.participants.add(self.user.profile,self.other.profile)
+  self.other.profile.phone_number='+254712345678'
+  self.other.profile.phone_verified=True
+  self.other.profile.sms_unread_reminders=True
+  self.other.profile.save(update_fields=['phone_number','phone_verified','sms_unread_reminders'])
+  with patch('core.views.AfricasTalkingSMS') as sms_class:
+   sms_class.return_value.configured=True
+   sms_class.return_value.send.return_value=False
+   response=self.client.post(f'/api/conversations/{conversation.id}/send-sms/')
+  self.assertEqual(response.status_code,502)
+  self.assertFalse(conversation.messages.exists())
+
  def test_nylon_payment_flow(self):
   # 1. Test initiate payment requires phone number
   resp = self.client.post('/api/profiles/me/initiate-nylon-payment/', {}, format='json')
@@ -470,5 +502,4 @@ class LunaJourneyTests(APITestCase):
   self.assertIn('summaries', conversation.luna_board)
   self.assertIn(str(self.user.profile.id), conversation.luna_board['summaries'])
   self.assertIn(str(self.other.profile.id), conversation.luna_board['summaries'])
-
 

@@ -199,6 +199,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   const activeProfileId = useSelector((s: RootState) => s.luna.profile?.id)
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
+  const [smsSending, setSmsSending] = useState(false)
   const [connected, setConnected] = useState(false)
   const [typingName, setTypingName] = useState('')
   const [online, setOnline] = useState(false)
@@ -710,21 +711,21 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                 {/* Send SMS Nudge button */}
                 <button
                   onClick={async () => {
+                    setSmsSending(true)
+                    setError('')
                     try {
                       const { data } = await api.post(`/conversations/${conversation.id}/send-sms/`)
-                      dispatch(addMessage({ conversationId: conversation.id, message: {
-                        id: Math.random(),
-                        body: data.message,
-                        is_ai: true,
-                        created_at: new Date().toISOString(),
-                        sender: null
-                      }}))
-                    } catch (e) {
+                      dispatch(addMessage({ conversationId: conversation.id, message: data.message }))
+                    } catch (e: any) {
                       console.error("SMS nudge failed", e)
+                      setError(e?.response?.data?.detail || 'The SMS could not be sent. Please try again.')
+                    } finally {
+                      setSmsSending(false)
                     }
                   }}
+                  disabled={smsSending}
                   className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white transition-all active:scale-95"
-                  title="Send SMS Nudge"
+                  title={smsSending ? 'Sending SMS...' : 'Send SMS Nudge'}
                 >
                   <Smartphone size={16} />
                 </button>

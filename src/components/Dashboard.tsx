@@ -497,7 +497,9 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
     setSending(true)
     setError('')
     setBody('')
-    wsRef.current?.send(JSON.stringify({ type: 'typing', typing: false }))
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'typing', typing: false }))
+    }
     try {
       // Persist chat messages through HTTP even when a WebSocket appears open.
       // A socket can disconnect between readyState inspection and delivery,
@@ -524,7 +526,11 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
     if (conversation.is_luna || wsRef.current?.readyState !== WebSocket.OPEN) return
     wsRef.current.send(JSON.stringify({ type: 'typing', typing: true }))
     if (typingTimer.current) clearTimeout(typingTimer.current)
-    typingTimer.current = window.setTimeout(() => wsRef.current?.send(JSON.stringify({ type: 'typing', typing: false })), 900)
+    typingTimer.current = window.setTimeout(() => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ type: 'typing', typing: false }))
+      }
+    }, 900)
   }
 
   const getGoalIcon = (goal: string) => {

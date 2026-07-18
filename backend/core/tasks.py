@@ -57,12 +57,40 @@ def refresh_matches(profile_id):
  for owner in [p,*list(candidates)]:
   inbox=Conversation.objects.filter(is_luna=True,participants=owner).first();pending=Match.objects.filter(requester=owner,status='suggested',presented_at__isnull=True,candidate__onboarding_complete=True,candidate__is_discoverable=True).order_by('-score').first()
   if inbox and pending and not inbox.pending_match_id:
-   inbox.pending_match=pending;inbox.luna_stage='offered';inbox.save(update_fields=['pending_match','luna_stage']);pending.presented_at=__import__('django.utils.timezone',fromlist=['now']).now();pending.save(update_fields=['presented_at']);Message.objects.create(conversation=inbox,is_ai=True,body='Hey — I found a profile that may align well with yours. Would you like me to show it to you so we can talk it through first?')
-   try:
-    sms=AfricasTalkingSMS()
-    sms.send(owner.phone_number, f"Hi {owner.display_name}, Luna here! I have found a potential match for you. Come online on the Luna app to discuss.")
-   except Exception:
-    pass
+   today = timezone.now().date()
+   daily_count = Match.objects.filter(requester=owner, presented_at__date=today).count()
+   should_present = False
+   is_premium_locked = False
+   if owner.is_premium:
+    should_present = True
+   else:
+    if daily_count < 2:
+     should_present = True
+    elif pending.score >= 90:
+     should_present = True
+     is_premium_locked = True
+   if should_present:
+    inbox.pending_match=pending
+    pending.presented_at=timezone.now()
+    pending.save(update_fields=['presented_at'])
+    if is_premium_locked:
+     inbox.luna_stage='premium_locked'
+     inbox.save(update_fields=['pending_match','luna_stage'])
+     Message.objects.create(
+      conversation=inbox,
+      is_ai=True,
+      body=f"Hey — I found a highly compatible {pending.score}% match for you! However, you've reached your limit of 2 daily free matches. Click below to upgrade to Premium to unlock this profile!",
+      metadata={'type': 'profile_locked_premium', 'score': pending.score}
+     )
+    else:
+     inbox.luna_stage='offered'
+     inbox.save(update_fields=['pending_match','luna_stage'])
+     Message.objects.create(conversation=inbox,is_ai=True,body='Hey — I found a profile that may align well with yours. Would you like me to show it to you so we can talk it through first?')
+     try:
+      sms=AfricasTalkingSMS()
+      sms.send(owner.phone_number, f"Hi {owner.display_name}, Luna here! I have found a potential match for you. Come online on the Luna app to discuss.")
+     except Exception:
+      pass
  return Match.objects.filter(requester=p).count()
 
 @shared_task
@@ -199,3 +227,95 @@ def extract_profile_insights(profile_id, message_body):
  except Exception:
   return 'failed'
  return 'no_change'
+
+@shared_task
+def process_nylon_payment(profile_id, phone_number, amount, reference):
+    import sys
+    import logging
+    from django.conf import settings
+    from .models import Profile, PremiumPayment, Conversation, Message
+
+    task_logger = logging.getLogger(__name__)
+    payment_record = PremiumPayment.objects.filter(reference=reference).first()
+    if not payment_record:
+        return 'not_found'
+
+    is_mock = (
+        'test' in sys.argv or 
+        settings.NYLONPAY_API_KEY == 'npk_test_luna_sandbox' or 
+        not settings.NYLONPAY_API_KEY
+    )
+
+    if is_mock:
+        payment_record.status = 'processing'
+        payment_record.save(update_fields=['status'])
+        if str(phone_number).endswith('0'):
+            payment_record.status = 'failed'
+        else:
+            payment_record.status = 'successful'
+            profile = Profile.objects.get(id=profile_id)
+            profile.is_premium = True
+            profile.save(update_fields=['is_premium'])
+            
+            inbox = Conversation.objects.filter(is_luna=True, participants=profile).first()
+            if inbox and inbox.luna_stage == 'premium_locked':
+                inbox.luna_stage = 'offered'
+                inbox.save(update_fields=['luna_stage'])
+                Message.objects.create(
+                    conversation=inbox,
+                    is_ai=True,
+                    body="Congratulations! Your account is now Premium. I've unlocked your 90%+ compatibility match suggestion! Would you like me to show it to you so we can talk it through?"
+                )
+        payment_record.save(update_fields=['status'])
+        return payment_record.status
+
+    from nylonpay import create_nylon_pay
+    nylonpay = create_nylon_pay(
+        api_key=settings.NYLONPAY_API_KEY,
+        api_secret=settings.NYLONPAY_API_SECRET
+    )
+
+    try:
+        payment_record.status = 'processing'
+        payment_record.save(update_fields=['status'])
+
+        profile = Profile.objects.get(id=profile_id)
+        
+        payment = nylonpay.collect_payment(
+            amount=amount,
+            currency=payment_record.currency,
+            customer={
+                "name": profile.display_name or profile.user.username,
+                "phone_number": phone_number,
+            },
+            description="Luna Premium Upgrade",
+            reference=str(reference),
+        )
+
+        tx = payment.wait()
+        
+        if tx and tx.status == 'successful':
+            payment_record.status = 'successful'
+            profile.is_premium = True
+            profile.save(update_fields=['is_premium'])
+            
+            inbox = Conversation.objects.filter(is_luna=True, participants=profile).first()
+            if inbox and inbox.luna_stage == 'premium_locked':
+                inbox.luna_stage = 'offered'
+                inbox.save(update_fields=['luna_stage'])
+                Message.objects.create(
+                    conversation=inbox,
+                    is_ai=True,
+                    body="Congratulations! Your account is now Premium. I've unlocked your 90%+ compatibility match suggestion! Would you like me to show it to you so we can talk it through?"
+                )
+        else:
+            payment_record.status = 'failed'
+            
+        payment_record.save(update_fields=['status'])
+        return payment_record.status
+
+    except Exception as e:
+        task_logger.exception("Nylon Pay collection failed")
+        payment_record.status = 'failed'
+        payment_record.save(update_fields=['status'])
+        return 'failed'

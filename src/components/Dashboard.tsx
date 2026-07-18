@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings, Menu } from 'lucide-react'
+import { ArrowLeft, ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings, Menu, AlertTriangle, Gift } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import api from '../lib/api'
 import { addMessage, loadDashboard, setProfile } from '../store'
@@ -193,7 +193,7 @@ function Circle({ size = 20, strokeWidth = 2, className = '' }) {
   )
 }
 
-function Chat({ conversation, onClose, onReload }: { conversation: Conversation; onClose: () => void; onReload: () => void }) {
+function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversation: Conversation; onClose: () => void; onReload: () => void; onGoToCounseling: () => void }) {
   const dispatch = useDispatch<AppDispatch>()
   const currentUserId = useSelector((s: RootState) => s.luna.profile?.user.id)
   const activeProfileId = useSelector((s: RootState) => s.luna.profile?.id)
@@ -587,6 +587,29 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
               </div>
             )}
 
+            {m.metadata?.type === 'profile_locked_premium' && (
+              <div className="mt-4 rounded-2xl border border-[#f27059]/30 bg-[#f27059]/5 p-5 text-[#f5ebe0] shadow-soft max-w-sm">
+                <div className="flex items-center gap-2 text-[#f27059] font-bold text-xs">
+                  <Lock size={14} className="animate-pulse" />
+                  <span>Premium Match Recommendation</span>
+                </div>
+                <div className="mt-2 text-lg font-bold font-display text-white">Profile Locked</div>
+                <div className="mt-2 flex items-center gap-1 bg-[#f27059]/10 border border-[#f27059]/20 rounded-full px-3 py-1 w-max text-[10px] font-bold text-[#f27059] uppercase tracking-wider">
+                  🔥 {m.metadata.score}% Compatibility
+                </div>
+                <p className="mt-3 text-xs text-[#f5ebe0]/60 leading-relaxed">
+                  Unlock detailed bios, values alignment, and direct messaging with this premium candidate by upgrading.
+                </p>
+                <button
+                  onClick={onGoToCounseling}
+                  className="mt-4 w-full rounded-full bg-[#f27059] py-2.5 text-xs font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all shadow-glow flex items-center justify-center gap-1.5"
+                >
+                  <Unlock size={12} />
+                  Upgrade to Reveal Profile
+                </button>
+              </div>
+            )}
+
             {m.metadata?.type === 'date_proposal' && (
               <div className="mt-4 rounded-2xl border border-[#f5ebe0]/10 bg-[#1e1410] p-5 text-[#f5ebe0] shadow-soft max-w-sm">
                 <div className="flex items-center gap-2 text-[#f27059] font-bold text-xs">
@@ -690,6 +713,13 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
 
         {/* Chat Messages */}
         <div className="flex-1 space-y-4 overflow-y-auto bg-[#1e1410] px-4 py-6 sm:px-6">
+          <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-3.5 flex gap-3 text-[11px] text-[#f5ebe0]/70 leading-relaxed shadow-soft">
+            <AlertTriangle size={16} className="text-yellow-500 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-yellow-500 uppercase tracking-wider block mb-1">Safety Advisory</span>
+              Be cautious of what personal information, phone numbers, or social media handles you share in chats. Luna operates with a strict meaningful connection policy, but does not monitor private off-platform interactions. Luna shall not be held liable or accountable for off-platform behaviors, financial transfers, or personal data shared between users.
+            </div>
+          </div>
           {(conversation.messages || []).map(renderMessage)}
           {(!conversation.messages || conversation.messages.length === 0) && (
             <p className="mt-16 text-center text-xs font-semibold text-[#f5ebe0]/40">This conversation has just begun.</p>
@@ -884,8 +914,7 @@ function Chat({ conversation, onClose, onReload }: { conversation: Conversation;
   )
 }
 
-function Counseling({ profile, onSaved }: { profile: Profile; onSaved: (profile: Profile) => void }) {
-  const [tab, setTab] = useState<'ai' | 'couples'>('ai')
+function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSaved: (profile: Profile) => void; tab: 'ai' | 'couples'; setTab: (t: 'ai' | 'couples') => void }) {
   const [loading, setLoading] = useState(false)
   const [cState, setCState] = useState<Conversation | null>(null)
   const [body, setBody] = useState('')
@@ -897,7 +926,73 @@ function Counseling({ profile, onSaved }: { profile: Profile; onSaved: (profile:
   const [scheduledTime, setScheduledTime] = useState('')
   const [scheduling, setScheduling] = useState(false)
   const [schedError, setSchedError] = useState('')
-  
+
+  const [checkoutPhone, setCheckoutPhone] = useState(profile.phone_number || '')
+  const [isInitiatingPayment, setIsInitiatingPayment] = useState(false)
+  const [paymentReference, setPaymentReference] = useState<string | null>(null)
+  const [paymentStatus, setPaymentStatus] = useState<string | null>(null)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [selectedProvider, setSelectedProvider] = useState<'mtn' | 'airtel'>('mtn')
+  const [premiumPrice, setPremiumPrice] = useState<{ amount_ugx: number; amount_usd: number } | null>(null)
+
+  useEffect(() => {
+    api.get('/profiles/premium-price/')
+      .then(res => setPremiumPrice(res.data))
+      .catch(err => console.error(err))
+  }, [])
+
+  useEffect(() => {
+    if (!paymentReference) return
+
+    let intervalId = setInterval(async () => {
+      try {
+        const res = await api.get(`/profiles/me/payment-status/?reference=${paymentReference}`)
+        const status = res.data.status
+        setPaymentStatus(status)
+
+        if (status === 'successful') {
+          clearInterval(intervalId)
+          setPaymentReference(null)
+          // Refresh profile details in frontend
+          const profRes = await api.get('/profiles/me/')
+          onSaved(profRes.data)
+        } else if (status === 'failed' || status === 'cancelled') {
+          clearInterval(intervalId)
+          setPaymentError(`Payment failed or cancelled (Status: ${status}).`)
+          setPaymentReference(null)
+        }
+      } catch (err) {
+        console.error(err)
+        clearInterval(intervalId)
+        setPaymentError('An error occurred while tracking payment status.')
+        setPaymentReference(null)
+      }
+    }, 3000)
+
+    return () => clearInterval(intervalId)
+  }, [paymentReference])
+
+  const initiateNylonPayment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!checkoutPhone.trim() || isInitiatingPayment) return
+    setIsInitiatingPayment(true)
+    setPaymentError(null)
+    setPaymentStatus(null)
+
+    try {
+      const res = await api.post('/profiles/me/initiate-nylon-payment/', {
+        phone_number: checkoutPhone.trim(),
+        amount: premiumPrice?.amount_ugx || 11000
+      })
+      setPaymentReference(res.data.reference)
+      setPaymentStatus(res.data.status)
+    } catch (err: any) {
+      setPaymentError(err.response?.data?.phone_number?.[0] || 'Failed to initiate payment.')
+    } finally {
+      setIsInitiatingPayment(false)
+    }
+  }
+
   const loadAI = async () => {
     setLoading(true)
     try {
@@ -968,15 +1063,6 @@ function Counseling({ profile, onSaved }: { profile: Profile; onSaved: (profile:
       setSchedError(err.response?.data?.detail || 'Failed to schedule session.')
     } finally {
       setScheduling(false)
-    }
-  }
-
-  const upgradeToPremium = async () => {
-    try {
-      const res = await api.post('/profiles/me/toggle-premium/')
-      onSaved(res.data)
-    } catch (err) {
-      console.error(err)
     }
   }
 
@@ -1071,28 +1157,154 @@ function Counseling({ profile, onSaved }: { profile: Profile; onSaved: (profile:
       ) : (
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {!profile.is_premium ? (
-            <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto my-12 bg-[#9c6644]/5 border border-[#f5ebe0]/10 rounded-[2rem] shadow-premium">
-              <div className="p-4.5 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-full mb-5">
-                <Lock size={32} />
+            paymentReference ? (
+              <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto my-12 bg-[#9c6644]/5 border border-[#f5ebe0]/10 rounded-[2rem] shadow-premium animate-pulse">
+                <div className="relative flex items-center justify-center w-16 h-16 mb-6">
+                  <div className="absolute inset-0 rounded-full border-4 border-[#f27059]/20 border-t-[#f27059] animate-spin" />
+                  <Lock size={24} className="text-[#f27059]" />
+                </div>
+                <h3 className="text-lg font-bold text-white font-display">Awaiting PIN Confirmation</h3>
+                <p className="mt-2 text-xs text-[#f5ebe0]/70 leading-relaxed">
+                  We have sent a Mobile Money payment prompt to <span className="font-semibold text-white">{checkoutPhone}</span>.
+                  Please approve the {premiumPrice ? `${premiumPrice.amount_ugx.toLocaleString()} UGX` : '11,000 UGX'} request on your phone.
+                </p>
+                <div className="mt-6 px-4 py-2 rounded-xl bg-[#291e19] border border-[#f5ebe0]/5 text-[10px] font-mono text-[#f5ebe0]/50 select-all">
+                  Ref: {paymentReference}
+                </div>
+                <div className="mt-1 text-[10px] text-[#f27059] font-semibold animate-pulse">
+                  Status: {paymentStatus || 'Initiated'}
+                </div>
+                <button
+                  onClick={() => {
+                    setPaymentReference(null)
+                    setPaymentError('Payment confirmation cancelled by user.')
+                  }}
+                  className="mt-6 text-xs font-semibold text-[#f5ebe0]/60 hover:text-white underline transition-all"
+                >
+                  Cancel & try again
+                </button>
               </div>
-              <h3 className="text-lg font-bold text-white font-display">Unlock Joint Couples Therapy</h3>
-              <p className="mt-2 text-xs text-[#f5ebe0]/70 leading-relaxed">
-                Connect and align together. Premium members can schedule live relationship counseling sessions with verified human therapists, including automatic calendar syncing and joint meeting links.
-              </p>
-              <button
-                onClick={upgradeToPremium}
-                className="mt-6 rounded-full bg-[#f27059] px-8 py-3.5 text-xs font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all shadow-glow"
-              >
-                Upgrade to Premium
-              </button>
-            </div>
+            ) : (
+              <div className="flex flex-col p-8 sm:p-10 max-w-md mx-auto my-6 bg-[#9c6644]/5 border border-[#f5ebe0]/10 rounded-[2rem] shadow-premium text-center">
+                <div className="mx-auto p-4 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-full w-fit mb-5">
+                  <Lock size={28} />
+                </div>
+                <h3 className="text-xl font-bold text-white font-display">Unlock Couples Therapy</h3>
+                <p className="mt-2 text-xs text-[#f5ebe0]/70 leading-relaxed">
+                  Premium members can schedule live counseling sessions with certified human relationship therapists, including automated meeting links.
+                </p>
+
+                {paymentError && (
+                  <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-3.5 text-xs text-red-400 text-left">
+                    {paymentError}
+                  </div>
+                )}
+
+                <form onSubmit={initiateNylonPayment} className="mt-6 space-y-5 text-left">
+                  {/* Provider Selection */}
+                  <div>
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/60 block mb-2 text-center">
+                      Select Payment Provider
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedProvider('mtn')}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all active:scale-95 ${
+                          selectedProvider === 'mtn'
+                            ? 'border-[#f27059] bg-[#f27059]/5 shadow-[0_0_15px_rgba(242,112,89,0.25)]'
+                            : 'border-[#f5ebe0]/10 bg-[#9c6644]/5 hover:border-[#f5ebe0]/20'
+                        }`}
+                      >
+                        <img src="/mtn.png" alt="MTN Mobile Money" className="h-10 w-auto object-contain rounded-lg" />
+                        <span className="text-[10px] font-bold mt-1 text-[#f5ebe0]">MTN MoMo</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedProvider('airtel')}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all active:scale-95 ${
+                          selectedProvider === 'airtel'
+                            ? 'border-[#f27059] bg-[#f27059]/5 shadow-[0_0_15px_rgba(242,112,89,0.25)]'
+                            : 'border-[#f5ebe0]/10 bg-[#9c6644]/5 hover:border-[#f5ebe0]/20'
+                        }`}
+                      >
+                        <img src="/airtel.png" alt="Airtel Money" className="h-10 w-auto object-contain rounded-lg" />
+                        <span className="text-[10px] font-bold mt-1 text-[#f5ebe0]">Airtel Money</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Phone Input */}
+                  <div>
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/60 block mb-1.5">
+                      {selectedProvider === 'mtn' ? 'MTN' : 'Airtel'} Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={checkoutPhone}
+                      onChange={e => setCheckoutPhone(e.target.value)}
+                      placeholder="e.g. +256700000000"
+                      className="premium-input w-full !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059]"
+                    />
+                  </div>
+
+                  {/* Pricing Breakdown */}
+                  <div className="flex justify-between items-center bg-[#291e19] border border-[#f5ebe0]/5 rounded-2xl p-4 mt-2">
+                    <div className="text-left">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/40 block">Total Amount</span>
+                      <span className="text-xs font-semibold text-white">Luna Premium Lifetime Upgrade</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-lg font-bold text-[#f27059] font-display block">
+                        {premiumPrice ? `${premiumPrice.amount_ugx.toLocaleString()} UGX` : '11,000 UGX'}
+                      </span>
+                      <span className="text-[10px] text-[#f5ebe0]/40 font-semibold block mt-0.5">
+                        ~ ${premiumPrice?.amount_usd || 3} USD
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isInitiatingPayment || !checkoutPhone.trim()}
+                    className="w-full rounded-full bg-[#f27059] py-3.5 text-xs font-bold text-white hover:bg-[#e05e47] active:scale-95 disabled:opacity-50 transition-all shadow-glow flex items-center justify-center gap-2"
+                  >
+                    {isInitiatingPayment ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                        Initiating...
+                      </>
+                    ) : (
+                      `Pay with ${selectedProvider === 'mtn' ? 'MTN MoMo' : 'Airtel Money'}`
+                    )}
+                  </button>
+                </form>
+              </div>
+            )
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
               <form onSubmit={scheduleSession} className="bg-[#9c6644]/5 border border-[#f5ebe0]/10 rounded-[2rem] p-6 space-y-4">
-                <h3 className="font-bold text-white text-sm flex items-center gap-1.5">
-                  <Calendar size={16} className="text-[#f27059]" />
-                  Schedule a Therapist Session
-                </h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="font-bold text-white text-sm flex items-center gap-1.5">
+                    <Calendar size={16} className="text-[#f27059]" />
+                    Schedule a Therapist Session
+                  </h3>
+                  <button 
+                    type="button" 
+                    onClick={async () => {
+                      try {
+                        const res = await api.post('/profiles/me/toggle-premium-test/')
+                        onSaved(res.data)
+                      } catch (e) {
+                        console.error(e)
+                      }
+                    }} 
+                    className="text-[10px] font-bold text-yellow-500 hover:underline select-none"
+                  >
+                    🔧 Reset to Free for testing
+                  </button>
+                </div>
                 {schedError && (
                   <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3.5 text-xs text-red-400">
                     {schedError}
@@ -1183,20 +1395,42 @@ function Counseling({ profile, onSaved }: { profile: Profile; onSaved: (profile:
   )
 }
 
-function Preferences({ profile, onSaved }: { profile: Profile; onSaved: (profile: Profile) => void }) {
+function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; onSaved: (profile: Profile) => void; navigateToPage: (page: 'conversations' | 'preferences' | 'counseling') => void }) {
   const [form, setForm] = useState({
     ...profile,
+    username: profile.user.username,
+    first_name: profile.user.first_name || '',
+    email: profile.user.email || '',
     values: profile.values.join(', '),
     interests: profile.interests.join(', '),
   })
   const [saved, setSaved] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [password, setPassword] = useState('')
+  const [deleteError, setDeleteError] = useState('')
+  const [deleting, setDeleting] = useState(false)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setForm(prev => ({ ...prev, profile_picture: reader.result as string }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const save = async () => {
     setBusy(true)
     try {
       const { data } = await api.patch('/profiles/me/', {
         ...form,
+        user: {
+          username: form.username,
+          first_name: form.first_name,
+          email: form.email,
+        },
         values: String(form.values).split(',').map(x => x.trim()).filter(Boolean),
         interests: String(form.interests).split(',').map(x => x.trim()).filter(Boolean)
       })
@@ -1210,6 +1444,41 @@ function Preferences({ profile, onSaved }: { profile: Profile; onSaved: (profile
     }
   }
 
+  const handleDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!profile.is_premium) {
+      setDeleteError('Account deletion is a Premium feature. Please subscribe to delete.')
+      return
+    }
+    if (!password) {
+      setDeleteError('Confirm password to delete account.')
+      return
+    }
+    if (!window.confirm('WARNING: Are you absolutely sure you want to permanently delete your account? This action is irreversible.')) {
+      return
+    }
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      await api.delete('/profiles/me/account/', { data: { password } })
+      api.post('/auth/logout/').catch(() => {})
+      window.location.href = '/'
+    } catch (err: any) {
+      setDeleteError(err.response?.data?.password?.[0] || err.response?.data?.detail || 'An error occurred during account deletion.')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const togglePremiumTest = async () => {
+    try {
+      const res = await api.post('/profiles/me/toggle-premium-test/')
+      onSaved(res.data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const labelStyle = 'text-xs font-bold uppercase tracking-wider text-[#f5ebe0]/80 block mb-1.5'
 
   return (
@@ -1218,13 +1487,72 @@ function Preferences({ profile, onSaved }: { profile: Profile; onSaved: (profile
       <h1 className="mt-2 text-3xl font-bold font-display text-white">Preferences</h1>
       
       <div className="bg-[#1e1410] border border-[#f5ebe0]/10 mt-8 rounded-[2rem] p-6 sm:p-8 space-y-6 text-[#f5ebe0]">
+        
+        {/* Profile Picture */}
         <div>
-          <label className={labelStyle}>Display name</label>
-          <input
-            className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
-            value={form.display_name}
-            onChange={e => setForm({ ...form, display_name: e.target.value })}
-          />
+          <label className={labelStyle}>Profile Picture</label>
+          <div className="flex items-center gap-4 mt-2">
+            {form.profile_picture ? (
+              <img src={form.profile_picture} className="h-16 w-16 rounded-full object-cover border border-[#f5ebe0]/20" />
+            ) : (
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-[#8ea869] text-[#1e1410] font-bold text-xl uppercase shrink-0">
+                {((form.display_name || form.username).substring(0, 2))}
+              </div>
+            )}
+            <label className="cursor-pointer rounded-full bg-[#f5ebe0]/10 border border-[#f5ebe0]/20 px-4 py-2 text-xs font-bold text-white hover:bg-[#f5ebe0]/20 active:scale-95 transition-all">
+              Upload Image
+              <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+            </label>
+            {form.profile_picture && (
+              <button
+                type="button"
+                onClick={() => setForm(prev => ({ ...prev, profile_picture: '' }))}
+                className="text-xs text-[#f27059] font-bold hover:underline"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Name Fields */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelStyle}>Display name</label>
+            <input
+              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              value={form.display_name}
+              onChange={e => setForm({ ...form, display_name: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className={labelStyle}>First Name</label>
+            <input
+              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              value={form.first_name}
+              onChange={e => setForm({ ...form, first_name: e.target.value })}
+            />
+          </div>
+        </div>
+
+        {/* Contacts & Credentials */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelStyle}>Username</label>
+            <input
+              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              value={form.username}
+              onChange={e => setForm({ ...form, username: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className={labelStyle}>Email Address (Contact)</label>
+            <input
+              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })}
+            />
+          </div>
         </div>
 
         <div>
@@ -1288,9 +1616,31 @@ function Preferences({ profile, onSaved }: { profile: Profile; onSaved: (profile
         <div className="pt-2">
           <label className={labelStyle}>Discoverability & Alerts</label>
           <div className="space-y-3 mt-3">
+            {profile.is_premium ? (
+              <div className="flex items-center justify-between rounded-2xl border border-[#f27059]/30 bg-[#f27059]/10 p-4.5 text-white shadow-premium">
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-[#f27059]">Luna Premium</div>
+                  <div className="text-[11px] text-[#f5ebe0]/70 mt-0.5">Your subscription is active. Enjoy all premium benefits!</div>
+                  <button type="button" onClick={togglePremiumTest} className="mt-2 text-[10px] text-yellow-400 font-bold hover:underline select-none block text-left">
+                    🔧 Toggle Premium status for testing (Dev Mode)
+                  </button>
+                </div>
+                <span className="rounded-full bg-[#f27059] px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">Active</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between rounded-2xl border border-[#f5ebe0]/10 bg-[#9c6644]/5 p-4.5 text-[#f5ebe0]/70">
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-[#f5ebe0]/50">Luna Premium</div>
+                  <div className="text-[11px] text-[#f5ebe0]/50 mt-0.5">Upgrade in the Counseling tab to unlock all advanced features.</div>
+                  <button type="button" onClick={togglePremiumTest} className="mt-2 text-[10px] text-yellow-500 font-bold hover:underline select-none block text-left">
+                    🔧 Toggle Premium status for testing (Dev Mode)
+                  </button>
+                </div>
+                <span className="rounded-full bg-[#f5ebe0]/10 px-3 py-1 text-[10px] font-bold text-[#f5ebe0]/40 uppercase tracking-wider">Inactive</span>
+              </div>
+            )}
             {([
               ['is_discoverable', 'Allow Luna to look for introductions', 'Let Gemini match your profile with other verified users.'],
-              ['is_premium', 'Luna Premium Subscription', 'Unlock couples therapy with certified human counselors.'],
               ['ai_profile_consent', 'Allow AI profile analysis', 'Use Gemini to build compatibility score metrics.'],
               ['sms_match_notifications', 'SMS connection notifications', 'Send quick text alerts when you get introduced.'],
               ['sms_unread_reminders', 'SMS unread reminders', 'Alert your phone if you have unread direct messages.'],
@@ -1322,10 +1672,57 @@ function Preferences({ profile, onSaved }: { profile: Profile; onSaved: (profile
         <button
           onClick={save}
           disabled={busy}
-          className="mt-4 w-full rounded-full bg-[#f27059] px-6 py-3.5 font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all disabled:opacity-50"
+          className="mt-4 w-full rounded-full bg-[#f27059] px-6 py-3.5 font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all disabled:opacity-50 shadow-glow"
         >
           {busy ? 'Saving...' : saved ? '✓ Changes Saved' : 'Save changes'}
         </button>
+
+        {/* Delete Account section */}
+        <div className="mt-8 pt-8 border-t border-[#f5ebe0]/10">
+          <label className="text-xs font-bold uppercase tracking-wider text-red-500 block mb-1.5">Danger Zone</label>
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 text-[#f5ebe0]">
+            <h4 className="text-sm font-bold text-white">Permanently Delete Account</h4>
+            <p className="text-xs text-[#f5ebe0]/70 mt-1 leading-relaxed">
+              This will instantly erase your profile summaries, conversations, matches, and details. This cannot be undone.
+            </p>
+            
+            {profile.is_premium ? (
+              <form onSubmit={handleDeleteAccount} className="mt-4 space-y-3">
+                {deleteError && <div className="text-xs text-red-400 font-bold">{deleteError}</div>}
+                <div>
+                  <input
+                    type="password"
+                    placeholder="Enter password to confirm deletion"
+                    className="premium-input !bg-[#291e19] !border-red-500/20 !text-[#f5ebe0] focus:!border-red-500 focus:!ring-red-500/20 text-xs py-2"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={deleting}
+                  className="rounded-full bg-red-500 hover:bg-red-600 px-5 py-2 text-xs font-bold text-white transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting...' : 'Delete Account'}
+                </button>
+              </form>
+            ) : (
+              <div className="mt-4 flex flex-col gap-3">
+                <div className="text-xs text-yellow-500/90 font-semibold flex items-center gap-1">
+                  <span>🔒 Account deletion is a Premium feature.</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigateToPage('counseling')}
+                  className="w-max rounded-full bg-[#f27059] px-5 py-2 text-xs font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all shadow-glow flex items-center gap-1"
+                >
+                  <Unlock size={11} /> Upgrade to Delete Account
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
     </section>
   )
@@ -1335,6 +1732,8 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
   const dispatch = useDispatch<AppDispatch>()
   const state = useSelector((s: RootState) => s.luna)
   const [inboxTab, setInboxTab] = useState<'chats' | 'offers'>('chats')
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
+  const [counselingTab, setCounselingTab] = useState<'ai' | 'couples'>('ai')
 
   const getInitialStateFromUrl = () => {
     const p = window.location.pathname
@@ -1355,10 +1754,13 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
   const page = urlState.page
   const chatId = urlState.chatId
 
-  const navigateToPage = (newPage: 'conversations' | 'preferences' | 'counseling') => {
+  const navigateToPage = (newPage: 'conversations' | 'preferences' | 'counseling', subTab?: 'ai' | 'couples') => {
     const path = newPage === 'preferences' ? '/preferences' : (newPage === 'counseling' ? '/counseling' : '/dashboard')
     window.history.pushState({}, '', path)
     setUrlState({ page: newPage, chatId: null })
+    if (newPage === 'counseling' && subTab) {
+      setCounselingTab(subTab)
+    }
   }
 
   const navigateToChat = (id: number | null) => {
@@ -1554,12 +1956,52 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                   </>
                 )}
               </div>
+
+              {/* Profile Card settings widget */}
+              <div className="mt-6 border-t border-[#f5ebe0]/10 pt-4">
+                <div 
+                  onClick={() => navigateToPage('preferences')}
+                  className="flex items-center gap-3 p-3 rounded-2xl bg-[#1e1410]/50 border border-[#f5ebe0]/10 hover:bg-[#1e1410] hover:border-[#f27059]/30 cursor-pointer transition-all active:scale-[0.98]"
+                >
+                  {profile.profile_picture ? (
+                    <img 
+                      src={profile.profile_picture} 
+                      alt={profile.display_name || profile.user.username} 
+                      className="h-10 w-10 rounded-full object-cover border border-[#f5ebe0]/20" 
+                    />
+                  ) : (
+                    <div className="grid h-10 w-10 place-items-center rounded-full bg-[#8ea869] text-[#1e1410] font-bold text-sm uppercase border border-[#8ea869]/20 shrink-0">
+                      {((profile.display_name || profile.user.username).substring(0, 2))}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-white text-sm truncate">{profile.display_name || profile.user.username}</div>
+                    <div className="text-[11px] font-semibold text-[#f5ebe0]/40 mt-0.5">
+                      {profile.is_premium ? (
+                        <span className="text-[#eab308] font-bold uppercase tracking-wider">Premium</span>
+                      ) : (
+                        <span>Free Tier</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {!profile.is_premium && (
+                  <button
+                    onClick={() => navigateToPage('counseling')}
+                    className="mt-3 w-full flex items-center justify-center gap-1.5 rounded-full border border-[#f5ebe0]/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold text-[#f5ebe0] py-2.5 transition-all shadow-soft active:scale-[0.98]"
+                  >
+                    <Gift size={12} className="text-[#f27059]" />
+                    Claim offer
+                  </button>
+                )}
+              </div>
+
             </section>
 
             {/* Conversation Window/Placeholder Pane */}
             <section className={`md:col-span-7 lg:col-span-8 ${chatId === null ? 'hidden md:flex md:items-center md:justify-center' : 'flex flex-col'}`}>
               {conversation ? (
-                <Chat conversation={conversation} onClose={() => navigateToChat(null)} onReload={() => dispatch(loadDashboard())} />
+                <Chat conversation={conversation} onClose={() => navigateToChat(null)} onReload={() => dispatch(loadDashboard())} onGoToCounseling={() => navigateToPage('counseling', 'couples')} />
               ) : (
                 <div className="hidden md:flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] border border-dashed border-cocoa-900/10 bg-white/20 h-[calc(100vh-210px)]">
                   <div className="p-4 bg-terracotta-50 rounded-full border border-terracotta-200/50 text-terracotta-500 mb-4 animate-bounce">
@@ -1575,11 +2017,100 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
 
           </div>
         ) : page === 'preferences' ? (
-          <Preferences profile={profile} onSaved={p => dispatch(setProfile(p))} />
+          <Preferences profile={profile} onSaved={p => dispatch(setProfile(p))} navigateToPage={navigateToPage} />
         ) : (
-          <Counseling profile={profile} onSaved={p => dispatch(setProfile(p))} />
+          <Counseling profile={profile} onSaved={p => dispatch(setProfile(p))} tab={counselingTab} setTab={setCounselingTab} />
         )}
       </main>
+
+      <footer className="w-full border-t border-[#f5ebe0]/10 py-6 text-center text-xs text-[#f5ebe0]/40">
+        <div className="mx-auto max-w-6xl px-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>© {new Date().getFullYear()} Luna. All rights reserved.</p>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setShowPrivacyModal(true)}
+              className="hover:text-white transition-all underline decoration-dotted"
+            >
+              Privacy Policy & Safety Disclaimer
+            </button>
+          </div>
+        </div>
+      </footer>
+
+      {showPrivacyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="w-full max-w-2xl bg-[#1e1410] border border-[#f5ebe0]/10 rounded-[2rem] shadow-soft overflow-hidden flex flex-col max-h-[85vh]">
+            <header className="px-6 py-5 border-b border-[#f5ebe0]/10 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-white font-bold font-display">
+                <Shield className="text-[#f27059]" size={20} />
+                <span>Luna Privacy Policy & Safety Disclaimer</span>
+              </div>
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="rounded-full p-1.5 hover:bg-[#f5ebe0]/10 text-[#f5ebe0]/70 hover:text-white transition-all"
+              >
+                <X size={18} />
+              </button>
+            </header>
+            
+            <div className="p-6 overflow-y-auto space-y-5 text-sm text-[#f5ebe0]/80 leading-relaxed">
+              <section className="space-y-2">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#f27059]">
+                  <AlertTriangle size={13} /> Chat Safety Disclaimer
+                </h4>
+                <p>
+                  Luna acts as an AI matchmaker to facilitate initial introductions and connection conversations. Luna has no control over, and does not accept responsibility for, the actions, conduct, or behavior of any users off-platform. 
+                </p>
+                <p className="font-semibold text-white/95">
+                  Be extremely cautious when sharing sensitive personal information, credentials, location, or payment details. Never send money, complete commercial transactions, or offer services in chats.
+                </p>
+              </section>
+
+              <section className="space-y-2">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#f27059]">
+                  <Shield size={13} /> Strict Connection Guidelines
+                </h4>
+                <p>
+                  This platform is strictly for meaningful and authentic human connections. Begging for financial help, soliciting cash/momo transfers, commercial sales, spamming, and prostitution are strictly prohibited. 
+                </p>
+                <p>
+                  Accounts violating these guidelines will be flagged by automated system filters and immediately suspended from all platform operations.
+                </p>
+              </section>
+
+              <section className="space-y-2">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#f27059]">
+                  <Users size={13} /> Data Collection & Handling
+                </h4>
+                <p>
+                  By consenting to onboard with Luna, your bio, lifestyle preferences, deal-breakers, and interests are safely analyzed to recommend matching profiles. 
+                </p>
+                <p>
+                  Your counseling conversations with Luna remain confidential and encrypted. We do not sell or share private chat records or personal identification details with third-party networks.
+                </p>
+              </section>
+
+              <section className="space-y-2">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#f27059]">
+                  <Lock size={13} /> User Rights & Account Deletion
+                </h4>
+                <p>
+                  You hold full rights over your profile data. At any time, you can edit your matching discoverability or request permanent account deletion via the Preferences panel. Deletion permanently erases your profile, messages, and matches from our records.
+                </p>
+              </section>
+            </div>
+
+            <footer className="px-6 py-4 border-t border-[#f5ebe0]/10 flex justify-end bg-cocoa-900/10">
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="rounded-full bg-[#f27059] px-6 py-2.5 text-xs font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all shadow-glow"
+              >
+                Understand & Close
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

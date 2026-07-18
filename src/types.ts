@@ -37,6 +37,7 @@ export type Profile = {
   gender: 'male' | 'female' | 'other';
   gender_preference: 'male' | 'female' | 'both';
   is_premium: boolean;
+  profile_picture?: string;
 };
 export type Match = {
   id: number;

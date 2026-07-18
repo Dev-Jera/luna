@@ -70,3 +70,8 @@ AFRICASTALKING_SMS_URL=os.getenv('AFRICASTALKING_SMS_URL','https://api.sandbox.a
 AFRICASTALKING_TIMEOUT=int(os.getenv('AFRICASTALKING_TIMEOUT','15'))
 TERMS_VERSION=os.getenv('TERMS_VERSION','2026-07')
 LOGGING={'version':1,'disable_existing_loggers':False,'formatters':{'json':{'()':'core.logging.JsonFormatter'}},'handlers':{'console':{'class':'logging.StreamHandler','formatter':'json'}},'loggers':{'django.request':{'handlers':['console'],'level':os.getenv('LOG_LEVEL','INFO'),'propagate':False},'core':{'handlers':['console'],'level':os.getenv('LOG_LEVEL','INFO'),'propagate':False}}}
+NYLONPAY_API_KEY = os.getenv('NYLON_PAY_KEY', os.getenv('NYLONPAY_API_KEY', ''))
+NYLONPAY_API_SECRET = os.getenv('NYLON_API_SECRETE', os.getenv('NYLONPAY_API_SECRET', ''))
+NYLON_WEB_HOOK_SECRETE = os.getenv('NYLON_WEB_HOOK_SECRETE', '')
+
+

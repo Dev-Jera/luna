@@ -75,6 +75,16 @@ class LunaJourneyTests(APITestCase):
   response=self.client.post(f'/api/conversations/{conversation.id}/ai-consent/',{'enabled':False},format='json');self.assertEqual(response.status_code,200);draft.refresh_from_db();self.assertEqual(draft.status,'discarded')
  def test_export_and_password_protected_deletion(self):
   exported=self.client.get('/api/profiles/me/export/');self.assertEqual(exported.status_code,200);self.assertIn('profile',exported.data)
+  
+  # Free user deletion check (should fail with 403)
+  rejected_free=self.client.delete('/api/profiles/me/account/',{'password':'wrong'},format='json')
+  self.assertEqual(rejected_free.status_code, 403)
+  
+  # Upgrade user to premium and test deletion checks
+  p = self.user.profile
+  p.is_premium = True
+  p.save(update_fields=['is_premium'])
+  
   rejected=self.client.delete('/api/profiles/me/account/',{'password':'wrong'},format='json');self.assertEqual(rejected.status_code,400)
  def test_login_uses_httponly_cookie_session(self):
   self.client.force_authenticate(user=None);response=self.client.post('/api/auth/token/',{'username':'amani','password':'strongpass123'},format='json');self.assertEqual(response.status_code,200);self.assertTrue(response.cookies['luna_access']['httponly']);self.assertTrue(response.cookies['luna_refresh']['httponly']);self.assertNotIn('access',response.data)
@@ -82,6 +92,9 @@ class LunaJourneyTests(APITestCase):
  def test_message_creates_notification_unread_state_and_local_moderation(self):
   conversation=Conversation.objects.create(title='Amani & Amara');conversation.participants.add(self.user.profile,self.other.profile)
   sent=self.client.post(f'/api/conversations/{conversation.id}/messages/',{'body':'I will hurt you'},format='json');self.assertEqual(sent.status_code,201);self.assertTrue(Notification.objects.filter(profile=self.other.profile).exists());self.assertIn('threat',ModerationEvent.objects.get(message_id=sent.data['id']).categories)
+  self.user.refresh_from_db()
+  self.assertFalse(self.user.is_active)
+  self.assertTrue(Report.objects.filter(reported=self.user.profile).exists())
   self.client.force_authenticate(self.other);listing=self.client.get('/api/conversations/')
   conversation_data = next(c for c in listing.data['results'] if c['id'] == conversation.id)
   self.assertEqual(conversation_data['unread_count'], 1)
@@ -341,10 +354,13 @@ class LunaJourneyTests(APITestCase):
   }, format='json')
   self.assertEqual(resp.status_code, 403)
 
-  # Upgrade to premium
-  resp_upgrade = self.client.post('/api/profiles/me/toggle-premium/')
+  # Upgrade to premium via Nylon Pay payment mock
+  resp_upgrade = self.client.post('/api/profiles/me/initiate-nylon-payment/', {
+   'phone_number': '+256700000001'
+  }, format='json')
   self.assertEqual(resp_upgrade.status_code, 200)
-  self.assertTrue(resp_upgrade.data['is_premium'])
+  self.user.profile.refresh_from_db()
+  self.assertTrue(self.user.profile.is_premium)
 
   # Schedule again as premium user
   resp_premium = self.client.post('/api/counseling/schedule/', {
@@ -381,3 +397,57 @@ class LunaJourneyTests(APITestCase):
   self.assertEqual(inbox.luna_stage, 'welcome')
   self.assertIsNone(inbox.pending_match)
   self.assertIn("sent amara an sms notification", resp_nudge.data['luna_reply']['body'].lower())
+
+ def test_nylon_payment_flow(self):
+  # 1. Test initiate payment requires phone number
+  resp = self.client.post('/api/profiles/me/initiate-nylon-payment/', {}, format='json')
+  self.assertEqual(resp.status_code, 400)
+
+  # 2. Test successful payment initiation (mock ends with non-0)
+  resp = self.client.post('/api/profiles/me/initiate-nylon-payment/', {'phone_number': '+256700123456'}, format='json')
+  self.assertEqual(resp.status_code, 200)
+  ref_success = resp.data['reference']
+  self.assertIsNotNone(ref_success)
+
+  # Check status is successful (since it runs synchronously in tests)
+  resp_status = self.client.get(f'/api/profiles/me/payment-status/?reference={ref_success}')
+  self.assertEqual(resp_status.status_code, 200)
+  self.assertEqual(resp_status.data['status'], 'successful')
+
+  # 3. Test failed payment initiation (mock ends with 0)
+  resp = self.client.post('/api/profiles/me/initiate-nylon-payment/', {'phone_number': '+256700123450'}, format='json')
+  self.assertEqual(resp.status_code, 200)
+  ref_failed = resp.data['reference']
+
+  # Check status is failed
+  resp_status_failed = self.client.get(f'/api/profiles/me/payment-status/?reference={ref_failed}')
+  self.assertEqual(resp_status_failed.status_code, 200)
+  self.assertEqual(resp_status_failed.data['status'], 'failed')
+
+ def test_auto_moderation_suspension(self):
+  # Create a clean conversation
+  conversation = Conversation.objects.create(title='Amani & Amara')
+  conversation.participants.add(self.user.profile, self.other.profile)
+
+  # 1. Test begging words triggers suspension and report
+  resp = self.client.post(f'/api/conversations/{conversation.id}/messages/', {'body': 'please send momo now'}, format='json')
+  self.assertEqual(resp.status_code, 201)
+
+  # Check that the sender is suspended
+  self.user.refresh_from_db()
+  self.assertFalse(self.user.is_active)
+
+  # Check that a system moderation report has been registered
+  self.assertTrue(Report.objects.filter(reported=self.user.profile, details__contains='begging').exists())
+
+  # 2. Test prostitution words triggers suspension on other user
+  self.client.force_authenticate(self.other)
+  resp = self.client.post(f'/api/conversations/{conversation.id}/messages/', {'body': 'what is hookup price per hour?'}, format='json')
+  self.assertEqual(resp.status_code, 201)
+
+  # Check that the other user is suspended
+  self.other.refresh_from_db()
+  self.assertFalse(self.other.is_active)
+  self.assertTrue(Report.objects.filter(reported=self.other.profile, details__contains='prostitution').exists())
+
+

@@ -8,10 +8,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle,UserRateThrottle
 from rest_framework.views import APIView
-from .models import AuditEvent,Block,Consent,Conversation,ConversationReadState,IntroductionDraft,Match,MatchFeedback,Message,Notification,Profile,Report,ModerationEvent,DateMeeting,CounselingSession
+from .models import AuditEvent,Block,Consent,Conversation,ConversationReadState,IntroductionDraft,Match,MatchFeedback,Message,Notification,Profile,Report,ModerationEvent,DateMeeting,CounselingSession,PremiumPayment
 from .moderation import inspect_message
 from .serializers import ConversationSerializer,IntroductionDraftSerializer,MatchSerializer,MessageSerializer,NotificationSerializer,ProfileSerializer,RegisterSerializer,CounselingSessionSerializer
-from .tasks import analyze_profile,enrich_match,generate_introduction,refresh_matches,generate_welcome_message,extract_profile_insights
+from .tasks import analyze_profile,enrich_match,generate_introduction,refresh_matches,generate_welcome_message,extract_profile_insights,process_nylon_payment
 from .task_dispatch import dispatch
 from .sms import AfricasTalkingSMS,consume_code,send_code
 from .ai import GeminiProvider
@@ -56,6 +56,14 @@ class ProfileViewSet(viewsets.GenericViewSet):
  def get_queryset(self):return type(self.request.user.profile).objects.filter(user=self.request.user)
  @action(detail=False,methods=['get','patch'],url_path='me')
  def me(self,request):
+  if request.method=='PATCH':
+   user_data = request.data.get('user')
+   if user_data and isinstance(user_data, dict):
+    u = request.user
+    if 'first_name' in user_data: u.first_name = user_data['first_name']
+    if 'email' in user_data: u.email = user_data['email']
+    if 'username' in user_data: u.username = user_data['username']
+    u.save()
   serializer=self.get_serializer(request.user.profile,data=request.data,partial=True) if request.method=='PATCH' else self.get_serializer(request.user.profile)
   if request.method=='PATCH':
    previous_consent=request.user.profile.ai_profile_consent;safety_fields={'is_discoverable','sms_match_notifications','sms_unread_reminders','sms_safety_alerts'};settings_changed=bool(safety_fields.intersection(request.data));serializer.is_valid(raise_exception=True);profile=serializer.save();dispatch(refresh_matches,profile.id)
@@ -76,14 +84,41 @@ class ProfileViewSet(viewsets.GenericViewSet):
   return Response({'exported_at':__import__('django.utils.timezone',fromlist=['now']).now(),'account':{'username':request.user.username,'email':request.user.email,'date_joined':request.user.date_joined},'profile':self.get_serializer(profile).data,'conversations':[{'id':c.id,'title':c.title,'participants':[p.display_name for p in c.participants.all()],'messages':[{'sender':m.sender.username if m.sender else None,'body':m.body,'created_at':m.created_at} for m in c.messages.all()]} for c in conversations]})
  @action(detail=False,methods=['delete'],url_path='me/account')
  def delete_account(self,request):
+  profile = request.user.profile
+  if not profile.is_premium:
+   return Response({'detail':'Account deletion is a Premium feature. Please subscribe to delete your account.'},status=status.HTTP_403_FORBIDDEN)
   if not request.user.check_password(str(request.data.get('password',''))):return Response({'password':['Password confirmation is incorrect.']},status=status.HTTP_400_BAD_REQUEST)
   request.user.delete();return Response(status=status.HTTP_204_NO_CONTENT)
- @action(detail=False,methods=['post'],url_path='me/toggle-premium')
- def toggle_premium(self,request):
+ @action(detail=False,methods=['post'],url_path='me/initiate-nylon-payment')
+ def initiate_nylon_payment(self,request):
+  profile=request.user.profile
+  phone_number=request.data.get('phone_number')
+  if not phone_number:
+   return Response({'phone_number':['Phone number is required.']},status=status.HTTP_400_BAD_REQUEST)
+  amount=11000
+  import uuid
+  reference=uuid.uuid4()
+  payment=PremiumPayment.objects.create(profile=profile,reference=reference,amount=amount)
+  dispatch(process_nylon_payment,profile.id,phone_number,amount,reference)
+  return Response({'reference':str(reference),'status':payment.status,'amount':amount})
+ @action(detail=False,methods=['get'],url_path='premium-price')
+ def premium_price(self,request):
+  return Response({'amount_ugx':11000,'amount_usd':3})
+ @action(detail=False,methods=['post'],url_path='me/toggle-premium-test')
+ def toggle_premium_test(self,request):
   profile=request.user.profile
   profile.is_premium = not profile.is_premium
   profile.save(update_fields=['is_premium'])
   return Response(self.get_serializer(profile).data)
+ @action(detail=False,methods=['get'],url_path='me/payment-status')
+ def payment_status(self,request):
+  reference=request.query_params.get('reference')
+  if not reference:
+   return Response({'reference':['Reference query parameter is required.']},status=status.HTTP_400_BAD_REQUEST)
+  payment=PremiumPayment.objects.filter(reference=reference,profile=request.user.profile).first()
+  if not payment:
+   return Response({'detail':'Payment not found.'},status=status.HTTP_404_NOT_FOUND)
+  return Response({'reference':str(payment.reference),'status':payment.status,'amount':payment.amount,'created_at':payment.created_at,'updated_at':payment.updated_at})
  @action(detail=False,methods=['post','delete'],url_path='safety/block',throttle_classes=[ScopedRateThrottle])
  def block(self,request):
   self.throttle_scope='safety';target=Profile.objects.filter(pk=request.data.get('profile_id')).exclude(pk=request.user.profile.pk).first()
@@ -265,6 +300,12 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
    context={'state':'relationship_counseling','instruction':'Speak as an empathetic relationship therapist. Offer support and ask clarifying questions about their concerns.'}
    return self._gemini_message(c,profile,body,context,system_prompt=LUNA_COUNSELING_SYSTEM)
   text=body.lower().strip();yes=any(word in text for word in ['yes','yeah','sure','show','okay','ok','please']);no=any(word in text for word in ['no','not interested','pass','skip']);match=c.pending_match
+  if c.luna_stage == 'premium_locked':
+   return Message.objects.create(
+    conversation=c,
+    is_ai=True,
+    body="This match is locked because you have reached your daily limit of 2 free matches. Please upgrade to Premium in the Counseling tab to unlock this profile!"
+   )
   if c.luna_stage == 'waiting_nudge' and match:
    candidate = match.candidate
    if yes:

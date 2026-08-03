@@ -191,24 +191,36 @@ class LunaJourneyTests(APITestCase):
    self.assertTrue(Report.objects.filter(reported=self.user.profile, reason='harassment').exists())
    self.assertIn('removed the other user', resp2.data['luna_reply']['body'])
  def test_contact_sharing_permission_and_masking(self):
-  c=Conversation.objects.create(title='Amani & Amara',is_luna=False)
-  c.participants.add(self.user.profile,self.other.profile)
-  # 1. Masking active when blocked
-  resp1 = self.client.post(f'/api/conversations/{c.id}/messages/', {'body': 'Call me at +254712345678 or email pilot@example.com'}, format='json')
-  self.assertEqual(resp1.status_code, 201)
-  self.assertIn('[REDACTED CONTACT DETAILS]', resp1.data['body'])
-  self.assertNotIn('+254712345678', resp1.data['body'])
-  
-  # 2. Permit contact details
-  permit_resp = self.client.post(f'/api/conversations/{c.id}/permit-contact/')
-  self.assertEqual(permit_resp.status_code, 200)
-  c.refresh_from_db()
-  self.assertTrue(c.is_contact_sharing_allowed)
-  
-  # 3. Masking inactive after consent
-  resp2 = self.client.post(f'/api/conversations/{c.id}/messages/', {'body': 'Call me at +254712345678'}, format='json')
-  self.assertEqual(resp2.status_code, 201)
-  self.assertIn('+254712345678', resp2.data['body'])
+   c=Conversation.objects.create(title='Amani & Amara',is_luna=False)
+   c.participants.add(self.user.profile,self.other.profile)
+   # 1. Masking active when blocked
+   resp1 = self.client.post(f'/api/conversations/{c.id}/messages/', {'body': 'Call me at +254712345678 or email pilot@example.com'}, format='json')
+   self.assertEqual(resp1.status_code, 201)
+   self.assertIn('[REDACTED CONTACT DETAILS]', resp1.data['body'])
+   self.assertNotIn('+254712345678', resp1.data['body'])
+   
+   # 2. First user consents — should NOT unlock yet (mutual consent required)
+   permit_resp1 = self.client.post(f'/api/conversations/{c.id}/permit-contact/')
+   self.assertEqual(permit_resp1.status_code, 200)
+   self.assertFalse(permit_resp1.data['is_contact_sharing_allowed'])
+   self.assertTrue(permit_resp1.data['waiting_for_other'])
+   c.refresh_from_db()
+   self.assertFalse(c.is_contact_sharing_allowed)
+   
+   # 3. Second user consents — should NOW unlock
+   self.client.force_authenticate(self.other)
+   permit_resp2 = self.client.post(f'/api/conversations/{c.id}/permit-contact/')
+   self.assertEqual(permit_resp2.status_code, 200)
+   self.assertTrue(permit_resp2.data['is_contact_sharing_allowed'])
+   self.assertFalse(permit_resp2.data['waiting_for_other'])
+   c.refresh_from_db()
+   self.assertTrue(c.is_contact_sharing_allowed)
+   
+   # 4. Masking inactive after mutual consent
+   self.client.force_authenticate(self.user)
+   resp2 = self.client.post(f'/api/conversations/{c.id}/messages/', {'body': 'Call me at +254712345678'}, format='json')
+   self.assertEqual(resp2.status_code, 201)
+   self.assertIn('+254712345678', resp2.data['body'])
   
  def test_venue_suggestion_and_date_scheduling(self):
   c=Conversation.objects.create(title='Amani & Amara',is_luna=False)
@@ -371,7 +383,7 @@ class LunaJourneyTests(APITestCase):
   }, format='json')
   self.assertEqual(resp_premium.status_code, 201)
   self.assertIn('meeting_link', resp_premium.data)
-  self.assertTrue(resp_premium.data['meeting_link'].startswith('https://meet.google.com/'))
+  self.assertTrue(resp_premium.data['meeting_link'].startswith('https://meet.jit.si/luna-'))
 
   # List sessions
   resp_list = self.client.get('/api/counseling/sessions/')
@@ -512,3 +524,35 @@ class LunaJourneyTests(APITestCase):
   self.assertIn('summaries', conversation.luna_board)
   self.assertIn(str(self.user.profile.id), conversation.luna_board['summaries'])
   self.assertIn(str(self.other.profile.id), conversation.luna_board['summaries'])
+
+ def test_nylon_webhook_updates_payment(self):
+  import uuid
+  from .models import PremiumPayment
+  profile=self.user.profile
+  reference=uuid.uuid4()
+  PremiumPayment.objects.create(profile=profile,reference=reference,amount=11000,status='processing')
+  self.client.force_authenticate(user=None)
+  resp=self.client.post('/api/webhooks/nylonpay/',{'reference':str(reference),'status':'successful'},format='json')
+  self.assertEqual(resp.status_code,200)
+  profile.refresh_from_db()
+  self.assertTrue(profile.is_premium)
+  payment=PremiumPayment.objects.get(reference=reference)
+  self.assertEqual(payment.status,'successful')
+
+ def test_nylon_webhook_ignores_already_finalised(self):
+  import uuid
+  from .models import PremiumPayment
+  profile=self.user.profile
+  reference=uuid.uuid4()
+  PremiumPayment.objects.create(profile=profile,reference=reference,amount=11000,status='successful')
+  self.client.force_authenticate(user=None)
+  resp=self.client.post('/api/webhooks/nylonpay/',{'reference':str(reference),'status':'failed'},format='json')
+  self.assertEqual(resp.status_code,200)
+  payment=PremiumPayment.objects.get(reference=reference)
+  self.assertEqual(payment.status,'successful')  # unchanged
+
+ def test_permit_contact_blocked_on_luna_conversations(self):
+  c=Conversation.objects.create(title='Luna',is_luna=True)
+  c.participants.add(self.user.profile)
+  resp=self.client.post(f'/api/conversations/{c.id}/permit-contact/')
+  self.assertEqual(resp.status_code,400)

@@ -213,6 +213,8 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
      async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':w_data})
     except Exception:pass
    
+  if not c.is_luna and c.luna_stage == 'introducing':
+   return Response({'body':['Please wait for Luna to introduce you before replying.']},status=status.HTTP_400_BAD_REQUEST)
   message=Message.objects.create(conversation=c,sender=request.user,body=body);inspect_message(message)
   if c.is_luna or c.luna_stage == 'moderating':
    data=MessageSerializer(message).data
@@ -386,8 +388,13 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   if c.luna_stage=='offered' and match:
    candidate=match.candidate
    if no:match.status='passed';match.save(update_fields=['status']);c.pending_match=None;c.luna_stage='welcome';c.save(update_fields=['pending_match','luna_stage']);return self._gemini_message(c,profile,body,{'state':'match_passed','instruction':'Confirm the private pass warmly. The profile was not revealed and the candidate will not be notified.'})
+   if any(word in text for word in ['chat', 'conversation about', 'first', 'discuss']):
+    c.luna_stage='discussing';c.save(update_fields=['luna_stage']);card={'id':candidate.id,'display_name':candidate.display_name,'bio':candidate.bio,'location':candidate.location,'connection_goal':candidate.connection_goal,'values':candidate.values,'interests':candidate.interests,'communication_style':candidate.communication_style,'reasons':match.reasons,'score':match.score};return self._gemini_message(c,profile,body,{'state':'profile_revealed','instruction':'Introduce the now-visible profile and invite thoughtful discussion without overstating compatibility.','candidate':card},{'type':'profile_card','profile':card})
+   if any(word in text for word in ['directly', 'add directly', 'go directly', 'direct']):
+    match.status = 'accepted'
+    match.save(update_fields=['status'])
+    return self._gemini_message(c,profile,body,{'state':'match_accepted_directly','instruction':'The user opted to go directly to chat. Tell them you will send the invite to the other person.'})
    if not yes:return self._gemini_message(c,profile,body,{'state':'match_offered','instruction':'A real potential match exists but remains hidden. Answer naturally and clarify that the user may view or privately pass.'})
-   c.luna_stage='discussing';c.save(update_fields=['luna_stage']);card={'id':candidate.id,'display_name':candidate.display_name,'bio':candidate.bio,'location':candidate.location,'connection_goal':candidate.connection_goal,'values':candidate.values,'interests':candidate.interests,'communication_style':candidate.communication_style,'reasons':match.reasons,'score':match.score};return self._gemini_message(c,profile,body,{'state':'profile_revealed','instruction':'Introduce the now-visible profile and invite thoughtful discussion without overstating compatibility.','candidate':card},{'type':'profile_card','profile':card})
   if c.luna_stage=='discussing' and match:
    candidate=match.candidate;is_connecting=any(word in text for word in ['invite', 'connect', 'introduce', 'meet', 'yes', 'fit', 'stay', 'moderate', 'leave'])
    if is_connecting:
@@ -395,11 +402,13 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
     match.save(update_fields=['status'])
     rev_match = Match.objects.filter(requester=candidate, candidate=profile).first()
     if rev_match and rev_match.status == 'accepted':
-     direct_c = Conversation.objects.create(title=f"{profile.display_name} & {candidate.display_name}", is_luna=False, luna_stage='moderating')
+     direct_c = Conversation.objects.create(title=f"{profile.display_name} & {candidate.display_name}", is_luna=False, luna_stage='introducing')
      direct_c.participants.add(profile, candidate)
      Message.objects.create(conversation=direct_c, is_ai=True, body=f"{profile.display_name} has joined the chat.", metadata={'type': 'system_left'})
      Message.objects.create(conversation=direct_c, is_ai=True, body=f"{candidate.display_name} has joined the chat.", metadata={'type': 'system_left'})
-     Message.objects.create(conversation=direct_c, is_ai=True, body=f"Hello {profile.display_name} and {candidate.display_name}! I have brought you both together. Would you like me to leave the chat and let you chat privately?")
+     Message.objects.create(conversation=direct_c, is_ai=True, body=f"Hello {profile.display_name} and {candidate.display_name}! I have brought you both together. Should I remain in the chat and help you with the conversation, or exit? (If I remain, you can tag me like #Luna and I will reply). What do you both think?")
+     direct_c.luna_stage = 'deciding_luna_presence'
+     direct_c.save(update_fields=['luna_stage'])
      c.luna_stage = 'welcome'
      c.pending_match = None
      c.save(update_fields=['luna_stage', 'pending_match'])
@@ -470,15 +479,31 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
        body=f"Hello! {candidate.display_name} is not currently online. Would you like me to notify you when they are ready?"
       )
    context={'state':'discussing_profile','candidate':{'display_name':candidate.display_name,'bio':candidate.bio,'location':candidate.location,'connection_goal':candidate.connection_goal,'values':candidate.values,'interests':candidate.interests,'communication_style':candidate.communication_style},'match_reasons':match.reasons};return self._gemini_message(c,profile,body,context)
-  if c.luna_stage=='moderating':
-   if any(word in text for word in ['luna leave', 'luna go', 'leave chat', 'luna end', 'yes']):
+  if c.luna_stage == 'deciding_luna_presence':
+   votes = dict(c.luna_presence_votes) if isinstance(c.luna_presence_votes, dict) else {}
+   if any(word in text for word in ['remain', 'stay', 'yes']):
+    votes[str(profile.id)] = 'remain'
+   elif any(word in text for word in ['exit', 'leave', 'no']):
+    votes[str(profile.id)] = 'exit'
+   c.luna_presence_votes = votes
+   c.save(update_fields=['luna_presence_votes'])
+   if len(votes) == 2:
+    if all(v == 'remain' for v in votes.values()):
+     c.luna_stage = 'luna_present'
+     c.save(update_fields=['luna_stage'])
+     return Message.objects.create(conversation=c, is_ai=True, body="I will remain in the chat with you both. Don't forget to tag me with #Luna if you need me!")
+    else:
+     c.luna_stage = 'left'
+     c.save(update_fields=['luna_stage'])
+     return Message.objects.create(conversation=c, is_ai=True, body="Understood! I will leave you both to chat privately.")
+   return None
+  if c.luna_stage in ['moderating', 'luna_present']:
+   if c.luna_stage == 'moderating' and any(word in text for word in ['luna leave', 'luna go', 'leave chat', 'luna end', 'yes']):
     c.luna_stage='left';c.save(update_fields=['luna_stage']);sys_msg=Message.objects.create(conversation=c, is_ai=True, body="Luna has left the conversation.", metadata={'type':'system_left'})
     try:
      from channels.layers import get_channel_layer;from .serializers import MessageSerializer;data=MessageSerializer(sys_msg).data;async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
     except Exception:pass
     return Message.objects.create(conversation=c, is_ai=True, body="Understood! I will leave you both to chat privately. Click 'Re-engage Luna' in the options when you're done!")
-   
-   # Dispute moderation and warnings
    provider=GeminiProvider()
    if provider.configured:
     eval_prompt = (
@@ -494,46 +519,24 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
      if eval_data.get('is_disrespectful'):
       already_flagged = ModerationEvent.objects.filter(message__conversation=c, message__sender=profile.user).exists()
       if already_flagged:
-       reply_body = "We hate to see you go but you leave me no choice."
+       reply_body = "you leave me no choice, we are sorry but we have to let you go."
        reply = Message.objects.create(conversation=c, is_ai=True, body=reply_body)
        try:
         from channels.layers import get_channel_layer;from .serializers import MessageSerializer;data=MessageSerializer(reply).data;async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
        except Exception:pass
-       
-       # Suspend & Remove
-       u = profile.user
-       u.is_active = False
-       u.save(update_fields=['is_active'])
-       c.participants.remove(profile)
-       
-       # Report to admin dashboard
-       remaining = c.participants.first()
-       reporter = remaining if remaining else profile
-       Report.objects.create(
-        reporter=reporter,
-        reported=profile,
-        conversation=c,
-        reason='harassment',
-        details=f"User suspended for repeated rudeness. Message: '{body}'"
-       )
-       
-       c.luna_stage = 'welcome'
-       c.pending_match = None
-       c.save(update_fields=['luna_stage', 'pending_match'])
-       
+       u = profile.user;u.is_active = False;u.save(update_fields=['is_active']);c.participants.remove(profile)
+       remaining = c.participants.first();reporter = remaining if remaining else profile
+       Report.objects.create(reporter=reporter,reported=profile,conversation=c,reason='harassment',details=f"User suspended for repeated rudeness. Message: '{body}'")
+       c.luna_stage = 'welcome';c.pending_match = None;c.save(update_fields=['luna_stage', 'pending_match'])
        comfort_msg = Message.objects.create(conversation=c, is_ai=True, body="I have removed the other user and suspended their account due to repeated disrespectful behavior. I'm here for you. Let me know if you'd like to look for a new connection when you're ready.")
        return comfort_msg
       else:
-       # First strike
        last_user_message = c.messages.filter(sender=profile.user).last()
-       if last_user_message:
-        ModerationEvent.objects.create(message=last_user_message, categories=['harassment'], severity='warning')
+       if last_user_message: ModerationEvent.objects.create(message=last_user_message, categories=['harassment'], severity='warning')
        settle_body = eval_data.get('settle_comment', "Disputes happen, but let's please keep our conversation respectful.")
        return Message.objects.create(conversation=c, is_ai=True, body=settle_body)
-    except Exception:
-      pass
-
-   if 'luna' in text:context={'state':'moderating_chat','instruction':'Intervene in the chat because you were mentioned. Keep it brief and encourage connection.'};return self._gemini_message(c,profile,body,context,system_prompt=MODERATION_SYSTEM)
+    except Exception: pass
+   if '#luna' in text:context={'state':'moderating_chat','instruction':'Intervene in the chat because you were mentioned. Keep it brief and encourage connection.'};return self._gemini_message(c,profile,body,context,system_prompt=MODERATION_SYSTEM)
    else:return None
   if c.luna_stage=='left':return None
   if c.luna_stage=='feedback':

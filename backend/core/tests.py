@@ -118,7 +118,7 @@ class LunaJourneyTests(APITestCase):
   reset_code=issue_code(profile,'reset');self.client.force_authenticate(user=None);reset=self.client.post('/api/auth/password-reset/confirm/',{'phone_number':profile.phone_number,'code':reset_code,'new_password':'newstrongpass123'},format='json');self.assertEqual(reset.status_code,200);self.user.refresh_from_db();self.assertTrue(self.user.check_password('newstrongpass123'))
  def test_luna_inbox_reveals_one_profile_before_introduction(self):
   inbox=Conversation.objects.create(title='Luna',is_luna=True,luna_stage='offered');inbox.participants.add(self.user.profile);match=Match.objects.create(requester=self.user.profile,candidate=self.other.profile,score=88,reasons=['Shared values']);inbox.pending_match=match;inbox.save(update_fields=['pending_match'])
-  shown=self.client.post(f'/api/conversations/{inbox.id}/messages/',{'body':'Yes, show me their profile'},format='json');self.assertEqual(shown.status_code,201);self.assertEqual(shown.data['luna_reply']['metadata']['type'],'profile_card');self.assertEqual(shown.data['luna_reply']['metadata']['profile']['display_name'],self.other.profile.display_name)
+  shown=self.client.post(f'/api/conversations/{inbox.id}/messages/',{'body':'Yes, let us discuss them first'},format='json');self.assertEqual(shown.status_code,201);self.assertEqual(shown.data['luna_reply']['metadata']['type'],'profile_card');self.assertEqual(shown.data['luna_reply']['metadata']['profile']['display_name'],self.other.profile.display_name)
   from .models import ConversationReadState
   from django.utils import timezone
   ConversationReadState.objects.create(conversation=inbox, profile=self.other.profile, last_read_at=timezone.now())
@@ -141,7 +141,7 @@ class LunaJourneyTests(APITestCase):
   match=Match.objects.create(requester=self.user.profile,candidate=self.other.profile,score=95,reasons=['Overlap'])
   inbox=Conversation.objects.create(title='Luna',is_luna=True,luna_stage='offered',pending_match=match)
   inbox.participants.add(self.user.profile)
-  response = self.client.post(f'/api/conversations/{inbox.id}/messages/', {'body': 'Yes, let’s see.'}, format='json')
+  response = self.client.post(f'/api/conversations/{inbox.id}/messages/', {'body': 'Yes, let’s discuss them.'}, format='json')
   self.assertEqual(response.status_code, 201)
   inbox.refresh_from_db()
   self.assertEqual(inbox.luna_stage, 'discussing')
@@ -160,7 +160,7 @@ class LunaJourneyTests(APITestCase):
   inbox_b = Conversation.objects.create(title='Luna', is_luna=True, luna_stage='offered', pending_match=rev_match)
   inbox_b.participants.add(self.other.profile)
   self.client.force_authenticate(self.other)
-  response_b = self.client.post(f'/api/conversations/{inbox_b.id}/messages/', {'body': 'Yes, let’s connect.'}, format='json')
+  response_b = self.client.post(f'/api/conversations/{inbox_b.id}/messages/', {'body': 'Yes, let’s discuss them.'}, format='json')
   self.assertEqual(response_b.status_code, 201)
   response_b2 = self.client.post(f'/api/conversations/{inbox_b.id}/messages/', {'body': 'connect'}, format='json')
   self.assertEqual(response_b2.status_code, 201)

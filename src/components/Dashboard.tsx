@@ -494,7 +494,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   const send = async (e: React.FormEvent) => {
     e.preventDefault()
     const outgoing = body.trim()
-    if (!outgoing || sending) return
+    if (!outgoing || sending || conversation.luna_stage === 'introducing') return
     setSending(true)
     setError('')
     setBody('')
@@ -512,9 +512,9 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
       } else {
         dispatch(addMessage({ conversationId: conversation.id, message: data }))
       }
-    } catch {
+    } catch (err: any) {
       setBody(outgoing)
-      setError('Your message was not sent. Please try again.')
+      setError(err?.response?.data?.body?.[0] || 'Your message was not sent. Please try again.')
     } finally {
       // Direct chats fall back to the REST endpoint while WebSockets reconnect.
       // Always release the composer after that request completes.
@@ -921,6 +921,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             <textarea
               rows={1}
               value={body}
+              disabled={conversation.luna_stage === 'introducing'}
               onChange={e => updateBody(e.target.value)}
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -928,12 +929,12 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                   send(e as any)
                 }
               }}
-              placeholder={conversation.is_luna ? 'Message Luna…' : 'Write a message…'}
-              className="max-h-24 min-h-[40px] flex-1 resize-none bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-[#f5ebe0]/50"
+              placeholder={conversation.luna_stage === 'introducing' ? "Wait for Luna's introduction..." : conversation.luna_stage === 'luna_present' ? "Write a message (Tag #Luna for AI help)..." : conversation.is_luna ? 'Message Luna…' : 'Write a message…'}
+              className="max-h-24 min-h-[40px] flex-1 resize-none bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-[#f5ebe0]/50 disabled:opacity-50"
             />
             <button
               aria-label="Send message"
-              disabled={sending || !body.trim()}
+              disabled={sending || !body.trim() || conversation.luna_stage === 'introducing'}
               className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f27059] text-white hover:bg-[#e05e47] active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
             >
               <Send size={15} />

@@ -85,7 +85,7 @@ def refresh_matches(profile_id):
     else:
      inbox.luna_stage='offered'
      inbox.save(update_fields=['pending_match','luna_stage'])
-     Message.objects.create(conversation=inbox,is_ai=True,body='Hey — I found a profile that may align well with yours. Would you like me to show it to you so we can talk it through first?')
+     Message.objects.create(conversation=inbox,is_ai=True,body='Hey — I have found a potential match for you! Would you like you and I to first have a conversation about the person or do you want me to add you directly to the chat?')
      try:
       sms=AfricasTalkingSMS()
       sms.send(owner.phone_number, f"Hi {owner.display_name}, Luna here! I have found a potential match for you. Come online on the Luna app to discuss.")

@@ -104,12 +104,6 @@ class ProfileViewSet(viewsets.GenericViewSet):
  @action(detail=False,methods=['get'],url_path='premium-price')
  def premium_price(self,request):
   return Response({'amount_ugx':11000,'amount_usd':3})
- @action(detail=False,methods=['post'],url_path='me/toggle-premium-test')
- def toggle_premium_test(self,request):
-  profile=request.user.profile
-  profile.is_premium = not profile.is_premium
-  profile.save(update_fields=['is_premium'])
-  return Response(self.get_serializer(profile).data)
  @action(detail=False,methods=['get'],url_path='me/payment-status')
  def payment_status(self,request):
   reference=request.query_params.get('reference')
@@ -136,7 +130,7 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
  serializer_class=MatchSerializer;queryset=Match.objects.none()
  def get_queryset(self):
   profile=self.request.user.profile
-  if not Match.objects.filter(requester=profile).exists():refresh_matches(profile.id)
+  if not Match.objects.filter(requester=profile).exists():dispatch(refresh_matches,profile.id)
   blocked_ids=set(profile.blocks_made.values_list('blocked_id',flat=True))|set(profile.blocks_received.values_list('blocker_id',flat=True))
   return Match.objects.filter(requester=profile,candidate__is_discoverable=True).exclude(candidate_id__in=blocked_ids).select_related('candidate__user','conversation')
  @action(detail=True,methods=['post'])
@@ -219,6 +213,8 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
      async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':w_data})
     except Exception:pass
    
+  if not c.is_luna and c.luna_stage == 'introducing':
+   return Response({'body':['Please wait for Luna to introduce you before replying.']},status=status.HTTP_400_BAD_REQUEST)
   message=Message.objects.create(conversation=c,sender=request.user,body=body);inspect_message(message)
   if c.is_luna or c.luna_stage == 'moderating':
    data=MessageSerializer(message).data
@@ -302,7 +298,8 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   c=self.get_object()
   from django.utils import timezone
   ConversationReadState.objects.update_or_create(conversation=c,profile=request.user.profile,defaults={'last_read_at':timezone.now()})
-  return Response(status=status.HTTP_204_NO_CONTENT)
+  Notification.objects.filter(profile=request.user.profile,conversation=c,read_at__isnull=True).update(read_at=timezone.now())
+  return Response({'unread_count':0})
  @action(detail=True, methods=['post'], url_path='send-sms')
  def send_sms_nudge(self, request, pk=None):
   c = self.get_object()
@@ -391,8 +388,13 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   if c.luna_stage=='offered' and match:
    candidate=match.candidate
    if no:match.status='passed';match.save(update_fields=['status']);c.pending_match=None;c.luna_stage='welcome';c.save(update_fields=['pending_match','luna_stage']);return self._gemini_message(c,profile,body,{'state':'match_passed','instruction':'Confirm the private pass warmly. The profile was not revealed and the candidate will not be notified.'})
+   if any(word in text for word in ['chat', 'conversation about', 'first', 'discuss']):
+    c.luna_stage='discussing';c.save(update_fields=['luna_stage']);card={'id':candidate.id,'display_name':candidate.display_name,'bio':candidate.bio,'location':candidate.location,'connection_goal':candidate.connection_goal,'values':candidate.values,'interests':candidate.interests,'communication_style':candidate.communication_style,'reasons':match.reasons,'score':match.score};return self._gemini_message(c,profile,body,{'state':'profile_revealed','instruction':'Introduce the now-visible profile and invite thoughtful discussion without overstating compatibility.','candidate':card},{'type':'profile_card','profile':card})
+   if any(word in text for word in ['directly', 'add directly', 'go directly', 'direct']):
+    match.status = 'accepted'
+    match.save(update_fields=['status'])
+    return self._gemini_message(c,profile,body,{'state':'match_accepted_directly','instruction':'The user opted to go directly to chat. Tell them you will send the invite to the other person.'})
    if not yes:return self._gemini_message(c,profile,body,{'state':'match_offered','instruction':'A real potential match exists but remains hidden. Answer naturally and clarify that the user may view or privately pass.'})
-   c.luna_stage='discussing';c.save(update_fields=['luna_stage']);card={'id':candidate.id,'display_name':candidate.display_name,'bio':candidate.bio,'location':candidate.location,'connection_goal':candidate.connection_goal,'values':candidate.values,'interests':candidate.interests,'communication_style':candidate.communication_style,'reasons':match.reasons,'score':match.score};return self._gemini_message(c,profile,body,{'state':'profile_revealed','instruction':'Introduce the now-visible profile and invite thoughtful discussion without overstating compatibility.','candidate':card},{'type':'profile_card','profile':card})
   if c.luna_stage=='discussing' and match:
    candidate=match.candidate;is_connecting=any(word in text for word in ['invite', 'connect', 'introduce', 'meet', 'yes', 'fit', 'stay', 'moderate', 'leave'])
    if is_connecting:
@@ -400,11 +402,13 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
     match.save(update_fields=['status'])
     rev_match = Match.objects.filter(requester=candidate, candidate=profile).first()
     if rev_match and rev_match.status == 'accepted':
-     direct_c = Conversation.objects.create(title=f"{profile.display_name} & {candidate.display_name}", is_luna=False, luna_stage='moderating')
+     direct_c = Conversation.objects.create(title=f"{profile.display_name} & {candidate.display_name}", is_luna=False, luna_stage='introducing')
      direct_c.participants.add(profile, candidate)
      Message.objects.create(conversation=direct_c, is_ai=True, body=f"{profile.display_name} has joined the chat.", metadata={'type': 'system_left'})
      Message.objects.create(conversation=direct_c, is_ai=True, body=f"{candidate.display_name} has joined the chat.", metadata={'type': 'system_left'})
-     Message.objects.create(conversation=direct_c, is_ai=True, body=f"Hello {profile.display_name} and {candidate.display_name}! I have brought you both together. Would you like me to leave the chat and let you chat privately?")
+     Message.objects.create(conversation=direct_c, is_ai=True, body=f"Hello {profile.display_name} and {candidate.display_name}! I have brought you both together. Should I remain in the chat and help you with the conversation, or exit? (If I remain, you can tag me like #Luna and I will reply). What do you both think?")
+     direct_c.luna_stage = 'deciding_luna_presence'
+     direct_c.save(update_fields=['luna_stage'])
      c.luna_stage = 'welcome'
      c.pending_match = None
      c.save(update_fields=['luna_stage', 'pending_match'])
@@ -475,15 +479,31 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
        body=f"Hello! {candidate.display_name} is not currently online. Would you like me to notify you when they are ready?"
       )
    context={'state':'discussing_profile','candidate':{'display_name':candidate.display_name,'bio':candidate.bio,'location':candidate.location,'connection_goal':candidate.connection_goal,'values':candidate.values,'interests':candidate.interests,'communication_style':candidate.communication_style},'match_reasons':match.reasons};return self._gemini_message(c,profile,body,context)
-  if c.luna_stage=='moderating':
-   if any(word in text for word in ['luna leave', 'luna go', 'leave chat', 'luna end', 'yes']):
+  if c.luna_stage == 'deciding_luna_presence':
+   votes = dict(c.luna_presence_votes) if isinstance(c.luna_presence_votes, dict) else {}
+   if any(word in text for word in ['remain', 'stay', 'yes']):
+    votes[str(profile.id)] = 'remain'
+   elif any(word in text for word in ['exit', 'leave', 'no']):
+    votes[str(profile.id)] = 'exit'
+   c.luna_presence_votes = votes
+   c.save(update_fields=['luna_presence_votes'])
+   if len(votes) == 2:
+    if all(v == 'remain' for v in votes.values()):
+     c.luna_stage = 'luna_present'
+     c.save(update_fields=['luna_stage'])
+     return Message.objects.create(conversation=c, is_ai=True, body="I will remain in the chat with you both. Don't forget to tag me with #Luna if you need me!")
+    else:
+     c.luna_stage = 'left'
+     c.save(update_fields=['luna_stage'])
+     return Message.objects.create(conversation=c, is_ai=True, body="Understood! I will leave you both to chat privately.")
+   return None
+  if c.luna_stage in ['moderating', 'luna_present']:
+   if c.luna_stage == 'moderating' and any(word in text for word in ['luna leave', 'luna go', 'leave chat', 'luna end', 'yes']):
     c.luna_stage='left';c.save(update_fields=['luna_stage']);sys_msg=Message.objects.create(conversation=c, is_ai=True, body="Luna has left the conversation.", metadata={'type':'system_left'})
     try:
      from channels.layers import get_channel_layer;from .serializers import MessageSerializer;data=MessageSerializer(sys_msg).data;async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
     except Exception:pass
     return Message.objects.create(conversation=c, is_ai=True, body="Understood! I will leave you both to chat privately. Click 'Re-engage Luna' in the options when you're done!")
-   
-   # Dispute moderation and warnings
    provider=GeminiProvider()
    if provider.configured:
     eval_prompt = (
@@ -499,46 +519,24 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
      if eval_data.get('is_disrespectful'):
       already_flagged = ModerationEvent.objects.filter(message__conversation=c, message__sender=profile.user).exists()
       if already_flagged:
-       reply_body = "We hate to see you go but you leave me no choice."
+       reply_body = "you leave me no choice, we are sorry but we have to let you go."
        reply = Message.objects.create(conversation=c, is_ai=True, body=reply_body)
        try:
         from channels.layers import get_channel_layer;from .serializers import MessageSerializer;data=MessageSerializer(reply).data;async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
        except Exception:pass
-       
-       # Suspend & Remove
-       u = profile.user
-       u.is_active = False
-       u.save(update_fields=['is_active'])
-       c.participants.remove(profile)
-       
-       # Report to admin dashboard
-       remaining = c.participants.first()
-       reporter = remaining if remaining else profile
-       Report.objects.create(
-        reporter=reporter,
-        reported=profile,
-        conversation=c,
-        reason='harassment',
-        details=f"User suspended for repeated rudeness. Message: '{body}'"
-       )
-       
-       c.luna_stage = 'welcome'
-       c.pending_match = None
-       c.save(update_fields=['luna_stage', 'pending_match'])
-       
+       u = profile.user;u.is_active = False;u.save(update_fields=['is_active']);c.participants.remove(profile)
+       remaining = c.participants.first();reporter = remaining if remaining else profile
+       Report.objects.create(reporter=reporter,reported=profile,conversation=c,reason='harassment',details=f"User suspended for repeated rudeness. Message: '{body}'")
+       c.luna_stage = 'welcome';c.pending_match = None;c.save(update_fields=['luna_stage', 'pending_match'])
        comfort_msg = Message.objects.create(conversation=c, is_ai=True, body="I have removed the other user and suspended their account due to repeated disrespectful behavior. I'm here for you. Let me know if you'd like to look for a new connection when you're ready.")
        return comfort_msg
       else:
-       # First strike
        last_user_message = c.messages.filter(sender=profile.user).last()
-       if last_user_message:
-        ModerationEvent.objects.create(message=last_user_message, categories=['harassment'], severity='warning')
+       if last_user_message: ModerationEvent.objects.create(message=last_user_message, categories=['harassment'], severity='warning')
        settle_body = eval_data.get('settle_comment', "Disputes happen, but let's please keep our conversation respectful.")
        return Message.objects.create(conversation=c, is_ai=True, body=settle_body)
-    except Exception:
-      pass
-
-   if 'luna' in text:context={'state':'moderating_chat','instruction':'Intervene in the chat because you were mentioned. Keep it brief and encourage connection.'};return self._gemini_message(c,profile,body,context,system_prompt=MODERATION_SYSTEM)
+    except Exception: pass
+   if '#luna' in text:context={'state':'moderating_chat','instruction':'Intervene in the chat because you were mentioned. Keep it brief and encourage connection.'};return self._gemini_message(c,profile,body,context,system_prompt=MODERATION_SYSTEM)
    else:return None
   if c.luna_stage=='left':return None
   if c.luna_stage=='feedback':
@@ -559,9 +557,6 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
     if not answer:raise ValueError('Gemini returned an empty reply')
    except Exception:answer='I’m having trouble reaching Gemini right now. Please try again in a moment.'
   return Message.objects.create(conversation=c,is_ai=True,body=answer,metadata=metadata or {})
- @action(detail=True,methods=['post'],url_path='read')
- def mark_read(self,request,pk=None):
-  c=self.get_object();ConversationReadState.objects.update_or_create(conversation=c,profile=request.user.profile,defaults={'last_read_at':timezone.now()});Notification.objects.filter(profile=request.user.profile,conversation=c,read_at__isnull=True).update(read_at=timezone.now());return Response({'unread_count':0})
  @action(detail=True,methods=['post'],url_path='ai-consent')
  def ai_consent(self,request,pk=None):
   c=self.get_object();enabled=bool(request.data.get('enabled',False));Consent.objects.update_or_create(profile=request.user.profile,conversation=c,defaults={'ai_assistance':enabled})
@@ -671,7 +666,7 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
   if not all([proposed_time,venue_name,venue_address]):
    return Response({'detail':'proposed_time, venue_name, and venue_address are required.'},status=status.HTTP_400_BAD_REQUEST)
   meeting=DateMeeting.objects.create(conversation=c,proposer=profile,proposed_time=proposed_time,venue_name=venue_name,venue_address=venue_address)
-  body=f"📅 {profile.display_name} proposed a date meetup at {venue_name} ({venue_address}) on {proposed_time}."
+  body=f"📅 {profile.display_name} proposed a meetup at {venue_name} ({venue_address}) on {proposed_time}. The other participant can accept or decline below."
   sys_msg=Message.objects.create(conversation=c,is_ai=True,body=body,metadata={'type':'date_proposal','meeting_id':meeting.id,'venue_name':venue_name,'proposed_time':proposed_time})
   try:
    data=MessageSerializer(sys_msg).data
@@ -687,11 +682,11 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
    return Response({'detail':'action must be accept or decline.'},status=status.HTTP_400_BAD_REQUEST)
   if action_val=='accept':
    meeting.status='accepted';meeting.save(update_fields=['status'])
-   body=f"✅ Meetup accepted! Proposed date at {meeting.venue_name} has been confirmed. Calendar invitation sent."
-   sys_msg=Message.objects.create(conversation=c,is_ai=True,body=body,metadata={'type':'date_confirmed','meeting_id':meeting.id})
+   body=f"✅ Meetup confirmed! Both of you will meet at {meeting.venue_name} ({meeting.venue_address}). Save this in your personal calendar."
+   sys_msg=Message.objects.create(conversation=c,is_ai=True,body=body,metadata={'type':'date_confirmed','meeting_id':meeting.id,'venue_name':meeting.venue_name,'venue_address':meeting.venue_address,'proposed_time':str(meeting.proposed_time)})
   else:
    meeting.status='declined';meeting.save(update_fields=['status'])
-   body=f"❌ Meetup proposal declined."
+   body=f"❌ Meetup proposal declined. Feel free to suggest a different time or venue."
    sys_msg=Message.objects.create(conversation=c,is_ai=True,body=body,metadata={'type':'date_declined','meeting_id':meeting.id})
   try:
    data=MessageSerializer(sys_msg).data
@@ -701,13 +696,34 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
  @action(detail=True,methods=['post'],url_path='permit-contact')
  def permit_contact(self,request,pk=None):
   c=self.get_object()
-  c.is_contact_sharing_allowed=True;c.save(update_fields=['is_contact_sharing_allowed'])
-  sys_msg=Message.objects.create(conversation=c,is_ai=True,body="🔓 Both participants have consented. Contact details sharing is now enabled for this chat.",metadata={'type':'contact_sharing_enabled'})
-  try:
-   data=MessageSerializer(sys_msg).data
-   async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
-  except Exception:pass
-  return Response({'is_contact_sharing_allowed':True})
+  if c.is_luna or c.is_counseling:
+   return Response({'detail':'Contact sharing is only available in direct match chats.'},status=status.HTTP_400_BAD_REQUEST)
+  profile=request.user.profile
+  board=c.luna_board or {}
+  consents=set(board.get('contact_sharing_consents',[]))
+  consents.add(profile.id)
+  board['contact_sharing_consents']=list(consents)
+  c.luna_board=board
+  participant_ids=set(c.participants.values_list('id',flat=True))
+  both_consented=participant_ids.issubset(consents)
+  if both_consented:
+   c.is_contact_sharing_allowed=True
+   c.save(update_fields=['is_contact_sharing_allowed','luna_board'])
+   sys_msg=Message.objects.create(conversation=c,is_ai=True,body="🔓 Both participants have consented. Contact details sharing is now enabled for this conversation.",metadata={'type':'contact_sharing_enabled'})
+   try:
+    data=MessageSerializer(sys_msg).data
+    async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
+   except Exception:pass
+   return Response({'is_contact_sharing_allowed':True,'waiting_for_other':False})
+  else:
+   c.save(update_fields=['luna_board'])
+   pending_count=len(participant_ids)-len(consents)
+   sys_msg=Message.objects.create(conversation=c,is_ai=True,body=f"🔒 {profile.display_name} has consented to share contact details. Waiting for the other participant to also consent ({pending_count} remaining).",metadata={'type':'contact_sharing_pending','consented_profile_id':profile.id})
+   try:
+    data=MessageSerializer(sys_msg).data
+    async_to_sync(get_channel_layer().group_send)(f'chat_{c.id}',{'type':'chat.message','message':data})
+   except Exception:pass
+   return Response({'is_contact_sharing_allowed':False,'waiting_for_other':True})
 class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
  serializer_class=NotificationSerializer;queryset=Notification.objects.none()
  def get_queryset(self):return Notification.objects.filter(profile=self.request.user.profile)
@@ -727,12 +743,18 @@ class CounselingViewSet(viewsets.GenericViewSet):
   return Response(ConversationSerializer(c,context={'request':request}).data)
  @action(detail=False,methods=['post'],url_path='schedule')
  def schedule(self,request):
+  import random,string
   profile=request.user.profile
   if not profile.is_premium:
    return Response({'detail':'Couples counseling requires a premium subscription.'},status=status.HTTP_403_FORBIDDEN)
   serializer=CounselingSessionSerializer(data=request.data)
   serializer.is_valid(raise_exception=True)
-  meeting_link="https://meet.google.com/" + "".join(timezone.now().strftime("%Y%m%d%H%M%S"))[-10:]
+  supplied_link=str(request.data.get('meeting_link','')).strip()
+  if supplied_link:
+   meeting_link=supplied_link
+  else:
+   room_slug=''.join(random.choices(string.ascii_lowercase+string.digits,k=12))
+   meeting_link=f"https://meet.jit.si/luna-{room_slug}"
   session=serializer.save(client=profile,meeting_link=meeting_link,status='scheduled')
   return Response(CounselingSessionSerializer(session).data,status=status.HTTP_201_CREATED)
  @action(detail=False,methods=['get'],url_path='sessions')
@@ -740,3 +762,35 @@ class CounselingViewSet(viewsets.GenericViewSet):
   profile=request.user.profile
   sessions=CounselingSession.objects.filter(client=profile)
   return Response(CounselingSessionSerializer(sessions,many=True).data)
+
+class NylonPayWebhookView(APIView):
+ """Receives payment status push callbacks from NylonPay.
+ Verifies the HMAC-SHA256 signature so only genuine NylonPay servers can
+ update payment records, preventing stuck 'processing' payments."""
+ permission_classes=[permissions.AllowAny];authentication_classes=[]
+ def post(self,request):
+  import hashlib,hmac
+  from django.conf import settings
+  secret=getattr(settings,'NYLON_WEB_HOOK_SECRETE','')
+  if secret:
+   received_sig=request.headers.get('X-NylonPay-Signature','')
+   expected_sig=hmac.new(secret.encode(),request.body,hashlib.sha256).hexdigest()
+   if not hmac.compare_digest(expected_sig,received_sig):
+    return Response({'detail':'Invalid signature.'},status=status.HTTP_400_BAD_REQUEST)
+  data=request.data;reference=data.get('reference');webhook_status=str(data.get('status','')).lower()
+  if not reference or webhook_status not in ('successful','failed','cancelled'):
+   return Response({'detail':'Unrecognised payload.'},status=status.HTTP_200_OK)
+  payment=PremiumPayment.objects.select_related('profile').filter(reference=reference).first()
+  if not payment:
+   return Response({'detail':'Payment not found.'},status=status.HTTP_200_OK)
+  if payment.status in ('successful','failed','cancelled'):
+   return Response({'detail':'Already finalised.'},status=status.HTTP_200_OK)
+  payment.status=webhook_status;payment.save(update_fields=['status','updated_at'])
+  if webhook_status=='successful':
+   profile=payment.profile;profile.is_premium=True;profile.save(update_fields=['is_premium'])
+   inbox=Conversation.objects.filter(is_luna=True,participants=profile).first()
+   if inbox and inbox.luna_stage=='premium_locked':
+    inbox.luna_stage='offered';inbox.save(update_fields=['luna_stage'])
+    Message.objects.create(conversation=inbox,is_ai=True,body="Congratulations! Your account is now Premium. I've unlocked your 90%+ compatibility match suggestion! Would you like me to show it to you so we can talk it through?")
+   AuditEvent.objects.create(actor=profile,event='payment.webhook_success',target_type='premium_payment',target_id=payment.id)
+  return Response({'received':True},status=status.HTTP_200_OK)

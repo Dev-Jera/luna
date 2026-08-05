@@ -4,17 +4,18 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   font-family: 'Inter', sans-serif;
-  background-color: #9c6644;
-  color: #1e1410;
+  background-color: #c8102e;
+  color: #ffffff;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #9c6644;
+  background-color: #c8102e;
+  color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -32,26 +33,26 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(15, 23, 42, 0.12);
+  background: rgba(220, 38, 38, 0.4);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(220, 38, 38, 0.3);
+  background: rgba(220, 38, 38, 0.6);
 }
 
 /* Premium Glassmorphism */
 .glass {
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(43, 33, 29, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-dark {
-  background: rgba(48, 37, 33, 0.85);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Dynamic Texture Overlay */
@@ -70,29 +71,29 @@ body {
 /* Custom Form Element Styling */
 .premium-input {
   width: 100%;
-  border: 1px solid rgba(43, 33, 29, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 1rem;
-  background: #ffffff;
+  background: #111111;
   padding: 0.875rem 1.125rem;
-  color: #2b211d;
+  color: #ffffff;
   font-size: 0.9375rem;
   outline: none;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .premium-input:focus {
-  border-color: #ad4f37;
-  box-shadow: 0 0 0 4px rgba(173, 79, 55, 0.08);
-  background: #ffffff;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+  background: #111111;
 }
 .premium-input::placeholder {
-  color: #a39089;
+  color: #9ca3af;
 }
 
 .premium-input-dark {
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 1rem;
-  background: rgba(48, 37, 33, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   padding: 0.875rem 1.125rem;
   color: #ffffff;
   font-size: 0.9375rem;
@@ -100,9 +101,9 @@ body {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .premium-input-dark:focus {
-  border-color: #ad4f37;
-  box-shadow: 0 0 0 4px rgba(173, 79, 55, 0.2);
-  background: rgba(48, 37, 33, 0.6);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.25);
+  background: rgba(0, 0, 0, 0.7);
 }
 .premium-input-dark::placeholder {
   color: rgba(255, 255, 255, 0.35);
@@ -143,7 +144,7 @@ body {
 }
 .hover-premium:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px -10px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.45);
 }
 
 /* Responsive Hero Clip Path */

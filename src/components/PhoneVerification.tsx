@@ -35,22 +35,22 @@ export default function PhoneVerification({ phone, onVerified }: { phone: string
   }
 
   return (
-    <main className="noise grid min-h-screen place-items-center px-6 bg-warmbg text-cocoa-900 selection:bg-terracotta-200">
-      <form onSubmit={confirm} className="glass w-full max-w-md rounded-[2.5rem] p-8 sm:p-10 border border-cocoa-900/5 shadow-2xl animate-slide-up">
-        <h1 className="text-2xl font-bold font-display text-cocoa-900">Verify your phone</h1>
-        <p className="mt-3 text-xs sm:text-sm text-cocoa-500 leading-relaxed font-medium">
-          We’ll send a six-digit verification code to <span className="text-cocoa-900 font-bold">{phone}</span>. It expires after 10 minutes.
+    <main className="noise grid min-h-screen place-items-center px-6 bg-warmbg text-white selection:bg-terracotta-300">
+      <form onSubmit={confirm} className="glass w-full max-w-md rounded-[2.5rem] p-8 sm:p-10 border border-white/10 shadow-2xl animate-slide-up">
+        <h1 className="text-2xl font-bold font-display text-white">Verify your phone</h1>
+        <p className="mt-3 text-xs sm:text-sm text-white/80 leading-relaxed font-medium">
+          We’ll send a six-digit verification code to <span className="text-white font-bold">{phone}</span>. It expires after 10 minutes.
         </p>
 
         {sent && (
           <div className="mt-6 space-y-1.5 animate-slide-up">
-            <label className="text-xs font-bold uppercase tracking-wider text-cocoa-500 text-center block">Enter Code</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-white/70 text-center block">Enter Code</label>
             <input
               value={code}
               onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               inputMode="numeric"
               placeholder="000000"
-              className="premium-input text-center text-2xl tracking-[0.4em] font-bold py-4"
+              className="premium-input-dark text-center text-2xl tracking-[0.4em] font-bold py-4"
               required
             />
           </div>
@@ -86,7 +86,7 @@ export default function PhoneVerification({ phone, onVerified }: { phone: string
             type="button"
             onClick={send}
             disabled={busy}
-            className="mt-4 w-full text-xs font-bold text-cocoa-500 hover:text-cocoa-900 transition-colors"
+            className="mt-4 w-full text-xs font-bold text-white/70 hover:text-white transition-colors"
           >
             Send a new code
           </button>

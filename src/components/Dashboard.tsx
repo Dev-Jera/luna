@@ -10,11 +10,11 @@ import NotificationCenter from './NotificationCenter'
 function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversations' | 'preferences' | 'counseling'; setPage: (page: 'conversations' | 'preferences' | 'counseling') => void; profile: Profile; onGoToAdmin?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false)
   return (
-    <header className="sticky top-0 z-20 bg-[#1e1410] border-b border-[#f5ebe0]/10">
+    <header className="sticky top-0 z-20 bg-[#000000] border-b border-[#ffffff]/10">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
         <button onClick={() => setPage('conversations')} className="flex items-center gap-2.5 text-base font-bold tracking-tight focus:outline-none">
-          <span className="h-4 w-4 rounded-full bg-[#f27059] block shrink-0" />
-          <span className="font-display text-xl font-bold tracking-tight text-[#f5ebe0]">luna<span className="text-[#f27059]">.</span></span>
+          <span className="h-4 w-4 rounded-full bg-[#dc2626] block shrink-0" />
+          <span className="font-display text-xl font-bold tracking-tight text-[#ffffff]">luna<span className="text-[#dc2626]">.</span></span>
         </button>
 
         {/* Right Side Header Controls */}
@@ -27,8 +27,8 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               onClick={() => setPage('conversations')}
               className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
                 page === 'conversations'
-                  ? 'bg-[#f27059] text-white shadow-premium'
-                  : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+                  ? 'bg-[#dc2626] text-white shadow-premium'
+                  : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
               }`}
             >
               <MessageCircle size={14} />
@@ -38,8 +38,8 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               onClick={() => setPage('counseling')}
               className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
                 page === 'counseling'
-                  ? 'bg-[#f27059] text-white shadow-premium'
-                  : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+                  ? 'bg-[#dc2626] text-white shadow-premium'
+                  : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
               }`}
             >
               <Heart size={14} />
@@ -49,8 +49,8 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               onClick={() => setPage('preferences')}
               className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
                 page === 'preferences'
-                  ? 'bg-[#f27059] text-white shadow-premium'
-                  : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+                  ? 'bg-[#dc2626] text-white shadow-premium'
+                  : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
               }`}
             >
               <Settings size={14} />
@@ -67,9 +67,9 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               </button>
             )}
             
-            <div className="w-[1px] h-6 bg-[#f5ebe0]/10 mx-1" />
+            <div className="w-[1px] h-6 bg-[#ffffff]/10 mx-1" />
 
-            <div className="hidden sm:grid h-9 w-9 place-items-center rounded-full bg-[#8ea869] text-sm font-bold text-[#1e1410]">
+            <div className="hidden sm:grid h-9 w-9 place-items-center rounded-full bg-[#ffffff] text-sm font-bold text-[#000000]">
               {profile.display_name[0]?.toUpperCase()}
             </div>
             <button
@@ -78,7 +78,7 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
                 await api.post('/auth/logout/')
                 location.reload()
               }}
-              className="rounded-full p-2.5 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-[#ffffff] transition-all duration-200"
+              className="rounded-full p-2.5 text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-[#ffffff] transition-all duration-200"
             >
               <LogOut size={16} />
             </button>
@@ -87,7 +87,7 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
           {/* Mobile hamburger menu toggle */}
           <button
             onClick={() => setMenuOpen(true)}
-            className="flex md:hidden rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white transition-all active:scale-95"
+            className="flex md:hidden rounded-full p-2 text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white transition-all active:scale-95"
             aria-label="Open navigation menu"
           >
             <Menu size={20} />
@@ -98,13 +98,13 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
       {/* Hamburger Drawer Overlay (Mobile Only) */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden bg-black/60 backdrop-blur-sm transition-opacity duration-300">
-          <div className="w-64 max-w-xs bg-[#1e1410] border-r border-[#f5ebe0]/10 p-6 flex flex-col h-full animate-slide-in">
-            <div className="flex items-center justify-between pb-6 border-b border-[#f5ebe0]/10">
+          <div className="w-64 max-w-xs bg-[#000000] border-r border-[#ffffff]/10 p-6 flex flex-col h-full animate-slide-in">
+            <div className="flex items-center justify-between pb-6 border-b border-[#ffffff]/10">
               <button onClick={() => { setPage('conversations'); setMenuOpen(false); }} className="flex items-center gap-2.5 text-base font-bold tracking-tight">
-                <span className="h-4 w-4 rounded-full bg-[#f27059] block shrink-0" />
-                <span className="font-display text-xl font-bold tracking-tight text-[#f5ebe0]">luna<span className="text-[#f27059]">.</span></span>
+                <span className="h-4 w-4 rounded-full bg-[#dc2626] block shrink-0" />
+                <span className="font-display text-xl font-bold tracking-tight text-[#ffffff]">luna<span className="text-[#dc2626]">.</span></span>
               </button>
-              <button onClick={() => setMenuOpen(false)} className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white">
+              <button onClick={() => setMenuOpen(false)} className="rounded-full p-2 text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white">
                 <X size={18} />
               </button>
             </div>
@@ -113,7 +113,7 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               <button
                 onClick={() => { setPage('conversations'); setMenuOpen(false); }}
                 className={`rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-3 transition-all ${
-                  page === 'conversations' ? 'bg-[#f27059] text-white shadow-premium' : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+                  page === 'conversations' ? 'bg-[#dc2626] text-white shadow-premium' : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
                 }`}
               >
                 <MessageCircle size={16} />
@@ -122,7 +122,7 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               <button
                 onClick={() => { setPage('counseling'); setMenuOpen(false); }}
                 className={`rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-3 transition-all ${
-                  page === 'counseling' ? 'bg-[#f27059] text-white shadow-premium' : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+                  page === 'counseling' ? 'bg-[#dc2626] text-white shadow-premium' : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
                 }`}
               >
                 <Heart size={16} />
@@ -131,7 +131,7 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               <button
                 onClick={() => { setPage('preferences'); setMenuOpen(false); }}
                 className={`rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-3 transition-all ${
-                  page === 'preferences' ? 'bg-[#f27059] text-white shadow-premium' : 'text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white'
+                  page === 'preferences' ? 'bg-[#dc2626] text-white shadow-premium' : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
                 }`}
               >
                 <Settings size={16} />
@@ -149,12 +149,12 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               )}
             </nav>
 
-            <div className="pt-6 border-t border-[#f5ebe0]/10 flex items-center justify-between">
+            <div className="pt-6 border-t border-[#ffffff]/10 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="grid h-8 w-8 place-items-center rounded-full bg-[#8ea869] text-xs font-bold text-[#1e1410]">
+                <div className="grid h-8 w-8 place-items-center rounded-full bg-[#ffffff] text-xs font-bold text-[#000000]">
                   {profile.display_name[0]?.toUpperCase()}
                 </div>
-                <span className="text-xs font-bold text-[#f5ebe0]">{profile.display_name}</span>
+                <span className="text-xs font-bold text-[#ffffff]">{profile.display_name}</span>
               </div>
               <button
                 aria-label="Sign out"
@@ -162,7 +162,7 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
                   await api.post('/auth/logout/')
                   location.reload()
                 }}
-                className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                className="rounded-full p-2 text-[#ffffff]/80 hover:bg-red-500/20 hover:text-red-400 transition-all"
               >
                 <LogOut size={16} />
               </button>
@@ -535,9 +535,9 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   }
 
   const getGoalIcon = (goal: string) => {
-    if (goal?.toLowerCase().includes('romance')) return <Heart size={13} className="text-[#eab308] inline mr-1" />
-    if (goal?.toLowerCase().includes('friendship')) return <Users size={13} className="text-[#0f4c81] inline mr-1" />
-    return <Briefcase size={13} className="text-[#0f4c81] inline mr-1" />
+    if (goal?.toLowerCase().includes('romance')) return <Heart size={13} className="text-[#ef4444] inline mr-1" />
+    if (goal?.toLowerCase().includes('friendship')) return <Users size={13} className="text-[#ffffff] inline mr-1" />
+    return <Briefcase size={13} className="text-[#ffffff] inline mr-1" />
   }
 
   const renderMessage = (m: Message) => {
@@ -546,7 +546,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
     if (isSystem) {
       return (
         <div key={m.id} className="flex justify-center my-4 w-full">
-          <div className="rounded-full bg-[#f5ebe0]/5 border border-[#f5ebe0]/10 px-4 py-1.5 text-[11px] font-semibold text-[#f5ebe0]/60 text-center shadow-soft">
+          <div className="rounded-full bg-[#ffffff]/5 border border-[#ffffff]/10 px-4 py-1.5 text-[11px] font-semibold text-[#ffffff]/60 text-center shadow-soft">
             {m.body}
           </div>
         </div>
@@ -558,34 +558,34 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
           <div
             className={`rounded-[1.75rem] px-5 py-3 text-[14px] leading-relaxed shadow-soft ${
               mine
-                ? 'rounded-br-sm bg-[#f27059] text-white'
+                ? 'rounded-br-sm bg-[#dc2626] text-white'
                 : m.is_ai
-                  ? 'rounded-bl-sm bg-[#9c6644]/10 border border-[#f5ebe0]/10 text-white'
-                  : 'rounded-bl-sm bg-[#9c6644] border border-[#f5ebe0]/10 text-white'
+                  ? 'rounded-bl-sm bg-[#c8102e]/10 border border-[#ffffff]/10 text-white'
+                  : 'rounded-bl-sm bg-[#c8102e] border border-[#ffffff]/10 text-white'
             }`}
           >
             {m.is_ai && (
-              <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#f27059]">
+              <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#dc2626]">
                 <Sparkles size={11} /> Luna
               </div>
             )}
             {!mine && !m.is_ai && m.sender && (
-              <div className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#f5ebe0]/80">
+              <div className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#ffffff]/80">
                 {m.sender.first_name || m.sender.username}
               </div>
             )}
             <p className="whitespace-pre-wrap">{m.body}</p>
 
             {m.metadata?.type === 'profile_card' && m.metadata?.profile && (
-              <div className="mt-4 rounded-2xl border border-[#f5ebe0]/10 bg-[#1e1410] p-5 text-[#f5ebe0] shadow-soft">
+              <div className="mt-4 rounded-2xl border border-[#ffffff]/10 bg-[#000000] p-5 text-[#ffffff] shadow-soft">
                 <div className="text-lg font-bold font-display text-white">{m.metadata.profile.display_name}</div>
-                <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#f5ebe0]/80">
+                <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#ffffff]/80">
                   {getGoalIcon(m.metadata.profile.connection_goal)}
                   <span>
                     {[m.metadata.profile.location, m.metadata.profile.connection_goal].filter(Boolean).join(' · ')}
                   </span>
                 </div>
-                <p className="mt-3.5 text-xs text-[#f5ebe0]/80 leading-relaxed border-t border-[#f5ebe0]/10 pt-3.5 italic">
+                <p className="mt-3.5 text-xs text-[#ffffff]/80 leading-relaxed border-t border-[#ffffff]/10 pt-3.5 italic">
                   "{m.metadata.profile.bio || 'No bio shared yet.'}"
                 </p>
                 {Array.isArray(m.metadata.profile.interests) && m.metadata.profile.interests.length > 0 && (
@@ -601,21 +601,21 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             )}
 
             {m.metadata?.type === 'profile_locked_premium' && (
-              <div className="mt-4 rounded-2xl border border-[#f27059]/30 bg-[#f27059]/5 p-5 text-[#f5ebe0] shadow-soft max-w-sm">
-                <div className="flex items-center gap-2 text-[#f27059] font-bold text-xs">
+              <div className="mt-4 rounded-2xl border border-[#dc2626]/30 bg-[#dc2626]/5 p-5 text-[#ffffff] shadow-soft max-w-sm">
+                <div className="flex items-center gap-2 text-[#dc2626] font-bold text-xs">
                   <Lock size={14} className="animate-pulse" />
                   <span>Premium Match Recommendation</span>
                 </div>
                 <div className="mt-2 text-lg font-bold font-display text-white">Profile Locked</div>
-                <div className="mt-2 flex items-center gap-1 bg-[#f27059]/10 border border-[#f27059]/20 rounded-full px-3 py-1 w-max text-[10px] font-bold text-[#f27059] uppercase tracking-wider">
+                <div className="mt-2 flex items-center gap-1 bg-[#dc2626]/10 border border-[#dc2626]/20 rounded-full px-3 py-1 w-max text-[10px] font-bold text-[#dc2626] uppercase tracking-wider">
                   🔥 {m.metadata.score}% Compatibility
                 </div>
-                <p className="mt-3 text-xs text-[#f5ebe0]/60 leading-relaxed">
+                <p className="mt-3 text-xs text-[#ffffff]/60 leading-relaxed">
                   Unlock detailed bios, values alignment, and direct messaging with this premium candidate by upgrading.
                 </p>
                 <button
                   onClick={onGoToCounseling}
-                  className="mt-4 w-full rounded-full bg-[#f27059] py-2.5 text-xs font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all shadow-glow flex items-center justify-center gap-1.5"
+                  className="mt-4 w-full rounded-full bg-[#dc2626] py-2.5 text-xs font-bold text-white hover:bg-[#b91c1c] active:scale-95 transition-all shadow-glow flex items-center justify-center gap-1.5"
                 >
                   <Unlock size={12} />
                   Upgrade to Reveal Profile
@@ -624,24 +624,24 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             )}
 
             {m.metadata?.type === 'date_proposal' && (
-              <div className="mt-4 rounded-2xl border border-[#f5ebe0]/10 bg-[#1e1410] p-5 text-[#f5ebe0] shadow-soft max-w-sm">
-                <div className="flex items-center gap-2 text-[#f27059] font-bold text-xs">
+              <div className="mt-4 rounded-2xl border border-[#ffffff]/10 bg-[#000000] p-5 text-[#ffffff] shadow-soft max-w-sm">
+                <div className="flex items-center gap-2 text-[#dc2626] font-bold text-xs">
                   <Calendar size={14} /> Meetup Proposal
                 </div>
                 <div className="mt-2 text-sm font-bold font-display text-white">{m.metadata.venue_name}</div>
-                <div className="text-xs text-[#f5ebe0]/70 mt-1">{m.metadata.proposed_time ? new Date(m.metadata.proposed_time).toLocaleString() : ''}</div>
+                <div className="text-xs text-[#ffffff]/70 mt-1">{m.metadata.proposed_time ? new Date(m.metadata.proposed_time).toLocaleString() : ''}</div>
                 
                 {m.sender?.id !== currentUserId && (
-                  <div className="flex gap-2.5 mt-4 pt-4 border-t border-[#f5ebe0]/10">
+                  <div className="flex gap-2.5 mt-4 pt-4 border-t border-[#ffffff]/10">
                     <button
                       onClick={() => respondToDate(m.metadata.meeting_id, 'decline')}
-                      className="flex-1 rounded-full border border-[#f5ebe0]/20 bg-transparent py-2 text-xs font-bold text-[#f5ebe0] hover:bg-[#f5ebe0]/10 active:scale-95 transition-all"
+                      className="flex-1 rounded-full border border-[#ffffff]/20 bg-transparent py-2 text-xs font-bold text-[#ffffff] hover:bg-[#ffffff]/10 active:scale-95 transition-all"
                     >
                       Decline
                     </button>
                     <button
                       onClick={() => respondToDate(m.metadata.meeting_id, 'accept')}
-                      className="flex-1 rounded-full bg-[#f27059] py-2 text-xs font-bold text-white shadow-glow hover:bg-[#e05e47] active:scale-95 transition-all"
+                      className="flex-1 rounded-full bg-[#dc2626] py-2 text-xs font-bold text-white shadow-glow hover:bg-[#b91c1c] active:scale-95 transition-all"
                     >
                       Accept
                     </button>
@@ -659,19 +659,19 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   }
 
   return (
-    <div className="fixed inset-0 z-40 bg-[#1e1410]/70 p-0 md:relative md:inset-auto md:z-0 md:p-0 md:bg-transparent md:h-full flex gap-6 w-full">
+    <div className="fixed inset-0 z-40 bg-[#000000]/70 p-0 md:relative md:inset-auto md:z-0 md:p-0 md:bg-transparent md:h-full flex gap-6 w-full">
       <section className="flex-1 flex h-full flex-col overflow-hidden">
         
         {/* Chat Header */}
-        <header className="relative flex items-center justify-between gap-3 border-b border-[#f5ebe0]/10 pb-4">
+        <header className="relative flex items-center justify-between gap-3 border-b border-[#ffffff]/10 pb-4">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#8ea869] text-[#1e1410] font-bold border border-[#8ea869]/20 sm:h-10 sm:w-10">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ffffff] text-[#000000] font-bold border border-[#ffffff]/20 sm:h-10 sm:w-10">
               {conversation.is_luna ? <Sparkles size={16} /> : <MessageCircle size={16} />}
             </div>
             <div className="min-w-0">
               <h2 className="truncate font-bold text-white text-sm sm:text-base">{conversation.title}</h2>
-              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[#f5ebe0]/80">
-                <span className={`h-1.5 w-1.5 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-[#f5ebe0]/30'}`} />
+              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[#ffffff]/80">
+                <span className={`h-1.5 w-1.5 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-[#ffffff]/30'}`} />
                 {conversation.is_luna ? 'Your private AI concierge' : connected ? 'Live conversation' : 'Reconnecting…'}
               </p>
             </div>
@@ -680,8 +680,8 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             {!conversation.is_luna && (
               <>
                 {/* E2EE Lock indicator */}
-                <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#f5ebe0]/80 border border-[#f5ebe0]/10 bg-[#9c6644]/10 rounded-full px-3 py-1">
-                  {conversation.is_contact_sharing_allowed ? <Unlock size={11} className="text-emerald-500" /> : <Lock size={11} className="text-[#f27059]" />}
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#ffffff]/80 border border-[#ffffff]/10 bg-[#c8102e]/10 rounded-full px-3 py-1">
+                  {conversation.is_contact_sharing_allowed ? <Unlock size={11} className="text-emerald-500" /> : <Lock size={11} className="text-[#dc2626]" />}
                   <span className="hidden sm:inline">{conversation.is_contact_sharing_allowed ? 'Direct' : 'Shielded'}</span>
                 </div>
 
@@ -690,23 +690,23 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                   aria-label="Open chat options"
                   aria-expanded={chatMenuOpen}
                   onClick={() => setChatMenuOpen(open => !open)}
-                  className="rounded-full border border-[#f5ebe0]/10 bg-[#9c6644]/10 p-2 text-[#f5ebe0]/80 transition-all hover:bg-[#9c6644]/20 hover:text-white active:scale-95"
+                  className="rounded-full border border-[#ffffff]/10 bg-[#c8102e]/10 p-2 text-[#ffffff]/80 transition-all hover:bg-[#c8102e]/20 hover:text-white active:scale-95"
                 >
                   {chatMenuOpen ? <X size={18} /> : <Menu size={18} />}
                 </button>
 
                 {chatMenuOpen && (
-                  <div className="absolute right-10 top-12 z-50 w-64 overflow-hidden rounded-2xl border border-[#f5ebe0]/10 bg-[#2a1b16] p-2 shadow-2xl">
+                  <div className="absolute right-10 top-12 z-50 w-64 overflow-hidden rounded-2xl border border-[#ffffff]/10 bg-[#111111] p-2 shadow-2xl">
                     {!conversation.is_contact_sharing_allowed && (
-                      <button onClick={() => { setChatMenuOpen(false); permitContact() }} disabled={permitting} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#f5ebe0] hover:bg-[#f5ebe0]/10 disabled:opacity-50">
-                        <Unlock size={17} className="text-[#f27059]" /> {permitting ? 'Unlocking sharing…' : 'Unlock contact sharing'}
+                      <button onClick={() => { setChatMenuOpen(false); permitContact() }} disabled={permitting} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#ffffff] hover:bg-[#ffffff]/10 disabled:opacity-50">
+                        <Unlock size={17} className="text-[#dc2626]" /> {permitting ? 'Unlocking sharing…' : 'Unlock contact sharing'}
                       </button>
                     )}
-                    <button onClick={() => { setChatMenuOpen(false); startCall() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#f5ebe0] hover:bg-[#f5ebe0]/10">
-                      <Video size={17} className="text-[#f27059]" /> Start video call
+                    <button onClick={() => { setChatMenuOpen(false); startCall() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#ffffff] hover:bg-[#ffffff]/10">
+                      <Video size={17} className="text-[#dc2626]" /> Start video call
                     </button>
-                    <button onClick={() => { setChatMenuOpen(false); setShowDatePicker(true); loadVenues() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#f5ebe0] hover:bg-[#f5ebe0]/10">
-                      <Calendar size={17} className="text-[#f27059]" /> Plan meetup date
+                    <button onClick={() => { setChatMenuOpen(false); setShowDatePicker(true); loadVenues() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#ffffff] hover:bg-[#ffffff]/10">
+                      <Calendar size={17} className="text-[#dc2626]" /> Plan meetup date
                     </button>
                     <button
                       disabled={smsSending}
@@ -724,12 +724,12 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                           setSmsSending(false)
                         }
                       }}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#f5ebe0] hover:bg-[#f5ebe0]/10 disabled:opacity-50"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#ffffff] hover:bg-[#ffffff]/10 disabled:opacity-50"
                     >
-                      <Smartphone size={17} className="text-[#f27059]" /> {smsSending ? 'Sending SMS…' : 'Send SMS nudge'}
+                      <Smartphone size={17} className="text-[#dc2626]" /> {smsSending ? 'Sending SMS…' : 'Send SMS nudge'}
                     </button>
-                    <button onClick={() => { setChatMenuOpen(false); setShowSideBoard(!showSideBoard) }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#f5ebe0] hover:bg-[#f5ebe0]/10">
-                      <Info size={17} className="text-[#f27059]" /> {showSideBoard ? 'Hide match info' : 'Show match info'}
+                    <button onClick={() => { setChatMenuOpen(false); setShowSideBoard(!showSideBoard) }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#ffffff] hover:bg-[#ffffff]/10">
+                      <Info size={17} className="text-[#dc2626]" /> {showSideBoard ? 'Hide match info' : 'Show match info'}
                     </button>
                   </div>
                 )}
@@ -738,7 +738,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             <button
               aria-label="Back to conversations"
               onClick={onClose}
-              className="rounded-full p-2 text-[#f5ebe0]/80 hover:bg-[#9c6644]/20 hover:text-white transition-colors"
+              className="rounded-full p-2 text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white transition-colors"
             >
               <ArrowLeft size={18} />
             </button>
@@ -747,7 +747,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
 
         {/* Chat Messages */}
         <div className="flex-1 space-y-4 overflow-y-auto py-6">
-          <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-3.5 flex gap-3 text-[11px] text-[#f5ebe0]/70 leading-relaxed shadow-soft">
+          <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-3.5 flex gap-3 text-[11px] text-[#ffffff]/70 leading-relaxed shadow-soft">
             <AlertTriangle size={16} className="text-yellow-500 shrink-0 mt-0.5" />
             <div>
               <span className="font-bold text-yellow-500 uppercase tracking-wider block mb-1">Safety Advisory</span>
@@ -756,18 +756,18 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
           </div>
           {(conversation.messages || []).map(renderMessage)}
           {(!conversation.messages || conversation.messages.length === 0) && (
-            <p className="mt-16 text-center text-xs font-semibold text-[#f5ebe0]/40">This conversation has just begun.</p>
+            <p className="mt-16 text-center text-xs font-semibold text-[#ffffff]/40">This conversation has just begun.</p>
           )}
           {sending && conversation.is_luna && (
-            <div className="flex items-center gap-2 text-xs font-medium text-[#f27059] bg-[#f27059]/10 rounded-full px-4 py-2 w-max border border-[#f27059]/20">
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#f27059]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#f27059] [animation-delay:0.2s]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#f27059] [animation-delay:0.4s]" />
+            <div className="flex items-center gap-2 text-xs font-medium text-[#dc2626] bg-[#dc2626]/10 rounded-full px-4 py-2 w-max border border-[#dc2626]/20">
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#dc2626]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#dc2626] [animation-delay:0.2s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#dc2626] [animation-delay:0.4s]" />
               Luna is drafting compatibility insights...
             </div>
           )}
           {typingName && (
-            <p className="text-[10px] text-[#f5ebe0]/60 italic px-2">{typingName} is typing...</p>
+            <p className="text-[10px] text-[#ffffff]/60 italic px-2">{typingName} is typing...</p>
           )}
           <div ref={endRef} />
         </div>
@@ -835,7 +835,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             <div className="flex justify-center gap-4">
               <button
                 onClick={endCall}
-                className="rounded-full bg-[#0f4c81] hover:bg-[#0c3e69] px-8 py-3 text-xs font-bold shadow-2xl active:scale-95 transition-all"
+                className="rounded-full bg-[#dc2626] hover:bg-[#b91c1c] px-8 py-3 text-xs font-bold shadow-2xl active:scale-95 transition-all"
               >
                 End Speed Date
               </button>
@@ -915,9 +915,9 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
         )}
 
         {/* Chat Form */}
-        <form onSubmit={send} className="py-4 border-t border-[#f5ebe0]/10">
+        <form onSubmit={send} className="py-4 border-t border-[#ffffff]/10">
           {error && <p className="mb-2.5 text-xs font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200/50 p-2.5 rounded-xl">{error}</p>}
-          <div className="flex items-end gap-3 rounded-2xl bg-[#9c6644]/10 p-1.5 border border-[#f5ebe0]/10 focus-within:border-[#f27059] focus-within:ring-4 focus-within:ring-[#f27059]/10 transition-all">
+          <div className="flex items-end gap-3 rounded-2xl bg-[#c8102e]/10 p-1.5 border border-[#ffffff]/10 focus-within:border-[#dc2626] focus-within:ring-4 focus-within:ring-[#dc2626]/10 transition-all">
             <textarea
               rows={1}
               value={body}
@@ -930,17 +930,17 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                 }
               }}
               placeholder={conversation.luna_stage === 'introducing' ? "Wait for Luna's introduction..." : conversation.luna_stage === 'luna_present' ? "Write a message (Tag #Luna for AI help)..." : conversation.is_luna ? 'Message Luna…' : 'Write a message…'}
-              className="max-h-24 min-h-[40px] flex-1 resize-none bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-[#f5ebe0]/50 disabled:opacity-50"
+              className="max-h-24 min-h-[40px] flex-1 resize-none bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-[#ffffff]/50 disabled:opacity-50"
             />
             <button
               aria-label="Send message"
               disabled={sending || !body.trim() || conversation.luna_stage === 'introducing'}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f27059] text-white hover:bg-[#e05e47] active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#dc2626] text-white hover:bg-[#b91c1c] active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
             >
               <Send size={15} />
             </button>
           </div>
-          <p className="mt-2.5 text-center text-[10px] text-[#f5ebe0]/50">
+          <p className="mt-2.5 text-center text-[10px] text-[#ffffff]/50">
             Press <strong className="text-white">Enter</strong> to send · <strong className="text-white">Shift + Enter</strong> for newline
           </p>
         </form>
@@ -964,10 +964,10 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
         const relationshipProgress = board.progress || "Match connected! Start chatting to unlock compatibility intelligence from Luna."
 
         return (
-          <aside className="hidden lg:flex w-80 shrink-0 flex-col bg-[#1c120e] border border-[#f5ebe0]/10 rounded-[2rem] shadow-soft overflow-y-auto p-5 text-[#f5ebe0] animate-fadeIn">
+          <aside className="hidden lg:flex w-80 shrink-0 flex-col bg-[#000000] border border-[#ffffff]/10 rounded-[2rem] shadow-soft overflow-y-auto p-5 text-[#ffffff] animate-fadeIn">
             {/* Header info */}
-            <div className="flex flex-col items-center text-center pb-4 border-b border-[#f5ebe0]/10">
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-[#9c6644]/20 text-[#f27059] font-bold text-xl border border-[#f5ebe0]/10 mb-3 shadow-inner relative overflow-hidden">
+            <div className="flex flex-col items-center text-center pb-4 border-b border-[#ffffff]/10">
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-[#c8102e]/20 text-[#dc2626] font-bold text-xl border border-[#ffffff]/10 mb-3 shadow-inner relative overflow-hidden">
                 {partner.profile_picture ? (
                   <img src={partner.profile_picture} alt={partner.display_name} className="w-full h-full object-cover" />
                 ) : (
@@ -975,9 +975,9 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                 )}
               </div>
               <h3 className="font-bold text-white text-sm">{partner.display_name}</h3>
-              <p className="text-[10px] text-[#f5ebe0]/60 mt-0.5">{partner.location || 'Uganda'}</p>
+              <p className="text-[10px] text-[#ffffff]/60 mt-0.5">{partner.location || 'Uganda'}</p>
               
-              <div className="mt-2.5 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f27059]/10 border border-[#f27059]/20 text-[9px] font-bold text-[#f27059] uppercase tracking-wider">
+              <div className="mt-2.5 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#dc2626]/10 border border-[#dc2626]/20 text-[9px] font-bold text-[#dc2626] uppercase tracking-wider">
                 {getGoalIcon(partner.connection_goal)}
                 <span>{partner.connection_goal}</span>
               </div>
@@ -985,27 +985,27 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
 
             {/* Profile summary from Luna */}
             <div className="mt-5 space-y-2">
-              <h4 className="text-[9px] font-bold uppercase tracking-wider text-[#f5ebe0]/40 flex items-center gap-1.5">
-                <Sparkles size={11} className="text-[#f27059]" />
+              <h4 className="text-[9px] font-bold uppercase tracking-wider text-[#ffffff]/40 flex items-center gap-1.5">
+                <Sparkles size={11} className="text-[#dc2626]" />
                 Luna's Partner Summary
               </h4>
-              <div className="rounded-2xl bg-[#9c6644]/5 border border-[#f5ebe0]/5 p-4 text-xs text-[#f5ebe0]/80 leading-relaxed italic">
+              <div className="rounded-2xl bg-[#c8102e]/5 border border-[#ffffff]/5 p-4 text-xs text-[#ffffff]/80 leading-relaxed italic">
                 "{partnerSummary}"
               </div>
             </div>
 
             {/* Match progression / timeline */}
             <div className="mt-6 space-y-3 flex-1">
-              <h4 className="text-[9px] font-bold uppercase tracking-wider text-[#f5ebe0]/40 flex items-center gap-1.5">
-                <TrendingUp size={11} className="text-[#f27059]" />
+              <h4 className="text-[9px] font-bold uppercase tracking-wider text-[#ffffff]/40 flex items-center gap-1.5">
+                <TrendingUp size={11} className="text-[#dc2626]" />
                 Relationship Progress
               </h4>
-              <p className="text-xs text-[#f5ebe0]/85 leading-relaxed font-semibold">
+              <p className="text-xs text-[#ffffff]/85 leading-relaxed font-semibold">
                 {relationshipProgress}
               </p>
 
               {/* Graphical checklist steps */}
-              <div className="mt-4 space-y-4 relative pl-4 border-l border-[#f5ebe0]/10 ml-2">
+              <div className="mt-4 space-y-4 relative pl-4 border-l border-[#ffffff]/10 ml-2">
                 {[
                   { label: "Connection Established", desc: "Matched and introduced by Luna.", checked: true },
                   { label: "First Exchange", desc: "Exchanged initial warm messages.", checked: isIcebreaker },
@@ -1017,15 +1017,15 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                     <span className={`absolute -left-[22px] top-0.5 grid h-3.5 w-3.5 place-items-center rounded-full border text-[8px] font-bold ${
                       step.checked
                         ? 'bg-emerald-500 border-emerald-500 text-white'
-                        : 'bg-[#1c120e] border-[#f5ebe0]/20 text-[#f5ebe0]/30'
+                        : 'bg-[#000000] border-[#ffffff]/20 text-[#ffffff]/30'
                     }`}>
                       {step.checked ? "✓" : ""}
                     </span>
                     <div>
-                      <div className={`text-[11px] font-bold ${step.checked ? 'text-white' : 'text-[#f5ebe0]/40'}`}>
+                      <div className={`text-[11px] font-bold ${step.checked ? 'text-white' : 'text-[#ffffff]/40'}`}>
                         {step.label}
                       </div>
-                      <div className="text-[9px] text-[#f5ebe0]/50 mt-0.5">{step.desc}</div>
+                      <div className="text-[9px] text-[#ffffff]/50 mt-0.5">{step.desc}</div>
                     </div>
                   </div>
                 ))}
@@ -1191,17 +1191,17 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
   }
 
   return (
-    <section className="mx-auto flex h-full w-full max-w-4xl flex-col bg-[#1e1410] border border-[#f5ebe0]/10 shadow-2xl sm:rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden lg:h-[calc(100vh-210px)]">
-      <header className="border-b border-[#f5ebe0]/10 bg-[#1e1410] px-5 py-4 sm:px-7 flex justify-between items-center shrink-0">
+    <section className="mx-auto flex h-full w-full max-w-4xl flex-col bg-[#000000] border border-[#ffffff]/10 shadow-2xl sm:rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden lg:h-[calc(100vh-210px)]">
+      <header className="border-b border-[#ffffff]/10 bg-[#000000] px-5 py-4 sm:px-7 flex justify-between items-center shrink-0">
         <div>
           <h2 className="font-bold text-white text-base">Relationship Counseling</h2>
-          <p className="text-xs text-[#f5ebe0]/60 mt-0.5">Private self-reflection and professional guidance</p>
+          <p className="text-xs text-[#ffffff]/60 mt-0.5">Private self-reflection and professional guidance</p>
         </div>
-        <div className="flex gap-1.5 bg-[#9c6644]/10 rounded-full p-1 border border-[#f5ebe0]/5">
+        <div className="flex gap-1.5 bg-[#c8102e]/10 rounded-full p-1 border border-[#ffffff]/5">
           <button
             onClick={() => setTab('ai')}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
-              tab === 'ai' ? 'bg-[#f27059] text-white' : 'text-[#f5ebe0]/60 hover:text-white'
+              tab === 'ai' ? 'bg-[#dc2626] text-white' : 'text-[#ffffff]/60 hover:text-white'
             }`}
           >
             AI Counselor
@@ -1209,7 +1209,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
           <button
             onClick={() => setTab('couples')}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 flex items-center gap-1 ${
-              tab === 'couples' ? 'bg-[#f27059] text-white' : 'text-[#f5ebe0]/60 hover:text-white'
+              tab === 'couples' ? 'bg-[#dc2626] text-white' : 'text-[#ffffff]/60 hover:text-white'
             }`}
           >
             Couples Therapy
@@ -1219,9 +1219,9 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
       </header>
 
       {tab === 'ai' ? (
-        <div className="flex-1 flex flex-col min-h-0 bg-[#1e1410]">
+        <div className="flex-1 flex flex-col min-h-0 bg-[#000000]">
           {loading ? (
-            <div className="flex-1 flex items-center justify-center text-sm text-[#f5ebe0]/50">
+            <div className="flex-1 flex items-center justify-center text-sm text-[#ffffff]/50">
               Initializing AI therapy session...
             </div>
           ) : (
@@ -1235,12 +1235,12 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                         <div
                           className={`rounded-[1.75rem] px-5 py-3 text-[14px] leading-relaxed shadow-soft ${
                             mine
-                              ? 'rounded-br-sm bg-[#f27059] text-white'
-                              : 'rounded-bl-sm bg-[#9c6644]/10 border border-[#f5ebe0]/10 text-white'
+                              ? 'rounded-br-sm bg-[#dc2626] text-white'
+                              : 'rounded-bl-sm bg-[#c8102e]/10 border border-[#ffffff]/10 text-white'
                           }`}
                         >
                           {!mine && (
-                            <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#f27059]">
+                            <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#dc2626]">
                               <Sparkles size={11} /> Luna Therapy
                             </div>
                           )}
@@ -1252,24 +1252,24 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                 })}
                 {sending && (
                   <div className="flex justify-start">
-                    <div className="rounded-[1.75rem] rounded-bl-sm bg-[#9c6644]/10 border border-[#f5ebe0]/10 px-5 py-3 text-sm text-white/50 animate-pulse">
+                    <div className="rounded-[1.75rem] rounded-bl-sm bg-[#c8102e]/10 border border-[#ffffff]/10 px-5 py-3 text-sm text-white/50 animate-pulse">
                       Luna is typing thoughts...
                     </div>
                   </div>
                 )}
               </div>
-              <form onSubmit={sendCounselingMessage} className="border-t border-[#f5ebe0]/10 p-5 bg-[#1e1410] shrink-0">
+              <form onSubmit={sendCounselingMessage} className="border-t border-[#ffffff]/10 p-5 bg-[#000000] shrink-0">
                 <div className="flex gap-3">
                   <input
                     type="text"
                     value={body}
                     onChange={e => setBody(e.target.value)}
                     placeholder="Describe what's happening or how you feel..."
-                    className="flex-1 rounded-2xl border border-[#f5ebe0]/10 bg-[#9c6644]/5 px-5 py-3.5 text-sm text-white placeholder-[#f5ebe0]/40 focus:border-[#f27059] focus:outline-none transition-all"
+                    className="flex-1 rounded-2xl border border-[#ffffff]/10 bg-[#c8102e]/5 px-5 py-3.5 text-sm text-white placeholder-[#ffffff]/40 focus:border-[#dc2626] focus:outline-none transition-all"
                   />
                   <button
                     disabled={sending || !body.trim()}
-                    className="grid h-12 w-12 place-items-center rounded-2xl bg-[#f27059] text-white hover:bg-[#e05e47] active:scale-95 disabled:opacity-30 transition-all"
+                    className="grid h-12 w-12 place-items-center rounded-2xl bg-[#dc2626] text-white hover:bg-[#b91c1c] active:scale-95 disabled:opacity-30 transition-all"
                   >
                     <Send size={16} />
                   </button>
@@ -1282,20 +1282,20 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {!profile.is_premium ? (
             paymentReference ? (
-              <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto my-12 bg-[#9c6644]/5 border border-[#f5ebe0]/10 rounded-[2rem] shadow-premium animate-pulse">
+              <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto my-12 bg-[#c8102e]/5 border border-[#ffffff]/10 rounded-[2rem] shadow-premium animate-pulse">
                 <div className="relative flex items-center justify-center w-16 h-16 mb-6">
-                  <div className="absolute inset-0 rounded-full border-4 border-[#f27059]/20 border-t-[#f27059] animate-spin" />
-                  <Lock size={24} className="text-[#f27059]" />
+                  <div className="absolute inset-0 rounded-full border-4 border-[#dc2626]/20 border-t-[#dc2626] animate-spin" />
+                  <Lock size={24} className="text-[#dc2626]" />
                 </div>
                 <h3 className="text-lg font-bold text-white font-display">Awaiting PIN Confirmation</h3>
-                <p className="mt-2 text-xs text-[#f5ebe0]/70 leading-relaxed">
+                <p className="mt-2 text-xs text-[#ffffff]/70 leading-relaxed">
                   We have sent a Mobile Money payment prompt to <span className="font-semibold text-white">{checkoutPhone}</span>.
                   Please approve the {premiumPrice ? `${premiumPrice.amount_ugx.toLocaleString()} UGX` : '11,000 UGX'} request on your phone.
                 </p>
-                <div className="mt-6 px-4 py-2 rounded-xl bg-[#291e19] border border-[#f5ebe0]/5 text-[10px] font-mono text-[#f5ebe0]/50 select-all">
+                <div className="mt-6 px-4 py-2 rounded-xl bg-[#111111] border border-[#ffffff]/5 text-[10px] font-mono text-[#ffffff]/50 select-all">
                   Ref: {paymentReference}
                 </div>
-                <div className="mt-1 text-[10px] text-[#f27059] font-semibold animate-pulse">
+                <div className="mt-1 text-[10px] text-[#dc2626] font-semibold animate-pulse">
                   Status: {paymentStatus || 'Initiated'}
                 </div>
                 <button
@@ -1303,18 +1303,18 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                     setPaymentReference(null)
                     setPaymentError('Payment confirmation cancelled by user.')
                   }}
-                  className="mt-6 text-xs font-semibold text-[#f5ebe0]/60 hover:text-white underline transition-all"
+                  className="mt-6 text-xs font-semibold text-[#ffffff]/60 hover:text-white underline transition-all"
                 >
                   Cancel & try again
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col p-8 sm:p-10 max-w-md mx-auto my-6 bg-[#9c6644]/5 border border-[#f5ebe0]/10 rounded-[2rem] shadow-premium text-center">
+              <div className="flex flex-col p-8 sm:p-10 max-w-md mx-auto my-6 bg-[#c8102e]/5 border border-[#ffffff]/10 rounded-[2rem] shadow-premium text-center">
                 <div className="mx-auto p-4 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-full w-fit mb-5">
                   <Lock size={28} />
                 </div>
                 <h3 className="text-xl font-bold text-white font-display">Unlock Couples Therapy</h3>
-                <p className="mt-2 text-xs text-[#f5ebe0]/70 leading-relaxed">
+                <p className="mt-2 text-xs text-[#ffffff]/70 leading-relaxed">
                   Premium members can schedule live counseling sessions with certified human relationship therapists, including automated meeting links.
                 </p>
 
@@ -1327,7 +1327,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                 <form onSubmit={initiateNylonPayment} className="mt-6 space-y-5 text-left">
                   {/* Provider Selection */}
                   <div>
-                    <label className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/60 block mb-2 text-center">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-[#ffffff]/60 block mb-2 text-center">
                       Select Payment Provider
                     </label>
                     <div className="grid grid-cols-2 gap-4">
@@ -1336,31 +1336,31 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                         onClick={() => setSelectedProvider('mtn')}
                         className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all active:scale-95 ${
                           selectedProvider === 'mtn'
-                            ? 'border-[#f27059] bg-[#f27059]/5 shadow-[0_0_15px_rgba(242,112,89,0.25)]'
-                            : 'border-[#f5ebe0]/10 bg-[#9c6644]/5 hover:border-[#f5ebe0]/20'
+                            ? 'border-[#dc2626] bg-[#dc2626]/5 shadow-[0_0_15px_rgba(242,112,89,0.25)]'
+                            : 'border-[#ffffff]/10 bg-[#c8102e]/5 hover:border-[#ffffff]/20'
                         }`}
                       >
                         <img src="/mtn.png" alt="MTN Mobile Money" className="h-10 w-auto object-contain rounded-lg" />
-                        <span className="text-[10px] font-bold mt-1 text-[#f5ebe0]">MTN MoMo</span>
+                        <span className="text-[10px] font-bold mt-1 text-[#ffffff]">MTN MoMo</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setSelectedProvider('airtel')}
                         className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all active:scale-95 ${
                           selectedProvider === 'airtel'
-                            ? 'border-[#f27059] bg-[#f27059]/5 shadow-[0_0_15px_rgba(242,112,89,0.25)]'
-                            : 'border-[#f5ebe0]/10 bg-[#9c6644]/5 hover:border-[#f5ebe0]/20'
+                            ? 'border-[#dc2626] bg-[#dc2626]/5 shadow-[0_0_15px_rgba(242,112,89,0.25)]'
+                            : 'border-[#ffffff]/10 bg-[#c8102e]/5 hover:border-[#ffffff]/20'
                         }`}
                       >
                         <img src="/airtel.png" alt="Airtel Money" className="h-10 w-auto object-contain rounded-lg" />
-                        <span className="text-[10px] font-bold mt-1 text-[#f5ebe0]">Airtel Money</span>
+                        <span className="text-[10px] font-bold mt-1 text-[#ffffff]">Airtel Money</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Phone Input */}
                   <div>
-                    <label className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/60 block mb-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-[#ffffff]/60 block mb-1.5">
                       {selectedProvider === 'mtn' ? 'MTN' : 'Airtel'} Phone Number
                     </label>
                     <input
@@ -1369,21 +1369,21 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                       value={checkoutPhone}
                       onChange={e => setCheckoutPhone(e.target.value)}
                       placeholder="e.g. +256700000000"
-                      className="premium-input w-full !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059]"
+                      className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626]"
                     />
                   </div>
 
                   {/* Pricing Breakdown */}
-                  <div className="flex justify-between items-center bg-[#291e19] border border-[#f5ebe0]/5 rounded-2xl p-4 mt-2">
+                  <div className="flex justify-between items-center bg-[#111111] border border-[#ffffff]/5 rounded-2xl p-4 mt-2">
                     <div className="text-left">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/40 block">Total Amount</span>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#ffffff]/40 block">Total Amount</span>
                       <span className="text-xs font-semibold text-white">Luna Premium Lifetime Upgrade</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-lg font-bold text-[#f27059] font-display block">
+                      <span className="text-lg font-bold text-[#dc2626] font-display block">
                         {premiumPrice ? `${premiumPrice.amount_ugx.toLocaleString()} UGX` : '11,000 UGX'}
                       </span>
-                      <span className="text-[10px] text-[#f5ebe0]/40 font-semibold block mt-0.5">
+                      <span className="text-[10px] text-[#ffffff]/40 font-semibold block mt-0.5">
                         ~ ${premiumPrice?.amount_usd || 3} USD
                       </span>
                     </div>
@@ -1392,7 +1392,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                   <button
                     type="submit"
                     disabled={isInitiatingPayment || !checkoutPhone.trim()}
-                    className="w-full rounded-full bg-[#f27059] py-3.5 text-xs font-bold text-white hover:bg-[#e05e47] active:scale-95 disabled:opacity-50 transition-all shadow-glow flex items-center justify-center gap-2"
+                    className="w-full rounded-full bg-[#dc2626] py-3.5 text-xs font-bold text-white hover:bg-[#b91c1c] active:scale-95 disabled:opacity-50 transition-all shadow-glow flex items-center justify-center gap-2"
                   >
                     {isInitiatingPayment ? (
                       <>
@@ -1408,10 +1408,10 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
             )
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-              <form onSubmit={scheduleSession} className="bg-[#9c6644]/5 border border-[#f5ebe0]/10 rounded-[2rem] p-6 space-y-4">
+              <form onSubmit={scheduleSession} className="bg-[#c8102e]/5 border border-[#ffffff]/10 rounded-[2rem] p-6 space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-bold text-white text-sm flex items-center gap-1.5">
-                    <Calendar size={16} className="text-[#f27059]" />
+                    <Calendar size={16} className="text-[#dc2626]" />
                     Schedule a Therapist Session
                   </h3>
                   <button 
@@ -1435,41 +1435,41 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                   </div>
                 )}
                 <div>
-                  <label className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/60 block mb-1.5">Partner's Full Name</label>
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-[#ffffff]/60 block mb-1.5">Partner's Full Name</label>
                   <input
                     type="text"
                     required
                     value={partnerName}
                     onChange={e => setPartnerName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="premium-input w-full !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059]"
+                    className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626]"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/60 block mb-1.5">Partner's Phone number</label>
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-[#ffffff]/60 block mb-1.5">Partner's Phone number</label>
                   <input
                     type="tel"
                     required
                     value={partnerPhone}
                     onChange={e => setPartnerPhone(e.target.value)}
                     placeholder="e.g. +256..."
-                    className="premium-input w-full !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059]"
+                    className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626]"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase font-bold tracking-wider text-[#f5ebe0]/60 block mb-1.5">Preferred Date & Time</label>
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-[#ffffff]/60 block mb-1.5">Preferred Date & Time</label>
                   <input
                     type="datetime-local"
                     required
                     value={scheduledTime}
                     onChange={e => setScheduledTime(e.target.value)}
-                    className="premium-input w-full !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059]"
+                    className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626]"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={scheduling}
-                  className="w-full rounded-full bg-[#f27059] py-3.5 text-xs font-bold text-white hover:bg-[#e05e47] transition-all"
+                  className="w-full rounded-full bg-[#dc2626] py-3.5 text-xs font-bold text-white hover:bg-[#b91c1c] transition-all"
                 >
                   {scheduling ? 'Scheduling...' : 'Schedule Session'}
                 </button>
@@ -1477,21 +1477,21 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
 
               <div className="space-y-4">
                 <h3 className="font-bold text-white text-sm flex items-center gap-1.5">
-                  <Calendar size={16} className="text-[#8ea869]" />
+                  <Calendar size={16} className="text-[#ffffff]" />
                   Upcoming Scheduled Sessions
                 </h3>
                 {sessions.length === 0 ? (
-                  <div className="text-xs text-[#f5ebe0]/50 p-6 text-center border border-[#f5ebe0]/10 rounded-2xl bg-[#9c6644]/5">
+                  <div className="text-xs text-[#ffffff]/50 p-6 text-center border border-[#ffffff]/10 rounded-2xl bg-[#c8102e]/5">
                     No sessions scheduled yet. Book your first couples therapy session above!
                   </div>
                 ) : (
                   <div className="space-y-3.5">
                     {sessions.map(s => (
-                      <div key={s.id} className="border border-[#f5ebe0]/10 rounded-2xl p-4.5 bg-[#9c6644]/5 space-y-3">
+                      <div key={s.id} className="border border-[#ffffff]/10 rounded-2xl p-4.5 bg-[#c8102e]/5 space-y-3">
                         <div className="flex justify-between items-start">
                           <div>
                             <div className="text-sm font-bold text-white">Joint session with {s.partner_name}</div>
-                            <div className="text-[11px] text-[#f5ebe0]/60 mt-0.5">{new Date(s.scheduled_time).toLocaleString()}</div>
+                            <div className="text-[11px] text-[#ffffff]/60 mt-0.5">{new Date(s.scheduled_time).toLocaleString()}</div>
                           </div>
                           <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
                             {s.status}
@@ -1501,7 +1501,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                           href={s.meeting_link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-1.5 w-full rounded-xl bg-[#8ea869]/10 hover:bg-[#8ea869]/20 border border-[#8ea869]/20 text-[#8ea869] font-bold py-2.5 text-xs transition-all"
+                          className="flex items-center justify-center gap-1.5 w-full rounded-xl bg-[#ffffff]/10 hover:bg-[#ffffff]/20 border border-[#ffffff]/20 text-[#ffffff] font-bold py-2.5 text-xs transition-all"
                         >
                           <Video size={13} />
                           Join Google Meet Session
@@ -1603,27 +1603,27 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
     }
   }
 
-  const labelStyle = 'text-xs font-bold uppercase tracking-wider text-[#f5ebe0]/80 block mb-1.5'
+  const labelStyle = 'text-xs font-bold uppercase tracking-wider text-[#ffffff]/80 block mb-1.5'
 
   return (
     <section className="mx-auto max-w-2xl py-10 w-full animate-fade-in">
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f27059]">Account Details</p>
+      <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#dc2626]">Account Details</p>
       <h1 className="mt-2 text-3xl font-bold font-display text-white">Preferences</h1>
       
-      <div className="bg-[#1e1410] border border-[#f5ebe0]/10 mt-8 rounded-[2rem] p-6 sm:p-8 space-y-6 text-[#f5ebe0]">
+      <div className="bg-[#000000] border border-[#ffffff]/10 mt-8 rounded-[2rem] p-6 sm:p-8 space-y-6 text-[#ffffff]">
         
         {/* Profile Picture */}
         <div>
           <label className={labelStyle}>Profile Picture</label>
           <div className="flex items-center gap-4 mt-2">
             {form.profile_picture ? (
-              <img src={form.profile_picture} className="h-16 w-16 rounded-full object-cover border border-[#f5ebe0]/20" />
+              <img src={form.profile_picture} className="h-16 w-16 rounded-full object-cover border border-[#ffffff]/20" />
             ) : (
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-[#8ea869] text-[#1e1410] font-bold text-xl uppercase shrink-0">
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-[#ffffff] text-[#000000] font-bold text-xl uppercase shrink-0">
                 {((form.display_name || form.username).substring(0, 2))}
               </div>
             )}
-            <label className="cursor-pointer rounded-full bg-[#f5ebe0]/10 border border-[#f5ebe0]/20 px-4 py-2 text-xs font-bold text-white hover:bg-[#f5ebe0]/20 active:scale-95 transition-all">
+            <label className="cursor-pointer rounded-full bg-[#ffffff]/10 border border-[#ffffff]/20 px-4 py-2 text-xs font-bold text-white hover:bg-[#ffffff]/20 active:scale-95 transition-all">
               Upload Image
               <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
             </label>
@@ -1631,7 +1631,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
               <button
                 type="button"
                 onClick={() => setForm(prev => ({ ...prev, profile_picture: '' }))}
-                className="text-xs text-[#f27059] font-bold hover:underline"
+                className="text-xs text-[#dc2626] font-bold hover:underline"
               >
                 Remove
               </button>
@@ -1644,7 +1644,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>Display name</label>
             <input
-              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
               value={form.display_name}
               onChange={e => setForm({ ...form, display_name: e.target.value })}
             />
@@ -1652,7 +1652,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>First Name</label>
             <input
-              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
               value={form.first_name}
               onChange={e => setForm({ ...form, first_name: e.target.value })}
             />
@@ -1664,7 +1664,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>Username</label>
             <input
-              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
               value={form.username}
               onChange={e => setForm({ ...form, username: e.target.value })}
             />
@@ -1672,7 +1672,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>Email Address (Contact)</label>
             <input
-              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
               value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
             />
@@ -1682,7 +1682,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
         <div>
           <label className={labelStyle}>About you</label>
           <textarea
-            className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20 resize-none"
+            className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20 resize-none"
             rows={3}
             value={form.bio}
             onChange={e => setForm({ ...form, bio: e.target.value })}
@@ -1692,7 +1692,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
         <div>
           <label className={labelStyle}>Values</label>
           <input
-            className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+            className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
             value={String(form.values)}
             onChange={e => setForm({ ...form, values: e.target.value as any })}
             placeholder="Separate values with commas"
@@ -1702,7 +1702,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
         <div>
           <label className={labelStyle}>Interests</label>
           <input
-            className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+            className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
             value={String(form.interests)}
             onChange={e => setForm({ ...form, interests: e.target.value as any })}
             placeholder="Separate interests with commas"
@@ -1713,7 +1713,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>My Gender</label>
             <select
-              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
               value={form.gender}
               onChange={e => setForm({ ...form, gender: e.target.value as any })}
             >
@@ -1726,7 +1726,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>Show me profiles of</label>
             <select
-              className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
               value={form.gender_preference}
               onChange={e => setForm({ ...form, gender_preference: e.target.value as any })}
             >
@@ -1741,26 +1741,26 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <label className={labelStyle}>Discoverability & Alerts</label>
           <div className="space-y-3 mt-3">
             {profile.is_premium ? (
-              <div className="flex items-center justify-between rounded-2xl border border-[#f27059]/30 bg-[#f27059]/10 p-4.5 text-white shadow-premium">
+              <div className="flex items-center justify-between rounded-2xl border border-[#dc2626]/30 bg-[#dc2626]/10 p-4.5 text-white shadow-premium">
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#f27059]">Luna Premium</div>
-                  <div className="text-[11px] text-[#f5ebe0]/70 mt-0.5">Your subscription is active. Enjoy all premium benefits!</div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-[#dc2626]">Luna Premium</div>
+                  <div className="text-[11px] text-[#ffffff]/70 mt-0.5">Your subscription is active. Enjoy all premium benefits!</div>
                   <button type="button" onClick={togglePremiumTest} className="mt-2 text-[10px] text-yellow-400 font-bold hover:underline select-none block text-left">
                     🔧 Toggle Premium status for testing (Dev Mode)
                   </button>
                 </div>
-                <span className="rounded-full bg-[#f27059] px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">Active</span>
+                <span className="rounded-full bg-[#dc2626] px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">Active</span>
               </div>
             ) : (
-              <div className="flex items-center justify-between rounded-2xl border border-[#f5ebe0]/10 bg-[#9c6644]/5 p-4.5 text-[#f5ebe0]/70">
+              <div className="flex items-center justify-between rounded-2xl border border-[#ffffff]/10 bg-[#c8102e]/5 p-4.5 text-[#ffffff]/70">
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#f5ebe0]/50">Luna Premium</div>
-                  <div className="text-[11px] text-[#f5ebe0]/50 mt-0.5">Upgrade in the Counseling tab to unlock all advanced features.</div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-[#ffffff]/50">Luna Premium</div>
+                  <div className="text-[11px] text-[#ffffff]/50 mt-0.5">Upgrade in the Counseling tab to unlock all advanced features.</div>
                   <button type="button" onClick={togglePremiumTest} className="mt-2 text-[10px] text-yellow-500 font-bold hover:underline select-none block text-left">
                     🔧 Toggle Premium status for testing (Dev Mode)
                   </button>
                 </div>
-                <span className="rounded-full bg-[#f5ebe0]/10 px-3 py-1 text-[10px] font-bold text-[#f5ebe0]/40 uppercase tracking-wider">Inactive</span>
+                <span className="rounded-full bg-[#ffffff]/10 px-3 py-1 text-[10px] font-bold text-[#ffffff]/40 uppercase tracking-wider">Inactive</span>
               </div>
             )}
             {([
@@ -1774,19 +1774,19 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
                 key={field}
                 className={`flex items-start gap-4 rounded-2xl border p-4.5 cursor-pointer transition-all ${
                   form[field]
-                    ? 'border-[#f27059]/30 bg-[#f27059]/10 text-white'
-                    : 'border-[#f5ebe0]/10 bg-[#9c6644]/10 hover:border-[#f27059]/20 text-[#f5ebe0]'
+                    ? 'border-[#dc2626]/30 bg-[#dc2626]/10 text-white'
+                    : 'border-[#ffffff]/10 bg-[#c8102e]/10 hover:border-[#dc2626]/20 text-[#ffffff]'
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={Boolean(form[field])}
                   onChange={e => setForm({ ...form, [field]: e.target.checked })}
-                  className="mt-0.5 rounded border-[#f5ebe0]/10 text-[#f27059] focus:ring-[#f27059]/20 h-4 w-4"
+                  className="mt-0.5 rounded border-[#ffffff]/10 text-[#dc2626] focus:ring-[#dc2626]/20 h-4 w-4"
                 />
                 <div>
-                  <span className={`block font-bold text-xs ${form[field] ? 'text-[#f27059]' : 'text-white'}`}>{label}</span>
-                  <span className="block text-[10px] text-[#f5ebe0]/70 mt-0.5">{desc}</span>
+                  <span className={`block font-bold text-xs ${form[field] ? 'text-[#dc2626]' : 'text-white'}`}>{label}</span>
+                  <span className="block text-[10px] text-[#ffffff]/70 mt-0.5">{desc}</span>
                 </div>
               </label>
             ))}
@@ -1796,17 +1796,17 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
         <button
           onClick={save}
           disabled={busy}
-          className="mt-4 w-full rounded-full bg-[#f27059] px-6 py-3.5 font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all disabled:opacity-50 shadow-glow"
+          className="mt-4 w-full rounded-full bg-[#dc2626] px-6 py-3.5 font-bold text-white hover:bg-[#b91c1c] active:scale-95 transition-all disabled:opacity-50 shadow-glow"
         >
           {busy ? 'Saving...' : saved ? '✓ Changes Saved' : 'Save changes'}
         </button>
 
         {/* Delete Account section */}
-        <div className="mt-8 pt-8 border-t border-[#f5ebe0]/10">
+        <div className="mt-8 pt-8 border-t border-[#ffffff]/10">
           <label className="text-xs font-bold uppercase tracking-wider text-red-500 block mb-1.5">Danger Zone</label>
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 text-[#f5ebe0]">
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 text-[#ffffff]">
             <h4 className="text-sm font-bold text-white">Permanently Delete Account</h4>
-            <p className="text-xs text-[#f5ebe0]/70 mt-1 leading-relaxed">
+            <p className="text-xs text-[#ffffff]/70 mt-1 leading-relaxed">
               This will instantly erase your profile summaries, conversations, matches, and details. This cannot be undone.
             </p>
             
@@ -1816,7 +1816,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
                 <input
                   type="password"
                   placeholder="Enter password to confirm deletion"
-                  className="premium-input !bg-[#291e19] !border-red-500/20 !text-[#f5ebe0] focus:!border-red-500 focus:!ring-red-500/20 text-xs py-2"
+                  className="premium-input !bg-[#111111] !border-red-500/20 !text-[#ffffff] focus:!border-red-500 focus:!ring-red-500/20 text-xs py-2"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                 />
@@ -1896,7 +1896,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
   if (!profile) return null
 
   return (
-    <div className="noise min-h-screen bg-[#1e1410] text-[#f5ebe0] selection:bg-[#f27059]/20 flex flex-col overflow-x-hidden">
+    <div className="noise min-h-screen bg-[#000000] text-[#ffffff] selection:bg-[#dc2626]/20 flex flex-col overflow-x-hidden">
       <AppHeader page={page} setPage={navigateToPage} profile={profile} onGoToAdmin={onGoToAdmin} />
       
       <main className={`mx-auto w-full ${page === 'conversations' ? 'max-w-[1440px]' : 'max-w-6xl'} px-5 pb-10 flex-1 flex flex-col transition-all duration-300`}>
@@ -1906,19 +1906,19 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
             {/* Conversations List Panel */}
             <section className={`flex flex-col h-full ${chatId !== null ? 'md:col-span-4 lg:col-span-3 hidden md:flex' : 'md:col-span-5 lg:col-span-4 flex'}`}>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f27059]">Your inbox</p>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#dc2626]">Your inbox</p>
                 <h1 className="mt-2 text-3xl font-bold font-display text-white">Conversations</h1>
-                <p className="mt-2 text-sm text-[#f5ebe0]/80">Luna brings potential connections here privately, one at a time.</p>
+                <p className="mt-2 text-sm text-[#ffffff]/80">Luna brings potential connections here privately, one at a time.</p>
               </div>
 
               {/* Navigation Tabs */}
-              <div className="flex gap-2 border-b border-[#f5ebe0]/10 pb-3 mt-6">
+              <div className="flex gap-2 border-b border-[#ffffff]/10 pb-3 mt-6">
                 <button
                   onClick={() => setInboxTab('chats')}
                   className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-200 ${
                     inboxTab === 'chats'
-                      ? 'bg-[#f27059] text-white shadow-premium'
-                      : 'text-[#f5ebe0]/80 hover:bg-[#1e1410] hover:text-white'
+                      ? 'bg-[#dc2626] text-white shadow-premium'
+                      : 'text-[#ffffff]/80 hover:bg-[#000000] hover:text-white'
                   }`}
                 >
                   Chats ({state.conversations.filter(c => !c.is_counseling).length})
@@ -1927,8 +1927,8 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                   onClick={() => setInboxTab('offers')}
                   className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-200 ${
                     inboxTab === 'offers'
-                      ? 'bg-[#f27059] text-white shadow-premium'
-                      : 'text-[#f5ebe0]/80 hover:bg-[#1e1410] hover:text-white'
+                      ? 'bg-[#dc2626] text-white shadow-premium'
+                      : 'text-[#ffffff]/80 hover:bg-[#000000] hover:text-white'
                   }`}
                 >
                   Match Offers ({state.matches.filter(m => m.status === 'suggested').length})
@@ -1946,35 +1946,35 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                           onClick={() => navigateToChat(c.id)}
                           className={`flex w-full items-center gap-4 rounded-2xl p-4.5 text-left transition-all duration-200 border ${
                             isSelected
-                              ? 'bg-[#1e1410] border-[#f27059]/30 text-white shadow-premium'
-                              : 'bg-[#1e1410]/50 border-[#f5ebe0]/10 hover:border-[#f27059]/30 hover:bg-[#1e1410] text-[#f5ebe0]'
+                              ? 'bg-[#000000] border-[#dc2626]/30 text-white shadow-premium'
+                              : 'bg-[#000000]/50 border-[#ffffff]/10 hover:border-[#dc2626]/30 hover:bg-[#000000] text-[#ffffff]'
                           }`}
                         >
                           <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl transition ${
-                            isSelected ? 'bg-[#f27059] text-white shadow-premium' : 'bg-[#8ea869] text-[#1e1410] border border-[#8ea869]/20'
+                            isSelected ? 'bg-[#dc2626] text-white shadow-premium' : 'bg-[#ffffff] text-[#000000] border border-[#ffffff]/20'
                           }`}>
                             {c.is_luna ? <Sparkles size={16} /> : <MessageCircle size={16} />}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between">
-                              <span className={`font-bold text-sm truncate ${isSelected ? 'text-[#f27059]' : 'text-white'}`}>
+                              <span className={`font-bold text-sm truncate ${isSelected ? 'text-[#dc2626]' : 'text-white'}`}>
                                 {c.title}
                               </span>
                               {c.unread_count > 0 && (
-                                <span className="h-2 w-2 shrink-0 rounded-full bg-[#f27059] shadow-glow" />
+                                <span className="h-2 w-2 shrink-0 rounded-full bg-[#dc2626] shadow-glow" />
                               )}
                             </div>
-                            <div className="mt-1 truncate text-xs text-[#f5ebe0]/60">
+                            <div className="mt-1 truncate text-xs text-[#ffffff]/60">
                               {c.messages && c.messages.length ? c.messages[c.messages.length - 1].body : 'Start the conversation'}
                             </div>
                           </div>
-                          <ArrowRight size={14} className={`shrink-0 transition-transform ${isSelected ? 'text-[#f27059]' : 'text-[#f5ebe0]/40'}`} />
+                          <ArrowRight size={14} className={`shrink-0 transition-transform ${isSelected ? 'text-[#dc2626]' : 'text-[#ffffff]/40'}`} />
                         </button>
                       )
                     })}
                     
                     {!state.loading && state.conversations.length === 0 && (
-                      <div className="rounded-2xl border border-dashed border-[#f5ebe0]/10 bg-[#291e19]/50 p-8 text-center text-xs font-semibold text-[#f5ebe0]/50">
+                      <div className="rounded-2xl border border-dashed border-[#ffffff]/10 bg-[#111111]/50 p-8 text-center text-xs font-semibold text-[#ffffff]/50">
                         Your Luna inbox is being prepared.
                       </div>
                     )}
@@ -1984,27 +1984,27 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                     {state.matches.filter(m => m.status === 'suggested').map(m => (
                       <div
                         key={m.id}
-                        className="bg-[#1e1410] border border-[#f5ebe0]/10 rounded-2xl p-5 shadow-soft flex flex-col gap-3 transition-all hover:border-[#f27059]/20 text-[#f5ebe0]"
+                        className="bg-[#000000] border border-[#ffffff]/10 rounded-2xl p-5 shadow-soft flex flex-col gap-3 transition-all hover:border-[#dc2626]/20 text-[#ffffff]"
                       >
                         <div className="flex items-center justify-between">
                           <div>
                             <span className="font-bold text-sm text-white">{m.profile.display_name}</span>
-                            <span className="text-[10px] block mt-0.5 uppercase tracking-wider font-bold text-[#f27059]">{m.profile.connection_goal}</span>
+                            <span className="text-[10px] block mt-0.5 uppercase tracking-wider font-bold text-[#dc2626]">{m.profile.connection_goal}</span>
                           </div>
-                          <span className="rounded-full bg-[#8ea869]/10 px-2.5 py-1 text-[10px] font-bold text-[#8ea869] border border-[#8ea869]/20">
+                          <span className="rounded-full bg-[#ffffff]/10 px-2.5 py-1 text-[10px] font-bold text-[#ffffff] border border-[#ffffff]/20">
                             {m.score}% Match
                           </span>
                         </div>
 
                         {m.profile.bio && (
-                          <p className="text-[11px] text-[#f5ebe0]/80 italic leading-relaxed border-t border-b border-[#f5ebe0]/10 py-3">
+                          <p className="text-[11px] text-[#ffffff]/80 italic leading-relaxed border-t border-b border-[#ffffff]/10 py-3">
                             "{m.profile.bio}"
                           </p>
                         )}
 
                         {m.ai_explanation ? (
-                          <div className="text-[10px] text-[#f5ebe0]/90 leading-normal bg-[#9c6644]/10 rounded-xl p-3 border border-[#f5ebe0]/10">
-                            <span className="font-bold text-[#f27059] block mb-1">Luna's Compatibility Insight:</span>
+                          <div className="text-[10px] text-[#ffffff]/90 leading-normal bg-[#c8102e]/10 rounded-xl p-3 border border-[#ffffff]/10">
+                            <span className="font-bold text-[#dc2626] block mb-1">Luna's Compatibility Insight:</span>
                             {m.ai_explanation}
                           </div>
                         ) : (
@@ -2017,7 +2017,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                                 console.error(e)
                               }
                             }}
-                            className="text-[10px] font-bold text-[#f27059] hover:text-[#e05e47] text-left flex items-center gap-1.5"
+                            className="text-[10px] font-bold text-[#dc2626] hover:text-[#b91c1c] text-left flex items-center gap-1.5"
                           >
                             <Sparkles size={12} className="animate-pulse" /> Ask Luna to explain match compatibility
                           </button>
@@ -2033,7 +2033,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                                 console.error(e)
                               }
                             }}
-                            className="flex-1 rounded-full border border-[#f5ebe0]/20 bg-transparent text-[10px] font-bold text-[#f5ebe0] py-2.5 hover:bg-[#f5ebe0]/10 active:scale-95 transition-all"
+                            className="flex-1 rounded-full border border-[#ffffff]/20 bg-transparent text-[10px] font-bold text-[#ffffff] py-2.5 hover:bg-[#ffffff]/10 active:scale-95 transition-all"
                           >
                             Pass
                           </button>
@@ -2049,7 +2049,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                                 console.error(e)
                               }
                             }}
-                            className="flex-1 rounded-full bg-[#f27059] text-[10px] font-bold text-white py-2.5 hover:bg-[#e05e47] active:scale-95 shadow-premium transition-all"
+                            className="flex-1 rounded-full bg-[#dc2626] text-[10px] font-bold text-white py-2.5 hover:bg-[#b91c1c] active:scale-95 shadow-premium transition-all"
                           >
                             Accept & Chat
                           </button>
@@ -2067,27 +2067,27 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
               </div>
 
               {/* Profile Card settings widget */}
-              <div className="mt-6 border-t border-[#f5ebe0]/10 pt-4">
+              <div className="mt-6 border-t border-[#ffffff]/10 pt-4">
                 <div 
                   onClick={() => navigateToPage('preferences')}
-                  className="flex items-center gap-3 p-3 rounded-2xl bg-[#1e1410]/50 border border-[#f5ebe0]/10 hover:bg-[#1e1410] hover:border-[#f27059]/30 cursor-pointer transition-all active:scale-[0.98]"
+                  className="flex items-center gap-3 p-3 rounded-2xl bg-[#000000]/50 border border-[#ffffff]/10 hover:bg-[#000000] hover:border-[#dc2626]/30 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {profile.profile_picture ? (
                     <img 
                       src={profile.profile_picture} 
                       alt={profile.display_name || profile.user.username} 
-                      className="h-10 w-10 rounded-full object-cover border border-[#f5ebe0]/20" 
+                      className="h-10 w-10 rounded-full object-cover border border-[#ffffff]/20" 
                     />
                   ) : (
-                    <div className="grid h-10 w-10 place-items-center rounded-full bg-[#8ea869] text-[#1e1410] font-bold text-sm uppercase border border-[#8ea869]/20 shrink-0">
+                    <div className="grid h-10 w-10 place-items-center rounded-full bg-[#ffffff] text-[#000000] font-bold text-sm uppercase border border-[#ffffff]/20 shrink-0">
                       {((profile.display_name || profile.user.username).substring(0, 2))}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-white text-sm truncate">{profile.display_name || profile.user.username}</div>
-                    <div className="text-[11px] font-semibold text-[#f5ebe0]/40 mt-0.5">
+                    <div className="text-[11px] font-semibold text-[#ffffff]/40 mt-0.5">
                       {profile.is_premium ? (
-                        <span className="text-[#eab308] font-bold uppercase tracking-wider">Premium</span>
+                        <span className="text-[#ffffff] font-bold uppercase tracking-wider">Premium</span>
                       ) : (
                         <span>Free Tier</span>
                       )}
@@ -2097,9 +2097,9 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                 {!profile.is_premium && (
                   <button
                     onClick={() => navigateToPage('counseling')}
-                    className="mt-3 w-full flex items-center justify-center gap-1.5 rounded-full border border-[#f5ebe0]/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold text-[#f5ebe0] py-2.5 transition-all shadow-soft active:scale-[0.98]"
+                    className="mt-3 w-full flex items-center justify-center gap-1.5 rounded-full border border-[#ffffff]/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold text-[#ffffff] py-2.5 transition-all shadow-soft active:scale-[0.98]"
                   >
-                    <Gift size={12} className="text-[#f27059]" />
+                    <Gift size={12} className="text-[#dc2626]" />
                     Claim offer
                   </button>
                 )}
@@ -2132,7 +2132,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
         )}
       </main>
 
-      <footer className="w-full border-t border-[#f5ebe0]/10 py-6 text-center text-xs text-[#f5ebe0]/40">
+      <footer className="w-full border-t border-[#ffffff]/10 py-6 text-center text-xs text-[#ffffff]/40">
         <div className="mx-auto max-w-6xl px-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} Luna. All rights reserved.</p>
           <div className="flex gap-4">
@@ -2148,23 +2148,23 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
 
       {showPrivacyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="w-full max-w-2xl bg-[#1e1410] border border-[#f5ebe0]/10 rounded-[2rem] shadow-soft overflow-hidden flex flex-col max-h-[85vh]">
-            <header className="px-6 py-5 border-b border-[#f5ebe0]/10 flex items-center justify-between">
+          <div className="w-full max-w-2xl bg-[#000000] border border-[#ffffff]/10 rounded-[2rem] shadow-soft overflow-hidden flex flex-col max-h-[85vh]">
+            <header className="px-6 py-5 border-b border-[#ffffff]/10 flex items-center justify-between">
               <div className="flex items-center gap-2 text-white font-bold font-display">
-                <Shield className="text-[#f27059]" size={20} />
+                <Shield className="text-[#dc2626]" size={20} />
                 <span>Luna Privacy Policy & Safety Disclaimer</span>
               </div>
               <button
                 onClick={() => setShowPrivacyModal(false)}
-                className="rounded-full p-1.5 hover:bg-[#f5ebe0]/10 text-[#f5ebe0]/70 hover:text-white transition-all"
+                className="rounded-full p-1.5 hover:bg-[#ffffff]/10 text-[#ffffff]/70 hover:text-white transition-all"
               >
                 <X size={18} />
               </button>
             </header>
             
-            <div className="p-6 overflow-y-auto space-y-5 text-sm text-[#f5ebe0]/80 leading-relaxed">
+            <div className="p-6 overflow-y-auto space-y-5 text-sm text-[#ffffff]/80 leading-relaxed">
               <section className="space-y-2">
-                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#f27059]">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#dc2626]">
                   <AlertTriangle size={13} /> Chat Safety Disclaimer
                 </h4>
                 <p>
@@ -2176,7 +2176,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
               </section>
 
               <section className="space-y-2">
-                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#f27059]">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#dc2626]">
                   <Shield size={13} /> Strict Connection Guidelines
                 </h4>
                 <p>
@@ -2188,7 +2188,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
               </section>
 
               <section className="space-y-2">
-                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#f27059]">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#dc2626]">
                   <Users size={13} /> Data Collection & Handling
                 </h4>
                 <p>
@@ -2200,7 +2200,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
               </section>
 
               <section className="space-y-2">
-                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#f27059]">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#dc2626]">
                   <Lock size={13} /> User Rights & Account Deletion
                 </h4>
                 <p>
@@ -2209,10 +2209,10 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
               </section>
             </div>
 
-            <footer className="px-6 py-4 border-t border-[#f5ebe0]/10 flex justify-end bg-cocoa-900/10">
+            <footer className="px-6 py-4 border-t border-[#ffffff]/10 flex justify-end bg-cocoa-900/10">
               <button
                 onClick={() => setShowPrivacyModal(false)}
-                className="rounded-full bg-[#f27059] px-6 py-2.5 text-xs font-bold text-white hover:bg-[#e05e47] active:scale-95 transition-all shadow-glow"
+                className="rounded-full bg-[#dc2626] px-6 py-2.5 text-xs font-bold text-white hover:bg-[#b91c1c] active:scale-95 transition-all shadow-glow"
               >
                 Understand & Close
               </button>

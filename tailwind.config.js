@@ -5,56 +5,69 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-        display: ['Georgia', 'serif']
+        display: ['Playfair Display', 'Georgia', 'serif']
       },
       colors: {
         terracotta: {
-          50: '#ffeedd',
-          100: '#ffddcc',
-          200: '#ffccbb',
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
           300: '#fca5a5',
-          500: '#f27059',
-          600: '#e05e47',
-          700: '#b93c27',
+          400: '#f87171',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
         },
         cocoa: {
-          50: '#f5ebe0',
-          100: '#e6ccb2',
-          300: '#b7b7a4',
-          500: '#6b705c',
-          700: '#3f37c9',
-          900: '#1e1410',
+          50: '#fafafa',
+          100: '#f5f5f5',
+          300: '#a3a3a3',
+          500: '#737373',
+          700: '#404040',
+          900: '#000000',
         },
         cream: '#ffffff',
-        warmbg: '#9c6644',
+        warmbg: '#c8102e',
+        brand: {
+          DEFAULT: '#c8102e',
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a5',
+          400: '#f87171',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#c8102e',
+        },
         // Compatibility mappings to prevent breakage in legacy screens
         lime: {
-          DEFAULT: '#8ea869',
-          50: '#f4f8ed',
-          100: '#e8eedb',
-          200: '#d1dfb7',
-          300: '#b9cf93',
-          500: '#8ea869',
-          600: '#748e50',
-          700: '#5a733c',
+          DEFAULT: '#ffffff',
+          50: '#ffffff',
+          100: '#ffffff',
+          200: '#ffffff',
+          300: '#ffffff',
+          500: '#ffffff',
+          600: '#e5e5e5',
+          700: '#d4d4d4',
         },
         ink: {
-          DEFAULT: '#1e1410',
-          50: '#f5ebe0',
-          100: '#e6ccb2',
-          300: '#b7b7a4',
-          500: '#6b705c',
-          700: '#3f37c9',
-          900: '#1e1410',
+          DEFAULT: '#000000',
+          50: '#fafafa',
+          100: '#f5f5f5',
+          300: '#a3a3a3',
+          500: '#737373',
+          700: '#404040',
+          900: '#000000',
         }
       },
       boxShadow: {
-        glow: '0 0 60px rgba(242,112,89,.15)',
-        premium: '0 10px 35px -5px rgba(30,20,16,.08), 0 2px 4px rgba(30,20,16,.03)',
-        soft: '0 4px 20px -2px rgba(30,20,16,.04)'
+        glow: '0 0 60px rgba(220,38,38,.2)',
+        premium: '0 10px 35px -5px rgba(0,0,0,.35), 0 2px 4px rgba(0,0,0,.2)',
+        soft: '0 4px 20px -2px rgba(0,0,0,.25)'
       }
     }
   },
   plugins: []
 }
-

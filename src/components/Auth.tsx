@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Circle, ShieldCheck, X, ArrowRight } from 'lucide-react'
+import { Circle, ShieldCheck, X, ArrowRight, Heart, Users, MessageCircle, Sparkles } from 'lucide-react'
 import api from '../lib/api'
 import PasswordRecovery from './PasswordRecovery'
 import HowItWorks from './HowItWorks'
@@ -91,112 +91,139 @@ export default function Auth() {
     )
   }
 
+  const pillars = [
+    { Icon: ShieldCheck, label: 'Private by default — no open DMs or public match lists' },
+    { Icon: MessageCircle, label: 'One thoughtful match at a time, chosen quietly' },
+    { Icon: Sparkles, label: 'Consent-first introductions, on your terms' }
+  ]
+
   return (
-    <main className="min-h-screen bg-[#9c6644] text-[#f5ebe0] selection:bg-[#f27059]/20 noise flex flex-col justify-between relative overflow-hidden">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-10 bg-[#1e1410] border-b border-[#f5ebe0]/10 px-6 sm:px-12 flex h-20 items-center justify-between">
+    <main className="min-h-screen bg-[#c8102e] text-white selection:bg-[#dc2626]/40 noise flex flex-col relative overflow-hidden">
+      {/* Navbar — sign in / sign up links sit above the actors photo */}
+      <nav className="sticky top-0 z-10 bg-black border-b border-white/10 px-6 sm:px-12 flex h-20 items-center justify-between">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2.5 text-base font-bold tracking-tight text-[#f5ebe0] focus:outline-none"
+          className="flex items-center gap-2.5 text-base font-bold tracking-tight text-white focus:outline-none"
         >
-          <Circle size={18} strokeWidth={4} className="text-[#f27059]" />
-          <span className="font-display text-xl tracking-tight">luna<span className="text-[#f27059]">.</span></span>
+          <Circle size={18} strokeWidth={4} className="text-[#BF2121]" />
+          <span className="font-display text-xl tracking-tight">luna<span className="text-[#BF2121]">.</span></span>
         </button>
-        <div className="flex items-center gap-6 text-sm font-medium text-[#f5ebe0]/80 sm:gap-8">
+        <div className="flex items-center gap-6 text-sm font-medium text-white/80 sm:gap-8">
           <button
             onClick={() => navigate('/how-it-works')}
-            className="hover:text-[#f27059] transition-colors duration-200"
+            className="hover:text-white transition-colors duration-200"
           >
-            How Luna Protects You
+            How It Works
           </button>
           <button
             onClick={() => begin('login')}
-            className="hover:text-[#f27059] transition-colors duration-200 hidden sm:block"
+            className="hover:text-white transition-colors duration-200 hidden sm:block"
           >
             Sign in
           </button>
           <button
             onClick={() => begin('register')}
-            className="rounded-full bg-[#f27059] px-6 py-2.5 font-semibold text-white hover:bg-[#e05e47] active:scale-95 transition-all duration-200"
+            className="rounded-full bg-[#BF2121] px-6 py-2.5 font-semibold text-white hover:bg-[#a31a1a] active:scale-95 transition-all duration-200"
           >
             Join Luna
           </button>
         </div>
       </nav>
 
-      {/* Main mockup landing card container */}
-      <div className="flex-1 flex flex-col md:flex-row-reverse items-stretch z-10 w-full bg-[#1e1410]">
-        {/* Right Column (Mascot Illustration) */}
-        <div className="w-full md:w-1/2 h-[380px] md:h-auto relative overflow-hidden bg-[#1e1410] flex-initial md:flex-1 flex items-center justify-center p-8">
-          <img
-            src="/static/luna_playful_mascot.png"
-            alt="Luna AI Mascot"
-            className="w-full max-w-[340px] md:max-w-[420px] aspect-square object-contain"
-          />
-        </div>
+      {/* Hero — actors as full-bleed background, content on top */}
+      <section className="relative flex-1 z-10 overflow-hidden">
+        <img
+          src="/static/actors.png"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-black/25" />
 
-        {/* Left Column (Content) */}
-        <div className="flex-initial md:flex-1 flex flex-col justify-center items-start px-6 sm:px-12 md:px-20 lg:px-28 py-12 md:py-20 max-w-2xl mx-auto md:mx-0 bg-[#1e1410]">
-          <div>
-            <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.25em] text-[#8ea869] mb-4">
+        <div className="relative z-10 flex flex-col justify-center px-6 sm:px-12 py-12 sm:py-20">
+          {/* Words directly on the background */}
+          <div className="mx-auto w-full max-w-3xl text-center">
+            <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.25em] text-white mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
               Your private matchmaking concierge
             </p>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.12] tracking-tight text-[#ffffff] mb-6">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.12] tracking-tight text-white mb-6 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
               Talk to Luna AI
             </h1>
-            <p className="text-sm sm:text-base leading-relaxed text-[#f5ebe0]/90 mb-8 max-w-lg">
-              You have no private matches yet. Find real connections by starting your AI interview.
+            <p className="text-sm sm:text-base leading-relaxed text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-[0_1px_6px_rgba(0,0,0,0.5)]">
+              Luna gets to know your values, goals, and deal-breakers, then quietly introduces you to one thoughtful match at a time. No swiping. No public profile. Just meaningful connections.
             </p>
+
+            <ul className="space-y-3 mb-8 max-w-2xl mx-auto">
+              {pillars.map(({ Icon, label }) => (
+                <li key={label} className="flex items-center justify-center gap-3 text-sm text-white/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.5)]">
+                  <span className="p-1.5 bg-[#BF2121]/80 rounded-lg shrink-0">
+                    <Icon size={15} className="text-white" />
+                  </span>
+                  <span className="leading-snug">{label}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
+              <button
+                onClick={() => begin('register')}
+                className="w-full sm:w-auto rounded-full bg-[#BF2121] text-sm font-bold text-white py-4 px-8 flex items-center justify-center gap-2 hover:bg-[#a31a1a] active:scale-[0.98] transition-all shadow-soft"
+              >
+                New Onboarding Chat + <ArrowRight size={16} />
+              </button>
+              <button
+                onClick={() => navigate('/how-it-works')}
+                className="w-full sm:w-auto text-center rounded-full border-2 border-[#BF2121]/70 bg-black/30 text-sm font-semibold text-white py-4 px-8 hover:bg-[#BF2121] hover:border-[#BF2121] active:scale-[0.98] transition-all"
+              >
+                How It Works
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <button
-              onClick={() => begin('register')}
-              className="w-full sm:w-auto rounded-full bg-[#f27059] text-sm font-bold text-white py-4 px-8 flex items-center justify-center gap-2 hover:bg-[#e05e47] active:scale-[0.98] transition-all shadow-soft"
-            >
-              New Onboarding Chat +
-            </button>
-
-            <button
-              onClick={() => navigate('/how-it-works')}
-              className="w-full sm:w-auto text-center rounded-full border-2 border-[#f5ebe0]/20 bg-transparent text-sm font-semibold text-[#f5ebe0] py-4 px-8 hover:bg-[#8ea869] hover:text-[#1e1410] hover:border-[#8ea869] active:scale-[0.98] transition-all"
-            >
-              How Luna Protects You
-            </button>
+          {/* Relationship circles below */}
+          <div className="mt-12 flex items-center justify-center gap-8 sm:gap-12">
+            <div className="flex h-28 w-28 sm:h-36 sm:w-36 flex-col items-center justify-center gap-2 rounded-full bg-black/60 backdrop-blur border-4 border-white/25 shadow-2xl">
+              <Heart size={28} className="text-[#BF2121] fill-[#BF2121]/40" />
+              <span className="text-sm sm:text-base font-bold text-white">Romantic</span>
+            </div>
+            <div className="flex h-28 w-28 sm:h-36 sm:w-36 flex-col items-center justify-center gap-2 rounded-full bg-black/60 backdrop-blur border-4 border-white/25 shadow-2xl">
+              <Users size={28} className="text-white" />
+              <span className="text-sm sm:text-base font-bold text-white">Friendship</span>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
-      <footer className="w-full border-t border-[#f5ebe0]/10 py-8 bg-[#1e1410] z-10">
-        <div className="mx-auto flex max-w-6xl justify-center px-6 text-xs text-[#f5ebe0]/60">
+      <footer className="w-full border-t border-white/10 py-8 bg-black z-10">
+        <div className="mx-auto flex max-w-6xl justify-center px-6 text-xs text-white/60">
           <span>© {new Date().getFullYear()} Luna. All rights reserved.</span>
         </div>
       </footer>
 
       {/* Auth Modal Overlay */}
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e1410]/70 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-[2rem] border border-[#f5ebe0]/10 bg-[#1e1410] p-8 text-[#f5ebe0] shadow-premium animate-slide-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-[2rem] border border-white/10 bg-black p-8 text-white shadow-premium animate-slide-up">
             <button
               onClick={() => setOpen(false)}
-              className="absolute right-6 top-6 p-1.5 rounded-full hover:bg-[#f5ebe0]/10 text-[#f5ebe0]/80 hover:text-white transition-colors"
+              className="absolute right-6 top-6 p-1.5 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-colors"
             >
               <X size={18} />
             </button>
             <div className="flex items-center gap-2">
-              <Circle size={22} strokeWidth={4} className="text-[#f27059]" />
-              <span className="font-display font-bold text-lg tracking-tight">luna<span className="text-[#f27059]">.</span></span>
+              <Circle size={22} strokeWidth={4} className="text-[#BF2121]" />
+              <span className="font-display font-bold text-lg tracking-tight">luna<span className="text-[#BF2121]">.</span></span>
             </div>
-            
+
             <h2 className="mt-6 text-2xl font-bold text-white font-display">
               {recovering ? 'Reset your password' : mode === 'login' ? 'Welcome back' : 'Let’s get to know you'}
             </h2>
-            <p className="mt-2 text-sm text-[#f5ebe0]/80 leading-relaxed">
-              {recovering 
-                ? 'Use your verified phone number to reset access.' 
-                : mode === 'login' 
-                  ? 'Continue your private conversation with Luna.' 
+            <p className="mt-2 text-sm text-white/80 leading-relaxed">
+              {recovering
+                ? 'Use your verified phone number to reset access.'
+                : mode === 'login'
+                  ? 'Continue your private conversation with Luna.'
                   : 'Your phone will be verified before Luna begins matching.'}
             </p>
 
@@ -209,60 +236,60 @@ export default function Auth() {
                 {mode === 'register' && (
                   <>
                     <div>
-                      <label className="text-xs font-semibold text-[#f5ebe0]/80 uppercase tracking-wider block mb-1">Your name</label>
+                      <label className="text-xs font-semibold text-white/80 uppercase tracking-wider block mb-1">Your name</label>
                       <input
                         value={firstName}
                         onChange={e => setFirstName(e.target.value)}
                         placeholder="What should we call you?"
-                        className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+                        className="premium-input-dark !bg-white/5 !border-white/15 !text-white focus:!border-[#BF2121] focus:!ring-[#BF2121]/25"
                         required
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-[#f5ebe0]/80 uppercase tracking-wider block mb-1">Phone number</label>
+                      <label className="text-xs font-semibold text-white/80 uppercase tracking-wider block mb-1">Phone number</label>
                       <input
                         type="tel"
                         value={phone}
                         onChange={e => setPhone(e.target.value)}
                         placeholder="+254..."
-                        className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+                        className="premium-input-dark !bg-white/5 !border-white/15 !text-white focus:!border-[#BF2121] focus:!ring-[#BF2121]/25"
                         required
                       />
                     </div>
                   </>
                 )}
                 <div>
-                  <label className="text-xs font-semibold text-[#f5ebe0]/80 uppercase tracking-wider block mb-1">Username</label>
+                  <label className="text-xs font-semibold text-white/80 uppercase tracking-wider block mb-1">Username</label>
                   <input
                     value={username}
                     onChange={e => setUsername(e.target.value)}
                     placeholder="Enter your username"
-                    className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+                    className="premium-input-dark !bg-white/5 !border-white/15 !text-white focus:!border-[#BF2121] focus:!ring-[#BF2121]/25"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-[#f5ebe0]/80 uppercase tracking-wider block mb-1">Password</label>
+                  <label className="text-xs font-semibold text-white/80 uppercase tracking-wider block mb-1">Password</label>
                   <input
                     type="password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     placeholder="Minimum 8 characters"
                     minLength={8}
-                    className="premium-input !bg-[#291e19] !border-[#f5ebe0]/10 !text-[#f5ebe0] focus:!border-[#f27059] focus:!ring-[#f27059]/20"
+                    className="premium-input-dark !bg-white/5 !border-white/15 !text-white focus:!border-[#BF2121] focus:!ring-[#BF2121]/25"
                     required
                   />
                 </div>
 
                 {mode === 'register' && (
-                  <div className="space-y-3.5 pt-2 text-xs text-[#f5ebe0]/80">
+                  <div className="space-y-3.5 pt-2 text-xs text-white/80">
                     <label className="flex items-start gap-3 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={adult}
                         onChange={e => setAdult(e.target.checked)}
                         required
-                        className="mt-0.5 rounded border-[#f5ebe0]/10 text-[#f27059] focus:ring-[#f27059]/20 h-4 w-4"
+                        className="mt-0.5 rounded border-white/15 text-[#BF2121] focus:ring-[#BF2121]/25 h-4 w-4"
                       />
                       <span>I confirm that I am 18 or older.</span>
                     </label>
@@ -272,7 +299,7 @@ export default function Auth() {
                         checked={legal}
                         onChange={e => setLegal(e.target.checked)}
                         required
-                        className="mt-0.5 rounded border-[#f5ebe0]/10 text-[#f27059] focus:ring-[#f27059]/20 h-4 w-4"
+                        className="mt-0.5 rounded border-white/15 text-[#BF2121] focus:ring-[#BF2121]/25 h-4 w-4"
                       />
                       <span>I accept Luna’s Terms, Privacy Notice, and Community Guidelines.</span>
                     </label>
@@ -294,7 +321,7 @@ export default function Auth() {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="w-full rounded-full bg-[#f27059] py-3.5 font-bold text-white shadow-premium hover:bg-[#e05e47] active:scale-[0.98] transition-all disabled:opacity-50 mt-4"
+                  className="w-full rounded-full bg-[#BF2121] py-3.5 font-bold text-white shadow-premium hover:bg-[#a31a1a] active:scale-[0.98] transition-all disabled:opacity-50 mt-4"
                 >
                   {busy ? 'One moment…' : mode === 'login' ? 'Enter Luna' : 'Create account'}
                 </button>
@@ -303,7 +330,7 @@ export default function Auth() {
                   <button
                     type="button"
                     onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setSuccess('') }}
-                    className="text-sm font-semibold text-[#f27059] hover:text-[#e05e47]"
+                    className="text-sm font-semibold text-[#BF2121] hover:text-[#bf5050]"
                   >
                     {mode === 'login' ? 'New here? Join Luna' : 'Already have an account? Sign in'}
                   </button>
@@ -311,7 +338,7 @@ export default function Auth() {
                     <button
                       type="button"
                       onClick={() => setRecovering(true)}
-                      className="block w-full text-xs font-semibold text-[#f5ebe0]/80 hover:text-white"
+                      className="block w-full text-xs font-semibold text-white/80 hover:text-white"
                     >
                       Forgot password?
                     </button>

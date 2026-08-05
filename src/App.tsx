@@ -62,9 +62,9 @@ export default function App(){
 
   if(session==='checking') {
     return (
-      <div className="grid min-h-screen place-items-center bg-warmbg text-sm font-bold text-terracotta-500 noise">
+      <div className="grid min-h-screen place-items-center bg-warmbg text-sm font-bold text-white noise">
         <div className="flex flex-col items-center gap-3 animate-pulse">
-          <Circle className="animate-spin text-terracotta-500" size={24} strokeWidth={3} />
+          <Circle className="animate-spin text-white" size={24} strokeWidth={3} />
           <span className="font-display tracking-wide">Luna is listening…</span>
         </div>
       </div>
@@ -75,9 +75,9 @@ export default function App(){
   
   if(loading&&!profile) {
     return (
-      <div className="grid min-h-screen place-items-center bg-warmbg text-sm font-bold text-terracotta-500 noise">
+      <div className="grid min-h-screen place-items-center bg-warmbg text-sm font-bold text-white noise">
         <div className="flex flex-col items-center gap-3 animate-pulse">
-          <Sparkles className="animate-bounce text-terracotta-500" size={24} />
+          <Sparkles className="animate-bounce text-white" size={24} />
           <span className="font-display tracking-wide">Finding your Luna…</span>
         </div>
       </div>
@@ -86,13 +86,13 @@ export default function App(){
   
   if(error&&!profile) {
     return (
-      <div className="grid min-h-screen place-items-center bg-warmbg text-cocoa-900 noise">
+      <div className="grid min-h-screen place-items-center bg-warmbg text-white noise">
         <div className="text-center max-w-sm p-8 bg-cream border border-cocoa-900/5 rounded-[2rem] shadow-premium">
-          <p className="font-bold text-lg font-display">We couldn’t open Luna.</p>
+          <p className="font-bold text-lg font-display text-cocoa-900">We couldn’t open Luna.</p>
           <p className="text-xs text-cocoa-500 mt-2">There was an issue connecting to the servers.</p>
           <button
             onClick={async()=>{await api.post('/auth/logout/');location.reload()}}
-            className="mt-6 rounded-full bg-terracotta-500 px-6 py-2.5 text-xs font-bold text-white shadow-premium hover:bg-terracotta-600 active:scale-95 transition-all"
+            className="mt-6 rounded-full bg-terracotta-600 px-6 py-2.5 text-xs font-bold text-white shadow-premium hover:bg-terracotta-700 active:scale-95 transition-all"
           >
             Return to sign in
           </button>

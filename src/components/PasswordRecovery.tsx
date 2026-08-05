@@ -106,7 +106,7 @@ export default function PasswordRecovery({ onBack }: { onBack: () => void }) {
       <button
         type="button"
         onClick={onBack}
-        className="w-full text-xs font-semibold text-cocoa-500 hover:text-cocoa-900 pt-2 transition-colors"
+        className="w-full text-xs font-semibold text-white/70 hover:text-white pt-2 transition-colors"
       >
         Back to sign in
       </button>

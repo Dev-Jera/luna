@@ -1,6 +1,5 @@
 import {useEffect,useState} from 'react'
 import {useDispatch,useSelector} from 'react-redux'
-import {Circle} from 'lucide-react'
 import Auth from './components/Auth'
 import Dashboard from './components/Dashboard'
 import Onboarding from './components/Onboarding'
@@ -65,31 +64,15 @@ export default function App(){
   }
 
   if(session==='checking') {
-    if (window.location.pathname === '/' || window.location.pathname === '/how-it-works') {
+    if (['/', '/how-it-works', '/login', '/register'].includes(window.location.pathname)) {
       return <Auth />
     }
-    return (
-      <div className="grid min-h-screen place-items-center bg-warmbg text-sm font-bold text-white noise">
-        <div className="flex flex-col items-center gap-3 animate-pulse">
-          <Circle className="animate-spin text-white" size={24} strokeWidth={3} />
-          <span className="font-display tracking-wide">Belong is listening…</span>
-        </div>
-      </div>
-    )
+    return null
   }
   
   if(session==='anonymous') return <Auth/>
   
-  if(loading&&!profile) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-warmbg text-sm font-bold text-white noise">
-        <div className="flex flex-col items-center gap-3 animate-pulse">
-          <Circle className="animate-spin text-white" size={24} />
-          <span className="font-display tracking-wide">Finding your people…</span>
-        </div>
-      </div>
-    )
-  }
+  if(loading&&!profile) return null
   
   if(error&&!profile) {
     return (

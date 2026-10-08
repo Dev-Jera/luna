@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Sparkles, X } from "lucide-react";
+import { Check, MessageCircle, X } from "lucide-react";
 import api from "../lib/api";
 import type { IntroductionDraft } from "../types";
 
@@ -56,7 +56,7 @@ export default function AiIntroduction({
       setDraft(data);
       setBody(data.body ?? "");
     } catch {
-      setError("Luna could not create a draft.");
+      setError("Belong could not create a draft.");
     } finally {
       setBusy(false);
     }
@@ -89,15 +89,15 @@ export default function AiIntroduction({
         disabled={busy || demo}
         className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-terracotta-50 px-3.5 py-2.5 text-xs font-bold text-terracotta-500 border border-terracotta-200/30 hover:bg-terracotta-100/50 active:scale-98 transition-all disabled:opacity-40"
       >
-        <Sparkles size={13} />
-        {busy ? "Asking Gemini…" : "Ask Luna to draft an introduction"}
+        <MessageCircle size={13} />
+        {busy ? "Asking Gemini…" : "Ask Belong to draft an introduction"}
       </button>
     );
     
   if (draft.status === "generating")
     return (
       <div className="mt-3 rounded-xl bg-terracotta-50/50 border border-terracotta-200/20 px-3.5 py-3 text-xs font-semibold text-terracotta-500">
-        <Sparkles className="mr-2 inline animate-pulse text-terracotta-500" size={13} />
+        <MessageCircle className="mr-2 inline text-terracotta-500" size={13} />
         Gemini is preparing a draft…
       </div>
     );
@@ -106,7 +106,7 @@ export default function AiIntroduction({
     <div className="mt-3 rounded-2xl border border-terracotta-200/40 bg-terracotta-50/30 p-4 animate-slide-up">
       <div className="flex items-center justify-between text-xs font-bold text-terracotta-500">
         <span className="flex items-center gap-1.5">
-          <Sparkles size={13} />
+          <MessageCircle size={13} />
           Gemini draft — review before sending
         </span>
         <button onClick={() => setDraft(null)} className="p-1 rounded-full hover:bg-terracotta-100 text-terracotta-500">

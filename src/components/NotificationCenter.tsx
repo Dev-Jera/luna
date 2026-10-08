@@ -26,20 +26,20 @@ export default function NotificationCenter() {
         onClick={() => setOpen(!open)}
         className={`relative grid h-10 w-10 place-items-center rounded-full border transition-all duration-200 ${
           open 
-            ? 'bg-[#dc2626] border-[#dc2626]/30 text-white' 
+            ? 'bg-[#168eea] border-[#168eea]/30 text-white'
             : 'border-[#ffffff]/10 bg-[#ffffff]/5 text-[#ffffff]/80 hover:bg-[#ffffff]/10 hover:text-white'
         }`}
       >
         <Bell size={16} />
         {unread > 0 && (
-          <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#dc2626] px-1 text-[9px] font-bold text-white shadow-glow border border-[#000000] animate-pulse">
+          <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full border border-[#000000] bg-[#168eea] px-1 text-[9px] font-bold text-white">
             {unread}
           </span>
         )}
       </button>
       
       {open && (
-        <div className="glass absolute right-0 top-14 z-30 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-[1.75rem] border border-[#ffffff]/10 bg-[#000000] shadow-2xl animate-slide-up">
+        <div className="absolute right-0 top-14 z-30 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-[1.75rem] border border-[#ffffff]/10 bg-[#000000] shadow-2xl animate-slide-up">
           <div className="flex items-center justify-between border-b border-[#ffffff]/10 p-4 bg-[#111111]">
             <div>
               <h3 className="text-sm font-bold text-white">Notifications</h3>
@@ -60,7 +60,7 @@ export default function NotificationCenter() {
                 className={`p-4 transition-colors ${
                   n.read_at 
                     ? 'opacity-60 bg-[#000000]' 
-                    : 'bg-[#dc2626]/5'
+                    : 'bg-[#168eea]/5'
                 }`}
               >
                 <div className="text-xs font-bold text-white">{n.title}</div>
@@ -82,7 +82,7 @@ export default function NotificationCenter() {
           {unread > 0 && (
             <button
               onClick={readAll}
-              className="flex w-full items-center justify-center gap-2 border-t border-[#ffffff]/10 bg-[#dc2626]/10 p-3.5 text-xs font-bold text-[#dc2626] hover:bg-[#dc2626]/20 transition-colors"
+              className="flex w-full items-center justify-center gap-2 border-t border-[#ffffff]/10 bg-[#168eea]/10 p-3.5 text-xs font-bold text-[#168eea] hover:bg-[#168eea]/20 transition-colors"
             >
               <Check size={13} strokeWidth={3} />
               Mark all as read

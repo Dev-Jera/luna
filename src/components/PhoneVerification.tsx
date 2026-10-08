@@ -3,6 +3,7 @@ import api from '../lib/api'
 
 export default function PhoneVerification({ phone, onVerified }: { phone: string; onVerified: () => void }) {
   const [code, setCode] = useState('')
+  const [devCode, setDevCode] = useState('')
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -11,8 +12,9 @@ export default function PhoneVerification({ phone, onVerified }: { phone: string
     setBusy(true)
     setError('')
     try {
-      await api.post('/auth/phone/send/')
+      const res = await api.post('/auth/phone/send/')
       setSent(true)
+      setDevCode(res.data?.dev_code || '')
     } catch {
       setError('We could not send a code. Check the SMS configuration and try again.')
     } finally {
@@ -35,8 +37,8 @@ export default function PhoneVerification({ phone, onVerified }: { phone: string
   }
 
   return (
-    <main className="noise grid min-h-screen place-items-center px-6 bg-warmbg text-white selection:bg-terracotta-300">
-      <form onSubmit={confirm} className="glass w-full max-w-md rounded-[2.5rem] p-8 sm:p-10 border border-white/10 shadow-2xl animate-slide-up">
+    <main className="noise grid min-h-screen place-items-center px-6 bg-[#0b1118] text-white selection:bg-[#168eea]/30">
+      <form onSubmit={confirm} className="w-full max-w-md rounded-[2.5rem] border border-[#202d3a] bg-[#111923] p-8 animate-slide-up sm:p-10">
         <h1 className="text-2xl font-bold font-display text-white">Verify your phone</h1>
         <p className="mt-3 text-xs sm:text-sm text-white/80 leading-relaxed font-medium">
           We’ll send a six-digit verification code to <span className="text-white font-bold">{phone}</span>. It expires after 10 minutes.
@@ -56,8 +58,17 @@ export default function PhoneVerification({ phone, onVerified }: { phone: string
           </div>
         )}
 
+        {sent && devCode && (
+          <p className="mt-4 rounded-xl border border-[#254a6d] bg-[#102a43] p-3 text-center text-xs font-semibold text-[#b9ddff]">
+            Dev mode (SMS not configured) — verification code:{' '}
+            <button type="button" className="font-bold underline" onClick={() => setCode(devCode)}>
+              {devCode}
+            </button>
+          </p>
+        )}
+
         {error && (
-          <p className="mt-4 text-xs font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200/50 p-3 rounded-xl">
+          <p className="mt-4 rounded-xl border border-amber-700/60 bg-amber-950/50 p-3 text-xs font-semibold text-amber-200">
             {error}
           </p>
         )}
@@ -66,7 +77,7 @@ export default function PhoneVerification({ phone, onVerified }: { phone: string
           <button
             type="submit"
             disabled={busy || code.length !== 6}
-            className="mt-6 w-full rounded-full bg-terracotta-500 px-4 py-3.5 font-bold text-white shadow-premium hover:bg-terracotta-600 active:scale-95 transition-all disabled:opacity-50"
+            className="mt-6 w-full rounded-full bg-[#168eea] px-4 py-3.5 font-bold text-white transition-colors hover:bg-[#0875c6] disabled:opacity-50"
           >
             {busy ? 'Verifying...' : 'Verify phone'}
           </button>
@@ -75,7 +86,7 @@ export default function PhoneVerification({ phone, onVerified }: { phone: string
             type="button"
             disabled={busy}
             onClick={send}
-            className="mt-6 w-full rounded-full bg-terracotta-500 px-4 py-3.5 font-bold text-white shadow-premium hover:bg-terracotta-600 active:scale-95 transition-all disabled:opacity-50"
+            className="mt-6 w-full rounded-full bg-[#168eea] px-4 py-3.5 font-bold text-white transition-colors hover:bg-[#0875c6] disabled:opacity-50"
           >
             {busy ? 'Sending...' : 'Send verification code'}
           </button>

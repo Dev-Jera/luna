@@ -6,7 +6,7 @@
 :root {
   color-scheme: dark;
   font-family: 'Inter', sans-serif;
-  background-color: #c8102e;
+  background-color: #000000;
   color: #ffffff;
 }
 
@@ -14,7 +14,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #c8102e;
+  background-color: #000000;
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -33,26 +33,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(220, 38, 38, 0.4);
+  background: rgba(22, 142, 234, 0.4);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(220, 38, 38, 0.6);
-}
-
-/* Premium Glassmorphism */
-.glass {
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-dark {
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(22, 142, 234, 0.6);
 }
 
 /* Dynamic Texture Overlay */
@@ -81,8 +66,8 @@ body {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .premium-input:focus {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+  border-color: #168eea;
+  box-shadow: none;
   background: #111111;
 }
 .premium-input::placeholder {
@@ -101,8 +86,8 @@ body {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .premium-input-dark:focus {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.25);
+  border-color: #168eea;
+  box-shadow: none;
   background: rgba(0, 0, 0, 0.7);
 }
 .premium-input-dark::placeholder {

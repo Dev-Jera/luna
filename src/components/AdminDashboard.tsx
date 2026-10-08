@@ -96,9 +96,9 @@ export default function AdminDashboard({ onBack }: Props) {
 
   if (loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#c8102e] text-sm font-bold text-[#dc2626] noise">
+      <div className="grid min-h-screen place-items-center bg-[#168eea] text-sm font-bold text-[#168eea] noise">
         <div className="flex flex-col items-center gap-3 animate-pulse">
-          <Shield className="animate-spin text-[#dc2626]" size={24} />
+          <Shield className="animate-spin text-[#168eea]" size={24} />
           <span className="font-display tracking-wide">Loading safety matrix…</span>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function AdminDashboard({ onBack }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#c8102e] text-[#ffffff] pb-16 noise">
+    <div className="min-h-screen bg-[#168eea] text-[#ffffff] pb-16 noise">
       {/* Header */}
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-[#ffffff]/10 bg-[#000000] px-6 py-4">
         <div className="flex items-center gap-3">
@@ -118,8 +118,8 @@ export default function AdminDashboard({ onBack }: Props) {
           </button>
           <div>
             <h1 className="text-xl font-bold font-display tracking-tight flex items-center gap-2 text-white">
-              <Shield className="text-[#dc2626]" size={20} />
-              Luna Control Panel
+              <Shield className="text-[#168eea]" size={20} />
+              Belong Control Panel
             </h1>
             <p className="text-[10px] text-[#ffffff]/80 font-bold uppercase tracking-wider">Moderator Dashboard</p>
           </div>
@@ -146,11 +146,11 @@ export default function AdminDashboard({ onBack }: Props) {
               <p className="text-[10px] text-[#ffffff]/80 mt-2 font-medium">Across {metrics.conversations} chats</p>
             </div>
             <div className="bg-[#000000] border border-[#ffffff]/10 rounded-3xl p-5 shadow-soft relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-[#dc2626]/20 rounded-full filter blur-2xl opacity-50 -mr-6 -mt-6"></div>
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[#168eea]/20 rounded-full filter blur-2xl opacity-50 -mr-6 -mt-6"></div>
               <p className="text-xs font-bold text-[#ffffff]/60 uppercase tracking-wider">Pending Reports</p>
-              <p className="text-2xl font-bold font-display text-[#dc2626] mt-1">{metrics.open_reports}</p>
+              <p className="text-2xl font-bold font-display text-[#168eea] mt-1">{metrics.open_reports}</p>
               <p className="text-[10px] text-[#ffffff]/80 mt-2 font-medium flex items-center gap-1">
-                <AlertTriangle size={10} className="text-[#dc2626] animate-pulse" /> Urgent attention needed
+                <AlertTriangle size={10} className="text-[#168eea] animate-pulse" /> Urgent attention needed
               </p>
             </div>
           </div>
@@ -162,7 +162,7 @@ export default function AdminDashboard({ onBack }: Props) {
             onClick={() => setActiveTab('reports')}
             className={`pb-3 text-sm font-bold tracking-tight transition-all border-b-2 ${
               activeTab === 'reports'
-                ? 'border-[#dc2626] text-[#dc2626]'
+                ? 'border-[#168eea] text-[#168eea]'
                 : 'border-transparent text-[#ffffff]/60 hover:text-white'
             }`}
           >
@@ -172,7 +172,7 @@ export default function AdminDashboard({ onBack }: Props) {
             onClick={() => setActiveTab('users')}
             className={`pb-3 text-sm font-bold tracking-tight transition-all border-b-2 ${
               activeTab === 'users'
-                ? 'border-[#dc2626] text-[#dc2626]'
+                ? 'border-[#168eea] text-[#168eea]'
                 : 'border-transparent text-[#ffffff]/60 hover:text-white'
             }`}
           >
@@ -197,7 +197,7 @@ export default function AdminDashboard({ onBack }: Props) {
                       <div className="flex items-center gap-2">
                         <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
                           r.status === 'open' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
-                          r.status === 'reviewing' ? 'bg-[#dc2626]/10 text-[#dc2626] border border-[#dc2626]/20' :
+                          r.status === 'reviewing' ? 'bg-[#168eea]/10 text-[#168eea] border border-[#168eea]/20' :
                           'bg-[#ffffff]/10 text-[#ffffff] border border-[#ffffff]/20'
                         }`}>
                           {r.status === 'open' && <AlertTriangle size={10} />}
@@ -210,8 +210,8 @@ export default function AdminDashboard({ onBack }: Props) {
                       <h3 className="font-bold text-base font-display mt-2 text-white">
                         {r.reporter_name} reported {r.reported_name}
                       </h3>
-                      <p className="text-xs text-[#dc2626] mt-1 font-bold uppercase tracking-wider">Reason: {r.reason}</p>
-                      <p className="text-xs text-[#ffffff]/90 mt-3 bg-[#c8102e]/10 border border-[#ffffff]/10 rounded-2xl p-4 italic">"{r.details}"</p>
+                      <p className="text-xs text-[#168eea] mt-1 font-bold uppercase tracking-wider">Reason: {r.reason}</p>
+                      <p className="text-xs text-[#ffffff]/90 mt-3 bg-[#168eea]/10 border border-[#ffffff]/10 rounded-2xl p-4 italic">"{r.details}"</p>
                     </div>
                     <div className="text-right text-[10px] text-[#ffffff]/50 font-bold">
                       Filed on {new Date(r.created_at).toLocaleString()}
@@ -224,7 +224,7 @@ export default function AdminDashboard({ onBack }: Props) {
                         value={actionNotes[r.id] || ''}
                         onChange={e => setActionNotes({ ...actionNotes, [r.id]: e.target.value })}
                         placeholder="Resolution notes or actions taken..."
-                        className="w-full text-xs bg-[#111111] border border-[#ffffff]/10 text-white rounded-2xl p-3 focus:outline-none focus:border-[#dc2626]/30 transition-all resize-none h-16"
+                        className="w-full text-xs bg-[#111111] border border-[#ffffff]/10 text-white rounded-2xl p-3 focus:outline-none focus:border-[#168eea]/30 transition-all resize-none h-16"
                       />
                       <div className="flex gap-3 justify-end mt-3">
                         <button
@@ -235,7 +235,7 @@ export default function AdminDashboard({ onBack }: Props) {
                         </button>
                         <button
                           onClick={() => resolveReport(r.id, 'resolved')}
-                          className="rounded-full bg-[#dc2626] text-xs font-bold text-white px-5 py-2 hover:bg-[#b91c1c] active:scale-95 transition-all"
+                          className="rounded-full bg-[#168eea] text-xs font-bold text-white px-5 py-2 hover:bg-[#0875c6] active:scale-95 transition-all"
                         >
                           Mark Resolved
                         </button>
@@ -269,9 +269,9 @@ export default function AdminDashboard({ onBack }: Props) {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 font-bold uppercase text-[9px] ${
-                        u.is_active ? 'bg-[#ffffff]/10 text-[#ffffff] border border-[#ffffff]/20' : 'bg-[#dc2626]/10 text-[#dc2626] border border-[#dc2626]/20'
+                        u.is_active ? 'bg-[#ffffff]/10 text-[#ffffff] border border-[#ffffff]/20' : 'bg-[#168eea]/10 text-[#168eea] border border-[#168eea]/20'
                       }`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${u.is_active ? 'bg-[#ffffff]' : 'bg-[#dc2626]'}`}></span>
+                        <span className={`h-1.5 w-1.5 rounded-full ${u.is_active ? 'bg-[#ffffff]' : 'bg-[#168eea]'}`}></span>
                         {u.is_active ? 'Active' : 'Suspended'}
                       </span>
                     </td>
@@ -280,7 +280,7 @@ export default function AdminDashboard({ onBack }: Props) {
                         onClick={() => toggleSuspend(u.id)}
                         className={`inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-[10px] font-bold tracking-wide transition-all shadow-soft active:scale-95 ${
                           u.is_active
-                            ? 'bg-[#dc2626] text-white hover:bg-[#b91c1c]'
+                            ? 'bg-[#168eea] text-white hover:bg-[#0875c6]'
                             : 'bg-[#ffffff] text-[#000000] hover:bg-[#d4d4d4]'
                         }`}
                       >

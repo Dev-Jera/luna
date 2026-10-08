@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react'
 import {useDispatch,useSelector} from 'react-redux'
-import {Circle, Sparkles} from 'lucide-react'
+import {Circle} from 'lucide-react'
 import Auth from './components/Auth'
 import Dashboard from './components/Dashboard'
 import Onboarding from './components/Onboarding'
@@ -22,9 +22,13 @@ export default function App(){
       .then(()=>{
         setSession('authenticated')
         dispatch(loadDashboard())
-        if (window.location.pathname === '/' || window.location.pathname === '/how-it-works') {
-          window.history.replaceState({}, '', '/dashboard')
-          setPath('/dashboard')
+        const currentPath = window.location.pathname
+        if (currentPath === '/login' || currentPath === '/register' || currentPath === '/how-it-works') {
+          window.history.replaceState({}, '', '/')
+          setPath('/')
+        } else if (currentPath !== '/' && currentPath !== '/admin' && currentPath !== '/dashboard' && currentPath !== '/home' && currentPath !== '/preferences' && currentPath !== '/counseling' && !currentPath.startsWith('/chat/')) {
+          window.history.replaceState({}, '', '/')
+          setPath('/')
         }
       })
       .catch(()=>setSession('anonymous'))
@@ -61,11 +65,14 @@ export default function App(){
   }
 
   if(session==='checking') {
+    if (window.location.pathname === '/' || window.location.pathname === '/how-it-works') {
+      return <Auth />
+    }
     return (
       <div className="grid min-h-screen place-items-center bg-warmbg text-sm font-bold text-white noise">
         <div className="flex flex-col items-center gap-3 animate-pulse">
           <Circle className="animate-spin text-white" size={24} strokeWidth={3} />
-          <span className="font-display tracking-wide">Luna is listening…</span>
+          <span className="font-display tracking-wide">Belong is listening…</span>
         </div>
       </div>
     )
@@ -77,8 +84,8 @@ export default function App(){
     return (
       <div className="grid min-h-screen place-items-center bg-warmbg text-sm font-bold text-white noise">
         <div className="flex flex-col items-center gap-3 animate-pulse">
-          <Sparkles className="animate-bounce text-white" size={24} />
-          <span className="font-display tracking-wide">Finding your Luna…</span>
+          <Circle className="animate-spin text-white" size={24} />
+          <span className="font-display tracking-wide">Finding your people…</span>
         </div>
       </div>
     )
@@ -88,7 +95,7 @@ export default function App(){
     return (
       <div className="grid min-h-screen place-items-center bg-warmbg text-white noise">
         <div className="text-center max-w-sm p-8 bg-cream border border-cocoa-900/5 rounded-[2rem] shadow-premium">
-          <p className="font-bold text-lg font-display text-cocoa-900">We couldn’t open Luna.</p>
+          <p className="font-bold text-lg font-display text-cocoa-900">We couldn’t open Belong.</p>
           <p className="text-xs text-cocoa-500 mt-2">There was an issue connecting to the servers.</p>
           <button
             onClick={async()=>{await api.post('/auth/logout/');location.reload()}}
@@ -112,11 +119,11 @@ export default function App(){
       ) : null}
 
       {showInstallBanner && (
-        <div className="fixed bottom-6 left-6 right-6 z-50 md:left-auto md:max-w-sm bg-cream/90 backdrop-blur-md border border-cocoa-900/10 rounded-3xl p-5 shadow-premium flex flex-col gap-3.5">
+        <div className="fixed bottom-6 left-6 right-6 z-50 md:left-auto md:max-w-sm bg-cream border border-cocoa-900/10 rounded-3xl p-5 shadow-premium flex flex-col gap-3.5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h4 className="font-bold text-xs font-display text-cocoa-900">Install Luna App</h4>
-              <p className="text-[10px] text-cocoa-500 mt-1 leading-normal">Add Luna directly to your home screen for instant, secure matching notifications and speed dates.</p>
+              <h4 className="font-bold text-xs font-display text-cocoa-900">Install Belong</h4>
+              <p className="text-[10px] text-cocoa-500 mt-1 leading-normal">Add Belong directly to your home screen for instant, secure matching notifications and speed dates.</p>
             </div>
             <button
               onClick={() => setShowInstallBanner(false)}
@@ -144,4 +151,3 @@ export default function App(){
     </>
   )
 }
-

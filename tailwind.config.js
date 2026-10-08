@@ -9,14 +9,14 @@ export default {
       },
       colors: {
         terracotta: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#168eea',
+          700: '#0875c6',
         },
         cocoa: {
           50: '#fafafa',
@@ -27,19 +27,19 @@ export default {
           900: '#000000',
         },
         cream: '#ffffff',
-        warmbg: '#c8102e',
+        warmbg: '#0b1728',
         brand: {
-          DEFAULT: '#c8102e',
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#c8102e',
+          DEFAULT: '#168eea',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#168eea',
+          700: '#0875c6',
+          800: '#075fa3',
+          900: '#0b3c74',
         },
         // Compatibility mappings to prevent breakage in legacy screens
         lime: {
@@ -63,7 +63,6 @@ export default {
         }
       },
       boxShadow: {
-        glow: '0 0 60px rgba(220,38,38,.2)',
         premium: '0 10px 35px -5px rgba(0,0,0,.35), 0 2px 4px rgba(0,0,0,.2)',
         soft: '0 4px 20px -2px rgba(0,0,0,.25)'
       }

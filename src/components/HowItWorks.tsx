@@ -2,28 +2,28 @@ import { Circle, EyeOff, LockKeyhole, MessageCircle, ShieldCheck, UserCheck } fr
 
 export default function HowItWorks({ onHome, onJoin, onSignIn }: { onHome: () => void; onJoin: () => void; onSignIn: () => void }) {
   const steps = [
-    ['01', 'Tell Luna what matters', 'Complete a private profile about your values, goals, interests, lifestyle, communication style, and deal-breakers. Luna uses these answers—not private chats—to look for alignment.'],
-    ['02', 'Luna searches quietly', 'There is no public catalogue and no endless swiping. Luna considers verified profiles privately and brings you one thoughtful possibility at a time.'],
-    ['03', 'You choose whether to look', 'Luna tells you a potential match exists without revealing them. Their profile appears only after you say yes. Passing is private.'],
-    ['04', 'Discuss the person with Luna', 'Ask why the match may make sense, explore shared values, or raise concerns. Luna answers only from information that person chose to share.'],
-    ['05', 'Request an introduction', 'If you feel comfortable, ask Luna to introduce you. You decide what to say and can leave, block, or report at any point.']
+    ['01', 'Tell Belong what matters', 'Complete a private profile about your values, goals, interests, lifestyle, communication style, and deal-breakers. Belong uses these answers—not private chats—to look for alignment.'],
+    ['02', 'Belong searches quietly', 'There is no public catalogue and no endless swiping. Belong considers verified profiles privately and brings you one thoughtful possibility at a time.'],
+    ['03', 'You choose whether to look', 'Belong tells you a potential match exists without revealing them. Their profile appears only after you say yes. Passing is private.'],
+    ['04', 'Discuss the person with Belong', 'Ask why the match may make sense, explore shared values, or raise concerns. Belong answers only from information that person chose to share.'],
+    ['05', 'Request an introduction', 'If you feel comfortable, ask Belong to introduce you. You decide what to say and can leave, block, or report at any point.']
   ]
 
   const protections = [
-    { Icon: UserCheck, title: 'Verified entry', body: 'New accounts verify a phone number before Luna begins matching.' },
+    { Icon: UserCheck, title: 'Verified entry', body: 'New accounts verify a phone number before Belong begins matching.' },
     { Icon: EyeOff, title: 'Private by default', body: 'No open DMs, public match list, follower count, or visible rejection.' },
-    { Icon: LockKeyhole, title: 'Consent boundaries', body: 'Luna cannot join a human conversation unless every participant opts in.' },
+    { Icon: LockKeyhole, title: 'Consent boundaries', body: 'Belong cannot join a human conversation unless every participant opts in.' },
     { Icon: MessageCircle, title: 'Safe notifications', body: 'SMS alerts never include profile details or private message content.' }
   ]
 
   return (
-    <main className="min-h-screen bg-[#c8102e] text-white selection:bg-[#dc2626]/40 noise">
+    <main className="min-h-screen bg-[#168eea] text-white selection:bg-[#168eea]/40 noise">
       {/* Header */}
       <header className="sticky top-0 z-20 bg-black border-b border-white/10">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6 sm:px-12">
           <button onClick={onHome} className="flex items-center gap-2.5 text-base font-bold tracking-tight focus:outline-none">
-            <Circle size={18} strokeWidth={4} className="text-[#ef4444]" />
-            <span className="font-display text-xl tracking-tight text-white">luna<span className="text-[#ef4444]">.</span></span>
+            <Circle size={18} strokeWidth={4} className="text-[#168eea]" />
+            <span className="font-display text-xl tracking-tight text-white">Belong</span>
           </button>
           <nav className="flex items-center gap-4 text-sm font-medium">
             <button onClick={onHome} className="rounded-full px-4 py-2 text-white/80 hover:text-white transition-colors">
@@ -32,8 +32,8 @@ export default function HowItWorks({ onHome, onJoin, onSignIn }: { onHome: () =>
             <button onClick={onSignIn} className="hidden sm:block rounded-full px-4 py-2 text-white/80 hover:text-white transition-colors">
               Sign in
             </button>
-            <button onClick={onJoin} className="rounded-full bg-white px-5 py-2.5 font-semibold text-black hover:bg-red-100 active:scale-95 transition-all">
-              Join Luna
+            <button onClick={onJoin} className="rounded-full bg-white px-5 py-2.5 font-semibold text-black hover:bg-blue-100 active:scale-95 transition-all">
+              Join Belong
             </button>
           </nav>
         </div>
@@ -42,16 +42,16 @@ export default function HowItWorks({ onHome, onJoin, onSignIn }: { onHome: () =>
       {/* Hero Section */}
       <section className="px-6 py-20 text-center sm:py-28 max-w-4xl mx-auto">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">
-          HOW LUNA WORKS
+          HOW BELONG WORKS
         </p>
         <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.12] tracking-tight text-white sm:text-6xl">
           A private path from<br />possibility to conversation.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-white/90">
-          Luna is not a feed or a dating catalogue. It is a consent-first concierge that helps you consider one meaningful connection at a time.
+          Belong is not a feed or a dating catalogue. It is a consent-first concierge that helps you consider one meaningful connection at a time.
         </p>
-        <p className="mx-auto mt-8 max-w-3xl rounded-[2rem] border border-white/15 bg-black/30 backdrop-blur px-6 py-6 sm:px-8 text-sm sm:text-base leading-relaxed text-white/95">
-          Luna isn’t built for endless scrolling or instant matches. Before you meet anyone, you’ll spend time talking with Luna. She learns who you are, what you’re looking for, and helps identify people who are genuinely invested in finding a meaningful relationship. If you’re looking to swipe through hundreds of profiles, Luna probably isn’t for you.
+        <p className="mx-auto mt-8 max-w-3xl rounded-[2rem] border border-white/15 bg-black px-6 py-6 sm:px-8 text-sm sm:text-base leading-relaxed text-white/95">
+          Belong isn’t built for endless scrolling or instant matches. Before you meet anyone, you’ll spend time talking with Belong. It learns who you are, what you’re looking for, and helps identify people who are genuinely invested in finding a meaningful relationship. If you’re looking to swipe through hundreds of profiles, Belong probably isn’t for you.
         </p>
       </section>
 
@@ -68,7 +68,7 @@ export default function HowItWorks({ onHome, onJoin, onSignIn }: { onHome: () =>
                 }`}
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-bold text-white px-3 py-1 bg-[#dc2626] rounded-full">
+                  <span className="text-sm font-bold text-white px-3 py-1 bg-[#168eea] rounded-full">
                     Step {number}
                   </span>
                 </div>
@@ -84,7 +84,7 @@ export default function HowItWorks({ onHome, onJoin, onSignIn }: { onHome: () =>
       <section className="bg-black py-20 px-6 sm:px-12 text-white noise relative border-b border-white/10">
         <div className="mx-auto max-w-5xl">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2.5 text-[#ef4444] mb-4">
+            <div className="flex items-center gap-2.5 text-[#168eea] mb-4">
               <ShieldCheck size={22} />
               <p className="text-xs font-bold uppercase tracking-[0.2em]">Safety is part of the product</p>
             </div>
@@ -92,13 +92,13 @@ export default function HowItWorks({ onHome, onJoin, onSignIn }: { onHome: () =>
               Protection is built into every step.
             </h2>
             <p className="mt-4 text-base text-white/90 leading-relaxed">
-              Luna limits access, exposure, and contact before a conversation starts.
+              Belong limits access, exposure, and contact before a conversation starts.
             </p>
           </div>
           <div className="mt-12 grid gap-6 sm:grid-cols-2">
             {protections.map(({ Icon, title, body }) => (
               <article key={title} className="rounded-2xl border border-white/10 bg-white/[0.04] p-8 hover:bg-white/[0.07] transition-all">
-                <div className="p-2 bg-white/[0.08] rounded-xl inline-block text-[#ef4444]">
+                <div className="p-2 bg-white/[0.08] rounded-xl inline-block text-[#168eea]">
                   <Icon size={22} />
                 </div>
                 <h3 className="mt-4 text-lg font-bold">{title}</h3>
@@ -110,10 +110,10 @@ export default function HowItWorks({ onHome, onJoin, onSignIn }: { onHome: () =>
       </section>
 
       {/* Privacy Limits */}
-      <section className="py-20 px-6 sm:px-12 bg-[#c8102e]">
+      <section className="py-20 px-6 sm:px-12 bg-[#168eea]">
         <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-2">
           <div className="rounded-[2.5rem] border border-white/10 bg-black p-8 sm:p-10 shadow-soft">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#ef4444]">Luna Data Use</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#168eea]">Belong Data Use</p>
             <h2 className="mt-3 font-display text-2xl font-semibold mb-6 text-white">Information you share.</h2>
             <ul className="space-y-4 text-sm text-white/90 font-medium">
               <li className="flex items-start gap-2.5">
@@ -136,24 +136,24 @@ export default function HowItWorks({ onHome, onJoin, onSignIn }: { onHome: () =>
           </div>
 
           <div className="rounded-[2.5rem] border border-white/10 bg-black p-8 sm:p-10 shadow-soft">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#ef4444]">Off Limits</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#168eea]">Off Limits</p>
             <h2 className="mt-3 font-display text-2xl font-semibold mb-6 text-white">Private remains private.</h2>
             <ul className="space-y-4 text-sm text-white/90 font-medium">
               <li className="flex items-start gap-2.5">
-                <span className="text-white bg-[#dc2626] rounded-full px-1.5 inline-block font-bold text-xs">×</span>
-                <span>Luna does not secretly read human chats</span>
+                <span className="text-white bg-[#168eea] rounded-full px-1.5 inline-block font-bold text-xs">×</span>
+                <span>Belong does not secretly read human chats</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="text-white bg-[#dc2626] rounded-full px-1.5 inline-block font-bold text-xs">×</span>
-                <span>Luna does not infer clinical or protected traits</span>
+                <span className="text-white bg-[#168eea] rounded-full px-1.5 inline-block font-bold text-xs">×</span>
+                <span>Belong does not infer clinical or protected traits</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="text-white bg-[#dc2626] rounded-full px-1.5 inline-block font-bold text-xs">×</span>
-                <span>Luna does not reveal your contact information</span>
+                <span className="text-white bg-[#168eea] rounded-full px-1.5 inline-block font-bold text-xs">×</span>
+                <span>Belong does not reveal your contact information</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="text-white bg-[#dc2626] rounded-full px-1.5 inline-block font-bold text-xs">×</span>
-                <span>Luna never sends outgoing messages as you</span>
+                <span className="text-white bg-[#168eea] rounded-full px-1.5 inline-block font-bold text-xs">×</span>
+                <span>Belong never sends outgoing messages as you</span>
               </li>
             </ul>
           </div>
@@ -167,8 +167,8 @@ export default function HowItWorks({ onHome, onJoin, onSignIn }: { onHome: () =>
           <p className="mt-4 text-sm sm:text-base text-white/80 leading-relaxed">
             Create your verified profile and stay in control from the first suggestion onward.
           </p>
-          <button onClick={onJoin} className="mt-8 rounded-full bg-[#dc2626] px-8 py-4 text-base font-bold text-white hover:bg-[#b91c1c] active:scale-[0.98] transition-all">
-            Start with Luna →
+          <button onClick={onJoin} className="mt-8 rounded-full bg-[#168eea] px-8 py-4 text-base font-bold text-white hover:bg-[#0875c6] active:scale-[0.98] transition-all">
+            Start with Belong →
           </button>
         </div>
       </section>

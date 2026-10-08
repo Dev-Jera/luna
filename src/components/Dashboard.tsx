@@ -1,20 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, LogOut, MessageCircle, Send, Sparkles, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings, Menu, AlertTriangle, Gift, Info, TrendingUp, Smartphone } from 'lucide-react'
+import { ArrowLeft, ArrowRight, House, LogOut, MessageCircle, Send, X, Heart, Users, Briefcase, Shield, Calendar, PhoneCall, Video, Lock, Unlock, HelpCircle, Settings, Menu, AlertTriangle, Gift, Info, TrendingUp, Smartphone } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import api from '../lib/api'
 import { addMessage, loadDashboard, setProfile } from '../store'
 import type { AppDispatch, RootState } from '../store'
 import type { Conversation, Message, Profile } from '../types'
 import NotificationCenter from './NotificationCenter'
+import HomeDashboard from './HomeDashboard'
 
-function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversations' | 'preferences' | 'counseling'; setPage: (page: 'conversations' | 'preferences' | 'counseling') => void; profile: Profile; onGoToAdmin?: () => void }) {
+type DashboardPage = 'home' | 'conversations' | 'preferences' | 'counseling'
+
+function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: DashboardPage; setPage: (page: DashboardPage) => void; profile: Profile; onGoToAdmin?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false)
   return (
     <header className="sticky top-0 z-20 bg-[#000000] border-b border-[#ffffff]/10">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
-        <button onClick={() => setPage('conversations')} className="flex items-center gap-2.5 text-base font-bold tracking-tight focus:outline-none">
-          <span className="h-4 w-4 rounded-full bg-[#dc2626] block shrink-0" />
-          <span className="font-display text-xl font-bold tracking-tight text-[#ffffff]">luna<span className="text-[#dc2626]">.</span></span>
+        <button onClick={() => setPage('home')} className="flex items-center gap-2.5 text-base font-bold tracking-tight focus:outline-none">
+          <span className="h-4 w-4 rounded-full bg-[#168eea] block shrink-0" />
+          <span className="font-display text-xl font-bold tracking-tight text-[#ffffff]">Belong</span>
         </button>
 
         {/* Right Side Header Controls */}
@@ -24,11 +27,22 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1.5 sm:gap-3">
             <button
+              onClick={() => setPage('home')}
+              className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
+                page === 'home'
+                  ? 'bg-[#168eea] text-white shadow-premium'
+                  : 'text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-white'
+              }`}
+            >
+              <House size={14} />
+              <span>Home</span>
+            </button>
+            <button
               onClick={() => setPage('conversations')}
               className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
                 page === 'conversations'
-                  ? 'bg-[#dc2626] text-white shadow-premium'
-                  : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
+                  ? 'bg-[#168eea] text-white shadow-premium'
+                  : 'text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-white'
               }`}
             >
               <MessageCircle size={14} />
@@ -38,8 +52,8 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               onClick={() => setPage('counseling')}
               className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
                 page === 'counseling'
-                  ? 'bg-[#dc2626] text-white shadow-premium'
-                  : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
+                  ? 'bg-[#168eea] text-white shadow-premium'
+                  : 'text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-white'
               }`}
             >
               <Heart size={14} />
@@ -49,8 +63,8 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               onClick={() => setPage('preferences')}
               className={`rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
                 page === 'preferences'
-                  ? 'bg-[#dc2626] text-white shadow-premium'
-                  : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
+                  ? 'bg-[#168eea] text-white shadow-premium'
+                  : 'text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-white'
               }`}
             >
               <Settings size={14} />
@@ -78,7 +92,7 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
                 await api.post('/auth/logout/')
                 location.reload()
               }}
-              className="rounded-full p-2.5 text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-[#ffffff] transition-all duration-200"
+              className="rounded-full p-2.5 text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-[#ffffff] transition-all duration-200"
             >
               <LogOut size={16} />
             </button>
@@ -87,7 +101,7 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
           {/* Mobile hamburger menu toggle */}
           <button
             onClick={() => setMenuOpen(true)}
-            className="flex md:hidden rounded-full p-2 text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white transition-all active:scale-95"
+            className="flex md:hidden rounded-full p-2 text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-white transition-all active:scale-95"
             aria-label="Open navigation menu"
           >
             <Menu size={20} />
@@ -97,23 +111,32 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
 
       {/* Hamburger Drawer Overlay (Mobile Only) */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+        <div className="fixed inset-0 z-50 flex md:hidden bg-black/60 transition-opacity duration-300">
           <div className="w-64 max-w-xs bg-[#000000] border-r border-[#ffffff]/10 p-6 flex flex-col h-full animate-slide-in">
             <div className="flex items-center justify-between pb-6 border-b border-[#ffffff]/10">
-              <button onClick={() => { setPage('conversations'); setMenuOpen(false); }} className="flex items-center gap-2.5 text-base font-bold tracking-tight">
-                <span className="h-4 w-4 rounded-full bg-[#dc2626] block shrink-0" />
-                <span className="font-display text-xl font-bold tracking-tight text-[#ffffff]">luna<span className="text-[#dc2626]">.</span></span>
+              <button onClick={() => { setPage('home'); setMenuOpen(false); }} className="flex items-center gap-2.5 text-base font-bold tracking-tight">
+                <span className="h-4 w-4 rounded-full bg-[#168eea] block shrink-0" />
+                <span className="font-display text-xl font-bold tracking-tight text-[#ffffff]">luna<span className="text-[#168eea]">.</span></span>
               </button>
-              <button onClick={() => setMenuOpen(false)} className="rounded-full p-2 text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white">
+              <button onClick={() => setMenuOpen(false)} className="rounded-full p-2 text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-white">
                 <X size={18} />
               </button>
             </div>
 
             <nav className="flex-1 py-8 flex flex-col gap-3">
               <button
+                onClick={() => { setPage('home'); setMenuOpen(false); }}
+                className={`rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-3 transition-all ${
+                  page === 'home' ? 'bg-[#168eea] text-white shadow-premium' : 'text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-white'
+                }`}
+              >
+                <House size={16} />
+                <span>Home</span>
+              </button>
+              <button
                 onClick={() => { setPage('conversations'); setMenuOpen(false); }}
                 className={`rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-3 transition-all ${
-                  page === 'conversations' ? 'bg-[#dc2626] text-white shadow-premium' : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
+                  page === 'conversations' ? 'bg-[#168eea] text-white shadow-premium' : 'text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-white'
                 }`}
               >
                 <MessageCircle size={16} />
@@ -122,7 +145,7 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               <button
                 onClick={() => { setPage('counseling'); setMenuOpen(false); }}
                 className={`rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-3 transition-all ${
-                  page === 'counseling' ? 'bg-[#dc2626] text-white shadow-premium' : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
+                  page === 'counseling' ? 'bg-[#168eea] text-white shadow-premium' : 'text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-white'
                 }`}
               >
                 <Heart size={16} />
@@ -131,7 +154,7 @@ function AppHeader({ page, setPage, profile, onGoToAdmin }: { page: 'conversatio
               <button
                 onClick={() => { setPage('preferences'); setMenuOpen(false); }}
                 className={`rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-3 transition-all ${
-                  page === 'preferences' ? 'bg-[#dc2626] text-white shadow-premium' : 'text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white'
+                  page === 'preferences' ? 'bg-[#168eea] text-white shadow-premium' : 'text-[#ffffff]/80 hover:bg-[#168eea]/20 hover:text-white'
                 }`}
               >
                 <Settings size={16} />
@@ -232,7 +255,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
       await api.post(`/conversations/${conversation.id}/reengage/`)
       onReload()
     } catch {
-      setError('Could not re-engage Luna. Please try again.')
+      setError('Could not re-engage Belong. Please try again.')
     } finally {
       setSending(false)
     }
@@ -535,18 +558,18 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   }
 
   const getGoalIcon = (goal: string) => {
-    if (goal?.toLowerCase().includes('romance')) return <Heart size={13} className="text-[#ef4444] inline mr-1" />
+    if (goal?.toLowerCase().includes('romance')) return <Heart size={13} className="text-[#168eea] inline mr-1" />
     if (goal?.toLowerCase().includes('friendship')) return <Users size={13} className="text-[#ffffff] inline mr-1" />
     return <Briefcase size={13} className="text-[#ffffff] inline mr-1" />
   }
 
   const renderMessage = (m: Message) => {
     const mine = m.sender?.id === currentUserId
-    const isSystem = m.metadata?.type === 'system_left' || (m.body && (m.body.includes('joined the chat') || m.body.includes('left the conversation') || m.body.includes('Luna has left')))
+    const isSystem = m.metadata?.type === 'system_left' || (m.body && (m.body.includes('joined the chat') || m.body.includes('left the conversation') || m.body.includes('Luna has left') || m.body.includes('Belong has left')))
     if (isSystem) {
       return (
         <div key={m.id} className="flex justify-center my-4 w-full">
-          <div className="rounded-full bg-[#ffffff]/5 border border-[#ffffff]/10 px-4 py-1.5 text-[11px] font-semibold text-[#ffffff]/60 text-center shadow-soft">
+          <div className="rounded-full bg-[#102a43] border border-[#254a6d] px-4 py-1.5 text-[11px] font-semibold text-[#ffffff]/70 text-center">
             {m.body}
           </div>
         </div>
@@ -556,17 +579,17 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
       <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'} mb-4`}>
         <div className={`max-w-[85%] ${mine ? 'items-end' : 'items-start'} flex flex-col`}>
           <div
-            className={`rounded-[1.75rem] px-5 py-3 text-[14px] leading-relaxed shadow-soft ${
+            className={`rounded-[1.75rem] px-5 py-3 text-[14px] leading-relaxed ${
               mine
-                ? 'rounded-br-sm bg-[#dc2626] text-white'
+                ? 'rounded-br-sm bg-[#168eea] text-white'
                 : m.is_ai
-                  ? 'rounded-bl-sm bg-[#c8102e]/10 border border-[#ffffff]/10 text-white'
-                  : 'rounded-bl-sm bg-[#c8102e] border border-[#ffffff]/10 text-white'
+                  ? 'rounded-bl-sm bg-[#102a43] border border-[#254a6d] text-white'
+                  : 'rounded-bl-sm bg-[#102a43] border border-[#254a6d] text-white'
             }`}
           >
             {m.is_ai && (
-              <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#dc2626]">
-                <Sparkles size={11} /> Luna
+              <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#168eea]">
+                <MessageCircle size={11} /> Belong
               </div>
             )}
             {!mine && !m.is_ai && m.sender && (
@@ -577,7 +600,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             <p className="whitespace-pre-wrap">{m.body}</p>
 
             {m.metadata?.type === 'profile_card' && m.metadata?.profile && (
-              <div className="mt-4 rounded-2xl border border-[#ffffff]/10 bg-[#000000] p-5 text-[#ffffff] shadow-soft">
+              <div className="mt-4 rounded-2xl border border-[#254a6d] bg-[#0b1f33] p-5 text-[#ffffff]">
                 <div className="text-lg font-bold font-display text-white">{m.metadata.profile.display_name}</div>
                 <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#ffffff]/80">
                   {getGoalIcon(m.metadata.profile.connection_goal)}
@@ -591,7 +614,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                 {Array.isArray(m.metadata.profile.interests) && m.metadata.profile.interests.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {m.metadata.profile.interests.map((item: string) => (
-                      <span key={item} className="rounded-full bg-terracotta-50 px-2.5 py-1 text-[10px] font-semibold text-terracotta-500 border border-terracotta-200/20">
+                      <span key={item} className="rounded-full bg-[#102a43] px-2.5 py-1 text-[10px] font-semibold text-[#8fcaff] border border-[#254a6d]">
                         {item}
                       </span>
                     ))}
@@ -601,21 +624,21 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             )}
 
             {m.metadata?.type === 'profile_locked_premium' && (
-              <div className="mt-4 rounded-2xl border border-[#dc2626]/30 bg-[#dc2626]/5 p-5 text-[#ffffff] shadow-soft max-w-sm">
-                <div className="flex items-center gap-2 text-[#dc2626] font-bold text-xs">
-                  <Lock size={14} className="animate-pulse" />
+              <div className="mt-4 rounded-2xl border border-[#254a6d] bg-[#0b1f33] p-5 text-[#ffffff] max-w-sm">
+                <div className="flex items-center gap-2 text-[#168eea] font-bold text-xs">
+                  <Lock size={14} />
                   <span>Premium Match Recommendation</span>
                 </div>
                 <div className="mt-2 text-lg font-bold font-display text-white">Profile Locked</div>
-                <div className="mt-2 flex items-center gap-1 bg-[#dc2626]/10 border border-[#dc2626]/20 rounded-full px-3 py-1 w-max text-[10px] font-bold text-[#dc2626] uppercase tracking-wider">
-                  🔥 {m.metadata.score}% Compatibility
+                <div className="mt-2 flex items-center gap-1 bg-[#168eea]/10 border border-[#168eea]/20 rounded-full px-3 py-1 w-max text-[10px] font-bold text-[#168eea] uppercase tracking-wider">
+                  {m.metadata.score}% Compatibility
                 </div>
                 <p className="mt-3 text-xs text-[#ffffff]/60 leading-relaxed">
                   Unlock detailed bios, values alignment, and direct messaging with this premium candidate by upgrading.
                 </p>
                 <button
                   onClick={onGoToCounseling}
-                  className="mt-4 w-full rounded-full bg-[#dc2626] py-2.5 text-xs font-bold text-white hover:bg-[#b91c1c] active:scale-95 transition-all shadow-glow flex items-center justify-center gap-1.5"
+                  className="mt-4 w-full rounded-full bg-[#168eea] py-2.5 text-xs font-bold text-white hover:bg-[#0875c6] active:scale-95 transition-all flex items-center justify-center gap-1.5"
                 >
                   <Unlock size={12} />
                   Upgrade to Reveal Profile
@@ -624,8 +647,8 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             )}
 
             {m.metadata?.type === 'date_proposal' && (
-              <div className="mt-4 rounded-2xl border border-[#ffffff]/10 bg-[#000000] p-5 text-[#ffffff] shadow-soft max-w-sm">
-                <div className="flex items-center gap-2 text-[#dc2626] font-bold text-xs">
+              <div className="mt-4 rounded-2xl border border-[#254a6d] bg-[#0b1f33] p-5 text-[#ffffff] max-w-sm">
+                <div className="flex items-center gap-2 text-[#168eea] font-bold text-xs">
                   <Calendar size={14} /> Meetup Proposal
                 </div>
                 <div className="mt-2 text-sm font-bold font-display text-white">{m.metadata.venue_name}</div>
@@ -641,7 +664,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                     </button>
                     <button
                       onClick={() => respondToDate(m.metadata.meeting_id, 'accept')}
-                      className="flex-1 rounded-full bg-[#dc2626] py-2 text-xs font-bold text-white shadow-glow hover:bg-[#b91c1c] active:scale-95 transition-all"
+                      className="flex-1 rounded-full bg-[#168eea] py-2 text-xs font-bold text-white hover:bg-[#0875c6] active:scale-95 transition-all"
                     >
                       Accept
                     </button>
@@ -650,7 +673,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
               </div>
             )}
           </div>
-          <span className="mt-1 px-2.5 text-[9px] font-semibold text-cocoa-300">
+          <span className="mt-1 px-2.5 text-[9px] font-semibold text-[#ffffff]/50">
             {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
@@ -659,19 +682,19 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
   }
 
   return (
-    <div className="fixed inset-0 z-40 bg-[#000000]/70 p-0 md:relative md:inset-auto md:z-0 md:p-0 md:bg-transparent md:h-full flex gap-6 w-full">
+    <div className="fixed inset-0 z-40 bg-[#06111e]/95 p-0 md:relative md:inset-auto md:z-0 md:p-0 md:bg-transparent md:h-full flex gap-6 w-full">
       <section className="flex-1 flex h-full flex-col overflow-hidden">
         
         {/* Chat Header */}
         <header className="relative flex items-center justify-between gap-3 border-b border-[#ffffff]/10 pb-4">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ffffff] text-[#000000] font-bold border border-[#ffffff]/20 sm:h-10 sm:w-10">
-              {conversation.is_luna ? <Sparkles size={16} /> : <MessageCircle size={16} />}
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#168eea] text-white font-bold sm:h-10 sm:w-10">
+              <MessageCircle size={16} />
             </div>
             <div className="min-w-0">
               <h2 className="truncate font-bold text-white text-sm sm:text-base">{conversation.title}</h2>
               <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[#ffffff]/80">
-                <span className={`h-1.5 w-1.5 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-[#ffffff]/30'}`} />
+                <span className={`h-1.5 w-1.5 rounded-full ${connected ? 'bg-[#168eea]' : 'bg-[#ffffff]/30'}`} />
                 {conversation.is_luna ? 'Your private AI concierge' : connected ? 'Live conversation' : 'Reconnecting…'}
               </p>
             </div>
@@ -680,8 +703,8 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             {!conversation.is_luna && (
               <>
                 {/* E2EE Lock indicator */}
-                <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#ffffff]/80 border border-[#ffffff]/10 bg-[#c8102e]/10 rounded-full px-3 py-1">
-                  {conversation.is_contact_sharing_allowed ? <Unlock size={11} className="text-emerald-500" /> : <Lock size={11} className="text-[#dc2626]" />}
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#ffffff]/80 border border-[#254a6d] bg-[#102a43] rounded-full px-3 py-1">
+                  {conversation.is_contact_sharing_allowed ? <Unlock size={11} className="text-emerald-500" /> : <Lock size={11} className="text-[#168eea]" />}
                   <span className="hidden sm:inline">{conversation.is_contact_sharing_allowed ? 'Direct' : 'Shielded'}</span>
                 </div>
 
@@ -690,23 +713,23 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                   aria-label="Open chat options"
                   aria-expanded={chatMenuOpen}
                   onClick={() => setChatMenuOpen(open => !open)}
-                  className="rounded-full border border-[#ffffff]/10 bg-[#c8102e]/10 p-2 text-[#ffffff]/80 transition-all hover:bg-[#c8102e]/20 hover:text-white active:scale-95"
+                  className="rounded-full border border-[#254a6d] bg-[#102a43] p-2 text-[#ffffff]/80 transition-colors hover:bg-[#168eea] hover:text-white"
                 >
                   {chatMenuOpen ? <X size={18} /> : <Menu size={18} />}
                 </button>
 
                 {chatMenuOpen && (
-                  <div className="absolute right-10 top-12 z-50 w-64 overflow-hidden rounded-2xl border border-[#ffffff]/10 bg-[#111111] p-2 shadow-2xl">
+                  <div className="absolute right-10 top-12 z-50 w-64 overflow-hidden rounded-2xl border border-[#254a6d] bg-[#0b1f33] p-2">
                     {!conversation.is_contact_sharing_allowed && (
                       <button onClick={() => { setChatMenuOpen(false); permitContact() }} disabled={permitting} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#ffffff] hover:bg-[#ffffff]/10 disabled:opacity-50">
-                        <Unlock size={17} className="text-[#dc2626]" /> {permitting ? 'Unlocking sharing…' : 'Unlock contact sharing'}
+                        <Unlock size={17} className="text-[#168eea]" /> {permitting ? 'Unlocking sharing…' : 'Unlock contact sharing'}
                       </button>
                     )}
                     <button onClick={() => { setChatMenuOpen(false); startCall() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#ffffff] hover:bg-[#ffffff]/10">
-                      <Video size={17} className="text-[#dc2626]" /> Start video call
+                      <Video size={17} className="text-[#168eea]" /> Start video call
                     </button>
                     <button onClick={() => { setChatMenuOpen(false); setShowDatePicker(true); loadVenues() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#ffffff] hover:bg-[#ffffff]/10">
-                      <Calendar size={17} className="text-[#dc2626]" /> Plan meetup date
+                      <Calendar size={17} className="text-[#168eea]" /> Plan meetup date
                     </button>
                     <button
                       disabled={smsSending}
@@ -726,10 +749,10 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                       }}
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#ffffff] hover:bg-[#ffffff]/10 disabled:opacity-50"
                     >
-                      <Smartphone size={17} className="text-[#dc2626]" /> {smsSending ? 'Sending SMS…' : 'Send SMS nudge'}
+                      <Smartphone size={17} className="text-[#168eea]" /> {smsSending ? 'Sending SMS…' : 'Send SMS nudge'}
                     </button>
                     <button onClick={() => { setChatMenuOpen(false); setShowSideBoard(!showSideBoard) }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#ffffff] hover:bg-[#ffffff]/10">
-                      <Info size={17} className="text-[#dc2626]" /> {showSideBoard ? 'Hide match info' : 'Show match info'}
+                      <Info size={17} className="text-[#168eea]" /> {showSideBoard ? 'Hide match info' : 'Show match info'}
                     </button>
                   </div>
                 )}
@@ -738,7 +761,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             <button
               aria-label="Back to conversations"
               onClick={onClose}
-              className="rounded-full p-2 text-[#ffffff]/80 hover:bg-[#c8102e]/20 hover:text-white transition-colors"
+              className="rounded-full p-2 text-[#ffffff]/80 hover:bg-[#168eea] hover:text-white transition-colors"
             >
               <ArrowLeft size={18} />
             </button>
@@ -747,11 +770,11 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
 
         {/* Chat Messages */}
         <div className="flex-1 space-y-4 overflow-y-auto py-6">
-          <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-3.5 flex gap-3 text-[11px] text-[#ffffff]/70 leading-relaxed shadow-soft">
+          <div className="rounded-xl border border-yellow-500/30 bg-[#102a43] p-3.5 flex gap-3 text-[11px] text-[#ffffff]/70 leading-relaxed">
             <AlertTriangle size={16} className="text-yellow-500 shrink-0 mt-0.5" />
             <div>
               <span className="font-bold text-yellow-500 uppercase tracking-wider block mb-1">Safety Advisory</span>
-              Be cautious of what personal information, phone numbers, or social media handles you share in chats. Luna operates with a strict meaningful connection policy, but does not monitor private off-platform interactions. Luna shall not be held liable or accountable for off-platform behaviors, financial transfers, or personal data shared between users.
+              Be cautious of what personal information, phone numbers, or social media handles you share in chats. Belong operates with a strict meaningful connection policy, but does not monitor private off-platform interactions. Belong shall not be held liable or accountable for off-platform behaviors, financial transfers, or personal data shared between users.
             </div>
           </div>
           {(conversation.messages || []).map(renderMessage)}
@@ -759,11 +782,11 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             <p className="mt-16 text-center text-xs font-semibold text-[#ffffff]/40">This conversation has just begun.</p>
           )}
           {sending && conversation.is_luna && (
-            <div className="flex items-center gap-2 text-xs font-medium text-[#dc2626] bg-[#dc2626]/10 rounded-full px-4 py-2 w-max border border-[#dc2626]/20">
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#dc2626]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#dc2626] [animation-delay:0.2s]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#dc2626] [animation-delay:0.4s]" />
-              Luna is drafting compatibility insights...
+            <div className="flex items-center gap-2 text-xs font-medium text-[#8fcaff] bg-[#102a43] rounded-full px-4 py-2 w-max border border-[#254a6d]">
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#168eea]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#168eea] [animation-delay:0.2s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#168eea] [animation-delay:0.4s]" />
+              Belong is drafting compatibility insights...
             </div>
           )}
           {typingName && (
@@ -773,27 +796,27 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
         </div>
 
         {conversation.luna_stage === 'left' && (
-          <div className="bg-terracotta-50 border-t border-b border-terracotta-200/40 px-5 py-3.5 flex items-center justify-between text-xs text-cocoa-900 font-semibold shadow-soft">
+          <div className="bg-[#102a43] border-t border-b border-[#254a6d] px-5 py-3.5 flex items-center justify-between text-xs text-white font-semibold">
             <span className="flex items-center gap-2">
-              <Sparkles size={14} className="text-terracotta-500 shrink-0 border-0" />
-              <span>Luna is away letting you talk privately. Click below to bring Luna back and debrief!</span>
+              <MessageCircle size={14} className="text-[#8fcaff] shrink-0 border-0" />
+              <span>Belong is away letting you talk privately. Click below to bring Belong back and debrief!</span>
             </span>
             <button
               onClick={reengage}
               disabled={sending}
-              className="rounded-full bg-terracotta-500 px-4 py-2 font-bold text-white shadow-premium hover:bg-terracotta-600 active:scale-95 transition-all shrink-0 ml-4"
+              className="rounded-full bg-[#168eea] px-4 py-2 font-bold text-white hover:bg-[#0875c6] transition-colors shrink-0 ml-4"
             >
-              Re-engage Luna
+              Re-engage Belong
             </button>
           </div>
         )}
 
         {/* WebRTC Video Call Overlay */}
         {callActive && (
-          <div className="absolute inset-0 z-50 bg-cocoa-900/90 flex flex-col justify-between p-6 text-white">
+          <div className="absolute inset-0 z-50 bg-[#06111e] flex flex-col justify-between p-6 text-white">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <Video size={16} className="text-terracotta-500 animate-pulse" />
+                <Video size={16} className="text-[#8fcaff]" />
                 <span className="text-xs font-bold uppercase tracking-wider">Speed Date Calling Mode</span>
               </div>
               <div className="rounded-full bg-yellow-500/20 px-4 py-1.5 border border-yellow-500/30 text-xs font-bold text-yellow-300">
@@ -802,7 +825,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             </div>
 
             <div className="flex-1 my-6 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-              <div className="bg-cocoa-900/50 border border-white/10 rounded-2xl overflow-hidden aspect-video relative shadow-2xl">
+              <div className="bg-[#102a43] border border-[#254a6d] rounded-2xl overflow-hidden aspect-video relative">
                 {localStream ? (
                   <video
                     ref={el => { if (el) el.srcObject = localStream; }}
@@ -814,10 +837,10 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                 ) : (
                   <div className="absolute inset-0 grid place-items-center text-xs text-white/50">Your camera is loading...</div>
                 )}
-                <div className="absolute bottom-3 left-3 bg-cocoa-900/60 backdrop-blur-md rounded-lg px-2.5 py-1 text-[10px] font-bold">You</div>
+                <div className="absolute bottom-3 left-3 bg-black rounded-lg px-2.5 py-1 text-[10px] font-bold">You</div>
               </div>
 
-              <div className="bg-cocoa-900/50 border border-white/10 rounded-2xl overflow-hidden aspect-video relative shadow-2xl">
+              <div className="bg-[#102a43] border border-[#254a6d] rounded-2xl overflow-hidden aspect-video relative">
                 {remoteStream ? (
                   <video
                     ref={el => { if (el) el.srcObject = remoteStream; }}
@@ -826,16 +849,16 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="absolute inset-0 grid place-items-center text-xs text-white/50 animate-pulse">Waiting for participant to connect...</div>
+                  <div className="absolute inset-0 grid place-items-center text-xs text-white/50">Waiting for participant to connect...</div>
                 )}
-                <div className="absolute bottom-3 left-3 bg-cocoa-900/60 backdrop-blur-md rounded-lg px-2.5 py-1 text-[10px] font-bold">Match Connection</div>
+                <div className="absolute bottom-3 left-3 bg-black rounded-lg px-2.5 py-1 text-[10px] font-bold">Match Connection</div>
               </div>
             </div>
 
             <div className="flex justify-center gap-4">
               <button
                 onClick={endCall}
-                className="rounded-full bg-[#dc2626] hover:bg-[#b91c1c] px-8 py-3 text-xs font-bold shadow-2xl active:scale-95 transition-all"
+                className="rounded-full bg-[#168eea] hover:bg-[#0875c6] px-8 py-3 text-xs font-bold transition-colors"
               >
                 End Speed Date
               </button>
@@ -845,29 +868,29 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
 
         {/* Date Proposal Modal Overlay */}
         {showDatePicker && (
-          <div className="absolute inset-0 z-40 bg-cocoa-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-cream border border-cocoa-900/5 rounded-[2rem] shadow-2xl w-full max-w-md p-6 relative">
+          <div className="absolute inset-0 z-40 bg-[#06111e]/95 flex items-center justify-center p-4">
+            <div className="bg-[#0b1f33] border border-[#254a6d] rounded-[2rem] w-full max-w-md p-6 relative text-white">
               <button
                 onClick={() => setShowDatePicker(false)}
-                className="absolute top-4 right-4 rounded-full p-1.5 hover:bg-cocoa-900/5 text-cocoa-500"
+                className="absolute top-4 right-4 rounded-full p-1.5 hover:bg-[#168eea] text-[#ffffff]/70"
               >
                 <X size={16} />
               </button>
-              <h3 className="font-bold text-lg font-display text-cocoa-900 flex items-center gap-2">
-                <Calendar className="text-terracotta-500" size={20} />
+              <h3 className="font-bold text-lg font-display text-white flex items-center gap-2">
+                <Calendar className="text-[#8fcaff]" size={20} />
                 Plan Meetup Date
               </h3>
-              <p className="text-xs text-cocoa-500 mt-1">Select one of Luna's safety-curated venues equidistant to both of you.</p>
+              <p className="text-xs text-[#ffffff]/60 mt-1">Select one of Belong's safety-curated venues equidistant to both of you.</p>
 
               {loadingVenues ? (
-                <div className="py-12 flex flex-col items-center gap-2 animate-pulse">
-                  <span className="h-5 w-5 rounded-full border-2 border-terracotta-500 border-t-transparent animate-spin"></span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-cocoa-400">Luna is studying the map…</span>
+                <div className="py-12 flex flex-col items-center gap-2">
+                  <span className="h-5 w-5 rounded-full border-2 border-[#168eea] border-t-transparent animate-spin"></span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#ffffff]/60">Belong is studying the map…</span>
                 </div>
               ) : (
                 <form onSubmit={proposeDate} className="mt-5 space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-cocoa-400 block">Select Venue</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[#ffffff]/60 block">Select Venue</label>
                     <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
                       {venues.map(v => {
                         const isSel = selectedVenue?.name === v.name
@@ -877,13 +900,13 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                             onClick={() => setSelectedVenue({ name: v.name, address: v.address })}
                             className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
                               isSel
-                                ? 'border-terracotta-500 bg-terracotta-50/50'
-                                : 'border-cocoa-900/5 bg-white hover:border-terracotta-500/20'
+                                ? 'border-[#168eea] bg-[#168eea] text-white'
+                                : 'border-[#254a6d] bg-[#102a43] text-white hover:border-[#168eea]'
                             }`}
                           >
-                            <div className="font-bold text-xs text-cocoa-900">{v.name}</div>
-                            <div className="text-[10px] text-cocoa-500 mt-0.5">{v.address}</div>
-                            <div className="text-[9px] text-terracotta-600 mt-1 italic font-semibold">{v.reason}</div>
+                            <div className="font-bold text-xs text-white">{v.name}</div>
+                            <div className="text-[10px] text-[#ffffff]/65 mt-0.5">{v.address}</div>
+                            <div className="text-[9px] text-[#8fcaff] mt-1 italic font-semibold">{v.reason}</div>
                           </div>
                         )
                       })}
@@ -891,20 +914,20 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-cocoa-400 block">Proposed Date & Time</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[#ffffff]/60 block">Proposed Date & Time</label>
                     <input
                       type="datetime-local"
                       required
                       value={proposedTime}
                       onChange={e => setProposedTime(e.target.value)}
-                      className="premium-input mt-1.5"
+                      className="mt-1.5 w-full rounded-xl border border-[#254a6d] bg-[#102a43] px-3 py-2.5 text-sm text-white outline-none focus:border-[#168eea]"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={!selectedVenue || !proposedTime}
-                    className="w-full rounded-full bg-terracotta-500 px-6 py-3 font-bold text-white shadow-premium hover:bg-terracotta-600 active:scale-95 transition-all disabled:opacity-50 mt-4"
+                    className="w-full rounded-full bg-[#168eea] px-6 py-3 font-bold text-white hover:bg-[#0875c6] transition-colors disabled:opacity-50 mt-4"
                   >
                     Send Date Proposal
                   </button>
@@ -917,7 +940,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
         {/* Chat Form */}
         <form onSubmit={send} className="py-4 border-t border-[#ffffff]/10">
           {error && <p className="mb-2.5 text-xs font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200/50 p-2.5 rounded-xl">{error}</p>}
-          <div className="flex items-end gap-3 rounded-2xl bg-[#c8102e]/10 p-1.5 border border-[#ffffff]/10 focus-within:border-[#dc2626] focus-within:ring-4 focus-within:ring-[#dc2626]/10 transition-all">
+          <div className="flex items-end gap-3 rounded-2xl bg-[#102a43] p-1.5 border border-[#254a6d] focus-within:border-[#168eea] transition-colors">
             <textarea
               rows={1}
               value={body}
@@ -929,13 +952,13 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
                   send(e as any)
                 }
               }}
-              placeholder={conversation.luna_stage === 'introducing' ? "Wait for Luna's introduction..." : conversation.luna_stage === 'luna_present' ? "Write a message (Tag #Luna for AI help)..." : conversation.is_luna ? 'Message Luna…' : 'Write a message…'}
+              placeholder={conversation.luna_stage === 'introducing' ? "Wait for Belong's introduction..." : conversation.luna_stage === 'luna_present' ? "Write a message (Tag #Belong for AI help)..." : conversation.is_luna ? 'Message Belong…' : 'Write a message…'}
               className="max-h-24 min-h-[40px] flex-1 resize-none bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-[#ffffff]/50 disabled:opacity-50"
             />
             <button
               aria-label="Send message"
               disabled={sending || !body.trim() || conversation.luna_stage === 'introducing'}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#dc2626] text-white hover:bg-[#b91c1c] active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#168eea] text-white hover:bg-[#0875c6] active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
             >
               <Send size={15} />
             </button>
@@ -961,13 +984,13 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
         const board = conversation.luna_board || {}
         const rawSummary = activeProfileId ? (board.summaries?.[String(activeProfileId)] || board.summaries?.[activeProfileId]) : undefined
         const partnerSummary = rawSummary || `${partner.display_name} is located in ${partner.location || 'Uganda'}. Connection goal: ${partner.connection_goal}.`
-        const relationshipProgress = board.progress || "Match connected! Start chatting to unlock compatibility intelligence from Luna."
+        const relationshipProgress = board.progress || "Match connected! Start chatting to unlock compatibility intelligence from Belong."
 
         return (
-          <aside className="hidden lg:flex w-80 shrink-0 flex-col bg-[#000000] border border-[#ffffff]/10 rounded-[2rem] shadow-soft overflow-y-auto p-5 text-[#ffffff] animate-fadeIn">
+          <aside className="hidden lg:flex w-80 shrink-0 flex-col bg-[#0b1f33] border border-[#254a6d] rounded-[2rem] overflow-y-auto p-5 text-[#ffffff]">
             {/* Header info */}
             <div className="flex flex-col items-center text-center pb-4 border-b border-[#ffffff]/10">
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-[#c8102e]/20 text-[#dc2626] font-bold text-xl border border-[#ffffff]/10 mb-3 shadow-inner relative overflow-hidden">
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-[#102a43] text-[#8fcaff] font-bold text-xl border border-[#254a6d] mb-3 relative overflow-hidden">
                 {partner.profile_picture ? (
                   <img src={partner.profile_picture} alt={partner.display_name} className="w-full h-full object-cover" />
                 ) : (
@@ -977,19 +1000,19 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
               <h3 className="font-bold text-white text-sm">{partner.display_name}</h3>
               <p className="text-[10px] text-[#ffffff]/60 mt-0.5">{partner.location || 'Uganda'}</p>
               
-              <div className="mt-2.5 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#dc2626]/10 border border-[#dc2626]/20 text-[9px] font-bold text-[#dc2626] uppercase tracking-wider">
+              <div className="mt-2.5 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#102a43] border border-[#254a6d] text-[9px] font-bold text-[#8fcaff] uppercase tracking-wider">
                 {getGoalIcon(partner.connection_goal)}
                 <span>{partner.connection_goal}</span>
               </div>
             </div>
 
-            {/* Profile summary from Luna */}
+            {/* Profile summary from Belong */}
             <div className="mt-5 space-y-2">
               <h4 className="text-[9px] font-bold uppercase tracking-wider text-[#ffffff]/40 flex items-center gap-1.5">
-                <Sparkles size={11} className="text-[#dc2626]" />
-                Luna's Partner Summary
+                <MessageCircle size={11} className="text-[#168eea]" />
+                Belong's Partner Summary
               </h4>
-              <div className="rounded-2xl bg-[#c8102e]/5 border border-[#ffffff]/5 p-4 text-xs text-[#ffffff]/80 leading-relaxed italic">
+              <div className="rounded-2xl bg-[#102a43] border border-[#254a6d] p-4 text-xs text-[#ffffff]/80 leading-relaxed italic">
                 "{partnerSummary}"
               </div>
             </div>
@@ -997,7 +1020,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
             {/* Match progression / timeline */}
             <div className="mt-6 space-y-3 flex-1">
               <h4 className="text-[9px] font-bold uppercase tracking-wider text-[#ffffff]/40 flex items-center gap-1.5">
-                <TrendingUp size={11} className="text-[#dc2626]" />
+                <TrendingUp size={11} className="text-[#168eea]" />
                 Relationship Progress
               </h4>
               <p className="text-xs text-[#ffffff]/85 leading-relaxed font-semibold">
@@ -1007,7 +1030,7 @@ function Chat({ conversation, onClose, onReload, onGoToCounseling }: { conversat
               {/* Graphical checklist steps */}
               <div className="mt-4 space-y-4 relative pl-4 border-l border-[#ffffff]/10 ml-2">
                 {[
-                  { label: "Connection Established", desc: "Matched and introduced by Luna.", checked: true },
+                  { label: "Connection Established", desc: "Matched and introduced by Belong.", checked: true },
                   { label: "First Exchange", desc: "Exchanged initial warm messages.", checked: isIcebreaker },
                   { label: "Deeper Flow", desc: "Shared values and interests details.", checked: isDeeper },
                   { label: "Shield Unlocked", desc: "Allowed sharing contact details.", checked: isContactShared },
@@ -1197,11 +1220,11 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
           <h2 className="font-bold text-white text-base">Relationship Counseling</h2>
           <p className="text-xs text-[#ffffff]/60 mt-0.5">Private self-reflection and professional guidance</p>
         </div>
-        <div className="flex gap-1.5 bg-[#c8102e]/10 rounded-full p-1 border border-[#ffffff]/5">
+        <div className="flex gap-1.5 bg-[#168eea]/10 rounded-full p-1 border border-[#ffffff]/5">
           <button
             onClick={() => setTab('ai')}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
-              tab === 'ai' ? 'bg-[#dc2626] text-white' : 'text-[#ffffff]/60 hover:text-white'
+              tab === 'ai' ? 'bg-[#168eea] text-white' : 'text-[#ffffff]/60 hover:text-white'
             }`}
           >
             AI Counselor
@@ -1209,7 +1232,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
           <button
             onClick={() => setTab('couples')}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 flex items-center gap-1 ${
-              tab === 'couples' ? 'bg-[#dc2626] text-white' : 'text-[#ffffff]/60 hover:text-white'
+              tab === 'couples' ? 'bg-[#168eea] text-white' : 'text-[#ffffff]/60 hover:text-white'
             }`}
           >
             Couples Therapy
@@ -1235,13 +1258,13 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                         <div
                           className={`rounded-[1.75rem] px-5 py-3 text-[14px] leading-relaxed shadow-soft ${
                             mine
-                              ? 'rounded-br-sm bg-[#dc2626] text-white'
-                              : 'rounded-bl-sm bg-[#c8102e]/10 border border-[#ffffff]/10 text-white'
+                              ? 'rounded-br-sm bg-[#168eea] text-white'
+                              : 'rounded-bl-sm bg-[#168eea]/10 border border-[#ffffff]/10 text-white'
                           }`}
                         >
                           {!mine && (
-                            <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#dc2626]">
-                              <Sparkles size={11} /> Luna Therapy
+                            <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#168eea]">
+                              <MessageCircle size={11} /> Belong Therapy
                             </div>
                           )}
                           <p className="whitespace-pre-wrap">{m.body}</p>
@@ -1252,8 +1275,8 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                 })}
                 {sending && (
                   <div className="flex justify-start">
-                    <div className="rounded-[1.75rem] rounded-bl-sm bg-[#c8102e]/10 border border-[#ffffff]/10 px-5 py-3 text-sm text-white/50 animate-pulse">
-                      Luna is typing thoughts...
+                    <div className="rounded-[1.75rem] rounded-bl-sm bg-[#168eea]/10 border border-[#ffffff]/10 px-5 py-3 text-sm text-white/50 animate-pulse">
+                      Belong is typing thoughts...
                     </div>
                   </div>
                 )}
@@ -1265,11 +1288,11 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                     value={body}
                     onChange={e => setBody(e.target.value)}
                     placeholder="Describe what's happening or how you feel..."
-                    className="flex-1 rounded-2xl border border-[#ffffff]/10 bg-[#c8102e]/5 px-5 py-3.5 text-sm text-white placeholder-[#ffffff]/40 focus:border-[#dc2626] focus:outline-none transition-all"
+                    className="flex-1 rounded-2xl border border-[#ffffff]/10 bg-[#168eea]/5 px-5 py-3.5 text-sm text-white placeholder-[#ffffff]/40 focus:border-[#168eea] focus:outline-none transition-all"
                   />
                   <button
                     disabled={sending || !body.trim()}
-                    className="grid h-12 w-12 place-items-center rounded-2xl bg-[#dc2626] text-white hover:bg-[#b91c1c] active:scale-95 disabled:opacity-30 transition-all"
+                    className="grid h-12 w-12 place-items-center rounded-2xl bg-[#168eea] text-white hover:bg-[#0875c6] active:scale-95 disabled:opacity-30 transition-all"
                   >
                     <Send size={16} />
                   </button>
@@ -1282,10 +1305,10 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {!profile.is_premium ? (
             paymentReference ? (
-              <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto my-12 bg-[#c8102e]/5 border border-[#ffffff]/10 rounded-[2rem] shadow-premium animate-pulse">
+              <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto my-12 bg-[#168eea]/5 border border-[#ffffff]/10 rounded-[2rem] shadow-premium animate-pulse">
                 <div className="relative flex items-center justify-center w-16 h-16 mb-6">
-                  <div className="absolute inset-0 rounded-full border-4 border-[#dc2626]/20 border-t-[#dc2626] animate-spin" />
-                  <Lock size={24} className="text-[#dc2626]" />
+                  <div className="absolute inset-0 rounded-full border-4 border-[#168eea]/20 border-t-[#168eea] animate-spin" />
+                  <Lock size={24} className="text-[#168eea]" />
                 </div>
                 <h3 className="text-lg font-bold text-white font-display">Awaiting PIN Confirmation</h3>
                 <p className="mt-2 text-xs text-[#ffffff]/70 leading-relaxed">
@@ -1295,7 +1318,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                 <div className="mt-6 px-4 py-2 rounded-xl bg-[#111111] border border-[#ffffff]/5 text-[10px] font-mono text-[#ffffff]/50 select-all">
                   Ref: {paymentReference}
                 </div>
-                <div className="mt-1 text-[10px] text-[#dc2626] font-semibold animate-pulse">
+                <div className="mt-1 text-[10px] text-[#168eea] font-semibold animate-pulse">
                   Status: {paymentStatus || 'Initiated'}
                 </div>
                 <button
@@ -1309,7 +1332,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col p-8 sm:p-10 max-w-md mx-auto my-6 bg-[#c8102e]/5 border border-[#ffffff]/10 rounded-[2rem] shadow-premium text-center">
+              <div className="flex flex-col p-8 sm:p-10 max-w-md mx-auto my-6 bg-[#168eea]/5 border border-[#ffffff]/10 rounded-[2rem] shadow-premium text-center">
                 <div className="mx-auto p-4 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-full w-fit mb-5">
                   <Lock size={28} />
                 </div>
@@ -1336,8 +1359,8 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                         onClick={() => setSelectedProvider('mtn')}
                         className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all active:scale-95 ${
                           selectedProvider === 'mtn'
-                            ? 'border-[#dc2626] bg-[#dc2626]/5 shadow-[0_0_15px_rgba(242,112,89,0.25)]'
-                            : 'border-[#ffffff]/10 bg-[#c8102e]/5 hover:border-[#ffffff]/20'
+                            ? 'border-[#168eea] bg-[#168eea]/5'
+                            : 'border-[#ffffff]/10 bg-[#168eea]/5 hover:border-[#ffffff]/20'
                         }`}
                       >
                         <img src="/mtn.png" alt="MTN Mobile Money" className="h-10 w-auto object-contain rounded-lg" />
@@ -1348,8 +1371,8 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                         onClick={() => setSelectedProvider('airtel')}
                         className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all active:scale-95 ${
                           selectedProvider === 'airtel'
-                            ? 'border-[#dc2626] bg-[#dc2626]/5 shadow-[0_0_15px_rgba(242,112,89,0.25)]'
-                            : 'border-[#ffffff]/10 bg-[#c8102e]/5 hover:border-[#ffffff]/20'
+                            ? 'border-[#168eea] bg-[#168eea]/5'
+                            : 'border-[#ffffff]/10 bg-[#168eea]/5 hover:border-[#ffffff]/20'
                         }`}
                       >
                         <img src="/airtel.png" alt="Airtel Money" className="h-10 w-auto object-contain rounded-lg" />
@@ -1369,7 +1392,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                       value={checkoutPhone}
                       onChange={e => setCheckoutPhone(e.target.value)}
                       placeholder="e.g. +256700000000"
-                      className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626]"
+                      className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea]"
                     />
                   </div>
 
@@ -1377,10 +1400,10 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                   <div className="flex justify-between items-center bg-[#111111] border border-[#ffffff]/5 rounded-2xl p-4 mt-2">
                     <div className="text-left">
                       <span className="text-[10px] uppercase font-bold tracking-wider text-[#ffffff]/40 block">Total Amount</span>
-                      <span className="text-xs font-semibold text-white">Luna Premium Lifetime Upgrade</span>
+                      <span className="text-xs font-semibold text-white">Belong Premium Lifetime Upgrade</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-lg font-bold text-[#dc2626] font-display block">
+                      <span className="text-lg font-bold text-[#168eea] font-display block">
                         {premiumPrice ? `${premiumPrice.amount_ugx.toLocaleString()} UGX` : '11,000 UGX'}
                       </span>
                       <span className="text-[10px] text-[#ffffff]/40 font-semibold block mt-0.5">
@@ -1392,7 +1415,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                   <button
                     type="submit"
                     disabled={isInitiatingPayment || !checkoutPhone.trim()}
-                    className="w-full rounded-full bg-[#dc2626] py-3.5 text-xs font-bold text-white hover:bg-[#b91c1c] active:scale-95 disabled:opacity-50 transition-all shadow-glow flex items-center justify-center gap-2"
+                    className="w-full rounded-full bg-[#168eea] py-3.5 text-xs font-bold text-white hover:bg-[#0875c6] active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                   >
                     {isInitiatingPayment ? (
                       <>
@@ -1408,10 +1431,10 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
             )
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-              <form onSubmit={scheduleSession} className="bg-[#c8102e]/5 border border-[#ffffff]/10 rounded-[2rem] p-6 space-y-4">
+              <form onSubmit={scheduleSession} className="bg-[#168eea]/5 border border-[#ffffff]/10 rounded-[2rem] p-6 space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-bold text-white text-sm flex items-center gap-1.5">
-                    <Calendar size={16} className="text-[#dc2626]" />
+                    <Calendar size={16} className="text-[#168eea]" />
                     Schedule a Therapist Session
                   </h3>
                   <button 
@@ -1424,9 +1447,9 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                         console.error(e)
                       }
                     }} 
-                    className="text-[10px] font-bold text-yellow-500 hover:underline select-none"
+                    className="inline-flex items-center gap-1.5 text-[10px] font-bold text-yellow-500 hover:underline select-none"
                   >
-                    🔧 Reset to Free for testing
+                    <Settings size={13} /> Reset to Free for testing
                   </button>
                 </div>
                 {schedError && (
@@ -1442,7 +1465,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                     value={partnerName}
                     onChange={e => setPartnerName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626]"
+                    className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea]"
                   />
                 </div>
                 <div>
@@ -1453,7 +1476,7 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                     value={partnerPhone}
                     onChange={e => setPartnerPhone(e.target.value)}
                     placeholder="e.g. +256..."
-                    className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626]"
+                    className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea]"
                   />
                 </div>
                 <div>
@@ -1463,13 +1486,13 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                     required
                     value={scheduledTime}
                     onChange={e => setScheduledTime(e.target.value)}
-                    className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626]"
+                    className="premium-input w-full !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea]"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={scheduling}
-                  className="w-full rounded-full bg-[#dc2626] py-3.5 text-xs font-bold text-white hover:bg-[#b91c1c] transition-all"
+                  className="w-full rounded-full bg-[#168eea] py-3.5 text-xs font-bold text-white hover:bg-[#0875c6] transition-all"
                 >
                   {scheduling ? 'Scheduling...' : 'Schedule Session'}
                 </button>
@@ -1481,13 +1504,13 @@ function Counseling({ profile, onSaved, tab, setTab }: { profile: Profile; onSav
                   Upcoming Scheduled Sessions
                 </h3>
                 {sessions.length === 0 ? (
-                  <div className="text-xs text-[#ffffff]/50 p-6 text-center border border-[#ffffff]/10 rounded-2xl bg-[#c8102e]/5">
+                  <div className="text-xs text-[#ffffff]/50 p-6 text-center border border-[#ffffff]/10 rounded-2xl bg-[#168eea]/5">
                     No sessions scheduled yet. Book your first couples therapy session above!
                   </div>
                 ) : (
                   <div className="space-y-3.5">
                     {sessions.map(s => (
-                      <div key={s.id} className="border border-[#ffffff]/10 rounded-2xl p-4.5 bg-[#c8102e]/5 space-y-3">
+                      <div key={s.id} className="border border-[#ffffff]/10 rounded-2xl p-4.5 bg-[#168eea]/5 space-y-3">
                         <div className="flex justify-between items-start">
                           <div>
                             <div className="text-sm font-bold text-white">Joint session with {s.partner_name}</div>
@@ -1607,7 +1630,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
 
   return (
     <section className="mx-auto max-w-2xl py-10 w-full animate-fade-in">
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#dc2626]">Account Details</p>
+      <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#168eea]">Account Details</p>
       <h1 className="mt-2 text-3xl font-bold font-display text-white">Preferences</h1>
       
       <div className="bg-[#000000] border border-[#ffffff]/10 mt-8 rounded-[2rem] p-6 sm:p-8 space-y-6 text-[#ffffff]">
@@ -1631,7 +1654,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
               <button
                 type="button"
                 onClick={() => setForm(prev => ({ ...prev, profile_picture: '' }))}
-                className="text-xs text-[#dc2626] font-bold hover:underline"
+                className="text-xs text-[#168eea] font-bold hover:underline"
               >
                 Remove
               </button>
@@ -1644,7 +1667,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>Display name</label>
             <input
-              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea] focus:!ring-[#168eea]/20"
               value={form.display_name}
               onChange={e => setForm({ ...form, display_name: e.target.value })}
             />
@@ -1652,7 +1675,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>First Name</label>
             <input
-              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea] focus:!ring-[#168eea]/20"
               value={form.first_name}
               onChange={e => setForm({ ...form, first_name: e.target.value })}
             />
@@ -1664,7 +1687,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>Username</label>
             <input
-              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea] focus:!ring-[#168eea]/20"
               value={form.username}
               onChange={e => setForm({ ...form, username: e.target.value })}
             />
@@ -1672,7 +1695,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>Email Address (Contact)</label>
             <input
-              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea] focus:!ring-[#168eea]/20"
               value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
             />
@@ -1682,7 +1705,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
         <div>
           <label className={labelStyle}>About you</label>
           <textarea
-            className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20 resize-none"
+            className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea] focus:!ring-[#168eea]/20 resize-none"
             rows={3}
             value={form.bio}
             onChange={e => setForm({ ...form, bio: e.target.value })}
@@ -1692,7 +1715,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
         <div>
           <label className={labelStyle}>Values</label>
           <input
-            className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
+            className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea] focus:!ring-[#168eea]/20"
             value={String(form.values)}
             onChange={e => setForm({ ...form, values: e.target.value as any })}
             placeholder="Separate values with commas"
@@ -1702,7 +1725,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
         <div>
           <label className={labelStyle}>Interests</label>
           <input
-            className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
+            className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea] focus:!ring-[#168eea]/20"
             value={String(form.interests)}
             onChange={e => setForm({ ...form, interests: e.target.value as any })}
             placeholder="Separate interests with commas"
@@ -1713,7 +1736,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>My Gender</label>
             <select
-              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea] focus:!ring-[#168eea]/20"
               value={form.gender}
               onChange={e => setForm({ ...form, gender: e.target.value as any })}
             >
@@ -1726,7 +1749,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <div>
             <label className={labelStyle}>Show me profiles of</label>
             <select
-              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#dc2626] focus:!ring-[#dc2626]/20"
+              className="premium-input !bg-[#111111] !border-[#ffffff]/10 !text-[#ffffff] focus:!border-[#168eea] focus:!ring-[#168eea]/20"
               value={form.gender_preference}
               onChange={e => setForm({ ...form, gender_preference: e.target.value as any })}
             >
@@ -1741,30 +1764,30 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
           <label className={labelStyle}>Discoverability & Alerts</label>
           <div className="space-y-3 mt-3">
             {profile.is_premium ? (
-              <div className="flex items-center justify-between rounded-2xl border border-[#dc2626]/30 bg-[#dc2626]/10 p-4.5 text-white shadow-premium">
+              <div className="flex items-center justify-between rounded-2xl border border-[#168eea]/30 bg-[#168eea]/10 p-4.5 text-white shadow-premium">
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#dc2626]">Luna Premium</div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-[#168eea]">Belong Premium</div>
                   <div className="text-[11px] text-[#ffffff]/70 mt-0.5">Your subscription is active. Enjoy all premium benefits!</div>
-                  <button type="button" onClick={togglePremiumTest} className="mt-2 text-[10px] text-yellow-400 font-bold hover:underline select-none block text-left">
-                    🔧 Toggle Premium status for testing (Dev Mode)
+                  <button type="button" onClick={togglePremiumTest} className="mt-2 inline-flex items-center gap-1.5 text-left text-[10px] font-bold text-yellow-400 hover:underline select-none">
+                    <Settings size={13} /> Toggle Premium status for testing (Dev Mode)
                   </button>
                 </div>
-                <span className="rounded-full bg-[#dc2626] px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">Active</span>
+                <span className="rounded-full bg-[#168eea] px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">Active</span>
               </div>
             ) : (
-              <div className="flex items-center justify-between rounded-2xl border border-[#ffffff]/10 bg-[#c8102e]/5 p-4.5 text-[#ffffff]/70">
+              <div className="flex items-center justify-between rounded-2xl border border-[#ffffff]/10 bg-[#168eea]/5 p-4.5 text-[#ffffff]/70">
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#ffffff]/50">Luna Premium</div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-[#ffffff]/50">Belong Premium</div>
                   <div className="text-[11px] text-[#ffffff]/50 mt-0.5">Upgrade in the Counseling tab to unlock all advanced features.</div>
-                  <button type="button" onClick={togglePremiumTest} className="mt-2 text-[10px] text-yellow-500 font-bold hover:underline select-none block text-left">
-                    🔧 Toggle Premium status for testing (Dev Mode)
+                  <button type="button" onClick={togglePremiumTest} className="mt-2 inline-flex items-center gap-1.5 text-left text-[10px] font-bold text-yellow-500 hover:underline select-none">
+                    <Settings size={13} /> Toggle Premium status for testing (Dev Mode)
                   </button>
                 </div>
                 <span className="rounded-full bg-[#ffffff]/10 px-3 py-1 text-[10px] font-bold text-[#ffffff]/40 uppercase tracking-wider">Inactive</span>
               </div>
             )}
             {([
-              ['is_discoverable', 'Allow Luna to look for introductions', 'Let Gemini match your profile with other verified users.'],
+              ['is_discoverable', 'Allow Belong to look for introductions', 'Let Gemini match your profile with other verified users.'],
               ['ai_profile_consent', 'Allow AI profile analysis', 'Use Gemini to build compatibility score metrics.'],
               ['sms_match_notifications', 'SMS connection notifications', 'Send quick text alerts when you get introduced.'],
               ['sms_unread_reminders', 'SMS unread reminders', 'Alert your phone if you have unread direct messages.'],
@@ -1774,18 +1797,18 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
                 key={field}
                 className={`flex items-start gap-4 rounded-2xl border p-4.5 cursor-pointer transition-all ${
                   form[field]
-                    ? 'border-[#dc2626]/30 bg-[#dc2626]/10 text-white'
-                    : 'border-[#ffffff]/10 bg-[#c8102e]/10 hover:border-[#dc2626]/20 text-[#ffffff]'
+                    ? 'border-[#168eea]/30 bg-[#168eea]/10 text-white'
+                    : 'border-[#ffffff]/10 bg-[#168eea]/10 hover:border-[#168eea]/20 text-[#ffffff]'
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={Boolean(form[field])}
                   onChange={e => setForm({ ...form, [field]: e.target.checked })}
-                  className="mt-0.5 rounded border-[#ffffff]/10 text-[#dc2626] focus:ring-[#dc2626]/20 h-4 w-4"
+                  className="mt-0.5 rounded border-[#ffffff]/10 text-[#168eea] focus:ring-[#168eea]/20 h-4 w-4"
                 />
                 <div>
-                  <span className={`block font-bold text-xs ${form[field] ? 'text-[#dc2626]' : 'text-white'}`}>{label}</span>
+                  <span className={`block font-bold text-xs ${form[field] ? 'text-[#168eea]' : 'text-white'}`}>{label}</span>
                   <span className="block text-[10px] text-[#ffffff]/70 mt-0.5">{desc}</span>
                 </div>
               </label>
@@ -1796,7 +1819,7 @@ function Preferences({ profile, onSaved, navigateToPage }: { profile: Profile; o
         <button
           onClick={save}
           disabled={busy}
-          className="mt-4 w-full rounded-full bg-[#dc2626] px-6 py-3.5 font-bold text-white hover:bg-[#b91c1c] active:scale-95 transition-all disabled:opacity-50 shadow-glow"
+          className="mt-4 w-full rounded-full bg-[#168eea] px-6 py-3.5 font-bold text-white hover:bg-[#0875c6] active:scale-95 transition-all disabled:opacity-50"
         >
           {busy ? 'Saving...' : saved ? '✓ Changes Saved' : 'Save changes'}
         </button>
@@ -1846,6 +1869,9 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
 
   const getInitialStateFromUrl = () => {
     const p = window.location.pathname
+    if (p === '/' || p === '/home') {
+      return { page: 'home' as const, chatId: null }
+    }
     if (p === '/preferences') {
       return { page: 'preferences' as const, chatId: null }
     }
@@ -1863,8 +1889,8 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
   const page = urlState.page
   const chatId = urlState.chatId
 
-  const navigateToPage = (newPage: 'conversations' | 'preferences' | 'counseling', subTab?: 'ai' | 'couples') => {
-    const path = newPage === 'preferences' ? '/preferences' : (newPage === 'counseling' ? '/counseling' : '/dashboard')
+  const navigateToPage = (newPage: DashboardPage, subTab?: 'ai' | 'couples') => {
+    const path = newPage === 'home' ? '/' : newPage === 'preferences' ? '/preferences' : (newPage === 'counseling' ? '/counseling' : '/dashboard')
     window.history.pushState({}, '', path)
     setUrlState({ page: newPage, chatId: null })
     if (newPage === 'counseling' && subTab) {
@@ -1896,19 +1922,31 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
   if (!profile) return null
 
   return (
-    <div className="noise min-h-screen bg-[#000000] text-[#ffffff] selection:bg-[#dc2626]/20 flex flex-col overflow-x-hidden">
+    <div className="noise min-h-screen bg-[#000000] text-[#ffffff] selection:bg-[#168eea]/20 flex flex-col overflow-x-hidden">
       <AppHeader page={page} setPage={navigateToPage} profile={profile} onGoToAdmin={onGoToAdmin} />
       
       <main className={`mx-auto w-full ${page === 'conversations' ? 'max-w-[1440px]' : 'max-w-6xl'} px-5 pb-10 flex-1 flex flex-col transition-all duration-300`}>
-        {page === 'conversations' ? (
+        {page === 'home' ? (
+          <HomeDashboard
+            profile={profile}
+            matches={state.matches}
+            conversations={state.conversations}
+            loading={state.loading}
+            onNavigate={navigateToPage}
+            onOpenMatches={() => {
+              setInboxTab('offers')
+              navigateToPage('conversations')
+            }}
+          />
+        ) : page === 'conversations' ? (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-8 flex-1 items-stretch md:h-[calc(100vh-160px)]">
             
             {/* Conversations List Panel */}
             <section className={`flex flex-col h-full ${chatId !== null ? 'md:col-span-4 lg:col-span-3 hidden md:flex' : 'md:col-span-5 lg:col-span-4 flex'}`}>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#dc2626]">Your inbox</p>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#168eea]">Your inbox</p>
                 <h1 className="mt-2 text-3xl font-bold font-display text-white">Conversations</h1>
-                <p className="mt-2 text-sm text-[#ffffff]/80">Luna brings potential connections here privately, one at a time.</p>
+                <p className="mt-2 text-sm text-[#ffffff]/80">Belong brings potential connections here privately, one at a time.</p>
               </div>
 
               {/* Navigation Tabs */}
@@ -1917,7 +1955,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                   onClick={() => setInboxTab('chats')}
                   className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-200 ${
                     inboxTab === 'chats'
-                      ? 'bg-[#dc2626] text-white shadow-premium'
+                      ? 'bg-[#168eea] text-white shadow-premium'
                       : 'text-[#ffffff]/80 hover:bg-[#000000] hover:text-white'
                   }`}
                 >
@@ -1927,7 +1965,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                   onClick={() => setInboxTab('offers')}
                   className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-200 ${
                     inboxTab === 'offers'
-                      ? 'bg-[#dc2626] text-white shadow-premium'
+                      ? 'bg-[#168eea] text-white shadow-premium'
                       : 'text-[#ffffff]/80 hover:bg-[#000000] hover:text-white'
                   }`}
                 >
@@ -1946,36 +1984,36 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                           onClick={() => navigateToChat(c.id)}
                           className={`flex w-full items-center gap-4 rounded-2xl p-4.5 text-left transition-all duration-200 border ${
                             isSelected
-                              ? 'bg-[#000000] border-[#dc2626]/30 text-white shadow-premium'
-                              : 'bg-[#000000]/50 border-[#ffffff]/10 hover:border-[#dc2626]/30 hover:bg-[#000000] text-[#ffffff]'
+                              ? 'bg-[#000000] border-[#168eea]/30 text-white shadow-premium'
+                              : 'bg-[#000000]/50 border-[#ffffff]/10 hover:border-[#168eea]/30 hover:bg-[#000000] text-[#ffffff]'
                           }`}
                         >
                           <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl transition ${
-                            isSelected ? 'bg-[#dc2626] text-white shadow-premium' : 'bg-[#ffffff] text-[#000000] border border-[#ffffff]/20'
+                            isSelected ? 'bg-[#168eea] text-white shadow-premium' : 'bg-[#ffffff] text-[#000000] border border-[#ffffff]/20'
                           }`}>
-                            {c.is_luna ? <Sparkles size={16} /> : <MessageCircle size={16} />}
+                            <MessageCircle size={16} />
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between">
-                              <span className={`font-bold text-sm truncate ${isSelected ? 'text-[#dc2626]' : 'text-white'}`}>
+                              <span className={`font-bold text-sm truncate ${isSelected ? 'text-[#168eea]' : 'text-white'}`}>
                                 {c.title}
                               </span>
                               {c.unread_count > 0 && (
-                                <span className="h-2 w-2 shrink-0 rounded-full bg-[#dc2626] shadow-glow" />
+                                <span className="h-2 w-2 shrink-0 rounded-full bg-[#168eea]" />
                               )}
                             </div>
                             <div className="mt-1 truncate text-xs text-[#ffffff]/60">
                               {c.messages && c.messages.length ? c.messages[c.messages.length - 1].body : 'Start the conversation'}
                             </div>
                           </div>
-                          <ArrowRight size={14} className={`shrink-0 transition-transform ${isSelected ? 'text-[#dc2626]' : 'text-[#ffffff]/40'}`} />
+                          <ArrowRight size={14} className={`shrink-0 transition-transform ${isSelected ? 'text-[#168eea]' : 'text-[#ffffff]/40'}`} />
                         </button>
                       )
                     })}
                     
                     {!state.loading && state.conversations.length === 0 && (
                       <div className="rounded-2xl border border-dashed border-[#ffffff]/10 bg-[#111111]/50 p-8 text-center text-xs font-semibold text-[#ffffff]/50">
-                        Your Luna inbox is being prepared.
+                        Your Belong inbox is being prepared.
                       </div>
                     )}
                   </>
@@ -1984,12 +2022,12 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                     {state.matches.filter(m => m.status === 'suggested').map(m => (
                       <div
                         key={m.id}
-                        className="bg-[#000000] border border-[#ffffff]/10 rounded-2xl p-5 shadow-soft flex flex-col gap-3 transition-all hover:border-[#dc2626]/20 text-[#ffffff]"
+                        className="bg-[#000000] border border-[#ffffff]/10 rounded-2xl p-5 shadow-soft flex flex-col gap-3 transition-all hover:border-[#168eea]/20 text-[#ffffff]"
                       >
                         <div className="flex items-center justify-between">
                           <div>
                             <span className="font-bold text-sm text-white">{m.profile.display_name}</span>
-                            <span className="text-[10px] block mt-0.5 uppercase tracking-wider font-bold text-[#dc2626]">{m.profile.connection_goal}</span>
+                            <span className="text-[10px] block mt-0.5 uppercase tracking-wider font-bold text-[#168eea]">{m.profile.connection_goal}</span>
                           </div>
                           <span className="rounded-full bg-[#ffffff]/10 px-2.5 py-1 text-[10px] font-bold text-[#ffffff] border border-[#ffffff]/20">
                             {m.score}% Match
@@ -2003,8 +2041,8 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                         )}
 
                         {m.ai_explanation ? (
-                          <div className="text-[10px] text-[#ffffff]/90 leading-normal bg-[#c8102e]/10 rounded-xl p-3 border border-[#ffffff]/10">
-                            <span className="font-bold text-[#dc2626] block mb-1">Luna's Compatibility Insight:</span>
+                          <div className="text-[10px] text-[#ffffff]/90 leading-normal bg-[#168eea]/10 rounded-xl p-3 border border-[#ffffff]/10">
+                            <span className="font-bold text-[#168eea] block mb-1">Belong's Compatibility Insight:</span>
                             {m.ai_explanation}
                           </div>
                         ) : (
@@ -2017,9 +2055,9 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                                 console.error(e)
                               }
                             }}
-                            className="text-[10px] font-bold text-[#dc2626] hover:text-[#b91c1c] text-left flex items-center gap-1.5"
+                            className="text-[10px] font-bold text-[#168eea] hover:text-[#0875c6] text-left flex items-center gap-1.5"
                           >
-                            <Sparkles size={12} className="animate-pulse" /> Ask Luna to explain match compatibility
+                            <MessageCircle size={12} /> Ask Belong to explain match compatibility
                           </button>
                         )}
 
@@ -2049,7 +2087,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                                 console.error(e)
                               }
                             }}
-                            className="flex-1 rounded-full bg-[#dc2626] text-[10px] font-bold text-white py-2.5 hover:bg-[#b91c1c] active:scale-95 shadow-premium transition-all"
+                            className="flex-1 rounded-full bg-[#168eea] text-[10px] font-bold text-white py-2.5 hover:bg-[#0875c6] active:scale-95 shadow-premium transition-all"
                           >
                             Accept & Chat
                           </button>
@@ -2059,7 +2097,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
 
                     {state.matches.filter(m => m.status === 'suggested').length === 0 && (
                       <div className="rounded-2xl border border-dashed border-cocoa-900/10 bg-white/20 p-8 text-center text-xs font-semibold text-cocoa-500">
-                        No new suggested matches at this moment. Luna is continually screening profiles.
+                        No new suggested matches at this moment. Belong is continually screening profiles.
                       </div>
                     )}
                   </>
@@ -2070,7 +2108,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
               <div className="mt-6 border-t border-[#ffffff]/10 pt-4">
                 <div 
                   onClick={() => navigateToPage('preferences')}
-                  className="flex items-center gap-3 p-3 rounded-2xl bg-[#000000]/50 border border-[#ffffff]/10 hover:bg-[#000000] hover:border-[#dc2626]/30 cursor-pointer transition-all active:scale-[0.98]"
+                  className="flex items-center gap-3 p-3 rounded-2xl bg-[#000000]/50 border border-[#ffffff]/10 hover:bg-[#000000] hover:border-[#168eea]/30 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {profile.profile_picture ? (
                     <img 
@@ -2099,7 +2137,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                     onClick={() => navigateToPage('counseling')}
                     className="mt-3 w-full flex items-center justify-center gap-1.5 rounded-full border border-[#ffffff]/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold text-[#ffffff] py-2.5 transition-all shadow-soft active:scale-[0.98]"
                   >
-                    <Gift size={12} className="text-[#dc2626]" />
+                    <Gift size={12} className="text-[#168eea]" />
                     Claim offer
                   </button>
                 )}
@@ -2113,12 +2151,12 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
                 <Chat conversation={conversation} onClose={() => navigateToChat(null)} onReload={() => dispatch(loadDashboard())} onGoToCounseling={() => navigateToPage('counseling', 'couples')} />
               ) : (
                 <div className="hidden md:flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] border border-dashed border-cocoa-900/10 bg-white/20 h-full w-full">
-                  <div className="p-4 bg-terracotta-50 rounded-full border border-terracotta-200/50 text-terracotta-500 mb-4 animate-bounce">
-                    <Sparkles size={36} />
+                  <div className="p-4 bg-terracotta-50 rounded-full border border-terracotta-200/50 text-terracotta-500 mb-4">
+                    <MessageCircle size={36} />
                   </div>
                   <h3 className="text-lg font-bold text-cocoa-900 font-display">Select a conversation</h3>
                   <p className="mt-2 text-xs text-cocoa-500 max-w-xs leading-relaxed">
-                    Click a connection profile or message with Luna on the left to read messages and compatibility insights.
+                    Click a connection profile or message with Belong on the left to read messages and compatibility insights.
                   </p>
                 </div>
               )}
@@ -2134,7 +2172,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
 
       <footer className="w-full border-t border-[#ffffff]/10 py-6 text-center text-xs text-[#ffffff]/40">
         <div className="mx-auto max-w-6xl px-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} Luna. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Belong. All rights reserved.</p>
           <div className="flex gap-4">
             <button
               onClick={() => setShowPrivacyModal(true)}
@@ -2147,12 +2185,12 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
       </footer>
 
       {showPrivacyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-fadeIn">
           <div className="w-full max-w-2xl bg-[#000000] border border-[#ffffff]/10 rounded-[2rem] shadow-soft overflow-hidden flex flex-col max-h-[85vh]">
             <header className="px-6 py-5 border-b border-[#ffffff]/10 flex items-center justify-between">
               <div className="flex items-center gap-2 text-white font-bold font-display">
-                <Shield className="text-[#dc2626]" size={20} />
-                <span>Luna Privacy Policy & Safety Disclaimer</span>
+                <Shield className="text-[#168eea]" size={20} />
+                <span>Belong Privacy Policy & Safety Disclaimer</span>
               </div>
               <button
                 onClick={() => setShowPrivacyModal(false)}
@@ -2164,11 +2202,11 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
             
             <div className="p-6 overflow-y-auto space-y-5 text-sm text-[#ffffff]/80 leading-relaxed">
               <section className="space-y-2">
-                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#dc2626]">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#168eea]">
                   <AlertTriangle size={13} /> Chat Safety Disclaimer
                 </h4>
                 <p>
-                  Luna acts as an AI matchmaker to facilitate initial introductions and connection conversations. Luna has no control over, and does not accept responsibility for, the actions, conduct, or behavior of any users off-platform. 
+                  Belong acts as an AI matchmaker to facilitate initial introductions and connection conversations. Belong has no control over, and does not accept responsibility for, the actions, conduct, or behavior of any users off-platform.
                 </p>
                 <p className="font-semibold text-white/95">
                   Be extremely cautious when sharing sensitive personal information, credentials, location, or payment details. Never send money, complete commercial transactions, or offer services in chats.
@@ -2176,7 +2214,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
               </section>
 
               <section className="space-y-2">
-                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#dc2626]">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#168eea]">
                   <Shield size={13} /> Strict Connection Guidelines
                 </h4>
                 <p>
@@ -2188,19 +2226,19 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
               </section>
 
               <section className="space-y-2">
-                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#dc2626]">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#168eea]">
                   <Users size={13} /> Data Collection & Handling
                 </h4>
                 <p>
-                  By consenting to onboard with Luna, your bio, lifestyle preferences, deal-breakers, and interests are safely analyzed to recommend matching profiles. 
+                  By consenting to onboard with Belong, your bio, lifestyle preferences, deal-breakers, and interests are safely analyzed to recommend matching profiles.
                 </p>
                 <p>
-                  Your counseling conversations with Luna remain confidential and encrypted. We do not sell or share private chat records or personal identification details with third-party networks.
+                  Your counseling conversations with Belong remain confidential and encrypted. We do not sell or share private chat records or personal identification details with third-party networks.
                 </p>
               </section>
 
               <section className="space-y-2">
-                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#dc2626]">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#168eea]">
                   <Lock size={13} /> User Rights & Account Deletion
                 </h4>
                 <p>
@@ -2212,7 +2250,7 @@ export default function Dashboard({ onGoToAdmin }: { onGoToAdmin?: () => void })
             <footer className="px-6 py-4 border-t border-[#ffffff]/10 flex justify-end bg-cocoa-900/10">
               <button
                 onClick={() => setShowPrivacyModal(false)}
-                className="rounded-full bg-[#dc2626] px-6 py-2.5 text-xs font-bold text-white hover:bg-[#b91c1c] active:scale-95 transition-all shadow-glow"
+                className="rounded-full bg-[#168eea] px-6 py-2.5 text-xs font-bold text-white hover:bg-[#0875c6] active:scale-95 transition-all"
               >
                 Understand & Close
               </button>
